@@ -36,8 +36,8 @@ The code expects each feature to have `NBHD_ID` and `NBHD_NAME` properties
 
 ## Known quirk in the city's file
 
-Virginia Village (`NBHD_ID` 69) has a small hole (about 14 acres near
-S Holly St & E Iliff Ave, belonging to no Denver neighborhood) stored as a
+Virginia Village (`NBHD_ID` 69) has a small hole (about 14 acres, centered
+near 39.6810, -104.9096, belonging to no Denver neighborhood) stored as a
 separate piece instead of as a hole in its main shape. That makes the shape
 technically invalid. We do **not** edit the file: `neighborhoods/geo.py`
 repairs it in memory when loading (`repair_shape`), and tests confirm the
