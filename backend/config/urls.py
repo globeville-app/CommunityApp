@@ -1,23 +1,20 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+
+from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/config", views.app_config, name="app-config"),
+    path("api/auth/", include("accounts.urls")),
 ]
+
+if settings.DEBUG:
+    # DEV ONLY: let Django serve uploaded photos. Real hosting uses file storage.
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# The admin's page titles read the app name from settings too.
+admin.site.site_header = f"{settings.APP_NAME} admin"
+admin.site.site_title = f"{settings.APP_NAME} admin"

@@ -7,6 +7,7 @@ hosting). Settings that would change for production are marked "DEV ONLY".
 
 import json
 import os
+import sys
 from pathlib import Path
 
 # backend/ (where manage.py lives)
@@ -109,6 +110,18 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Rate limits are counted in the cache. While tests run we use a cache that
+# remembers nothing, so hundreds of quick test requests don't trip the
+# limits; the throttle test switches the real cache back on for itself.
+RUNNING_TESTS = len(sys.argv) > 1 and sys.argv[1] == "test"
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache"
+        if RUNNING_TESTS
+        else "django.core.cache.backends.locmem.LocMemCache"
+    }
+}
+
 # Uploaded profile photos. Served by Django only while DEBUG is on.
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -127,7 +140,10 @@ REST_FRAMEWORK = {
     # Every error response has the same shape: {"code": ..., "detail": ...}
     "EXCEPTION_HANDLER": "config.errors.api_exception_handler",
     # Only the views that opt in (with throttle_scope) are rate-limited.
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
     "DEFAULT_THROTTLE_RATES": {
+        # Slows down password guessing.
+        "auth": "20/min",
         # Each match calls a free public geocoder; don't let one account
         # hammer it through our server.
         "join_match": "10/min",
@@ -161,3 +177,8 @@ LOGGING = {
         "httpcore": {"level": "WARNING"},
     },
 }
+
+if RUNNING_TESTS:
+    # Real password hashing is deliberately slow. Tests create many users,
+    # so they use a fast (insecure) hasher. Never used outside tests.
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
