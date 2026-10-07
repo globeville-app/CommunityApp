@@ -169,9 +169,12 @@ npm run demo:build      # writes mobile/web-demo/index.html (one self-contained 
 ```
 
 The demo uses the real screens, with a pretend backend inside the page
-(`src/demo/fakeBackend.ts`). Neighborhood matching is **simulated**: it knows a
-few public sample addresses, Denver neighborhood names typed into the address,
-and nearby suburb names. Everything stays in that browser.
+(`src/demo/fakeBackend.ts`). The neighborhood check uses Denver's **real**
+boundaries (the build embeds `backend/data/denver_statistical_neighborhoods.geojson`),
+but the address lookup is **simulated**, because a web page can't reach the
+Census geocoder. The demo knows the locations of a few public sample
+addresses, recognizes Denver neighborhood names typed into the address, and
+treats nearby suburb names as outside Denver. Everything stays in that browser.
 
 Only the browser uses the demo files (`*.web.ts`, `*.web.tsx`); the phone app
 never loads them.

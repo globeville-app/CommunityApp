@@ -18,7 +18,7 @@ export function DemoBanner() {
   return (
     <View style={styles.banner}>
       <Text style={styles.text}>
-        <Text style={styles.strong}>Demo</Text> · sample data · simulated matching · stays in this browser
+        <Text style={styles.strong}>Demo</Text> · real Denver map · sample addresses · stays in this browser
       </Text>
       <Pressable accessibilityRole="button" accessibilityLabel="Reset demo" onPress={onReset} style={styles.reset}>
         <Text style={styles.resetText}>Reset</Text>

@@ -44,7 +44,26 @@ bundle = bundle.replace(/"(\/assets\/[^"]+\.(png|jpg|jpeg|gif))"/g, (whole, asse
 // A literal "</script" inside the bundle would end the inline <script> early.
 bundle = bundle.replace(/<\/script/gi, "<\\/script").replace(/<!--/g, "<\\!--");
 
-// 4. Wrap it in a page: a phone-sized frame on wide screens, full screen on phones.
+// 4. Denver's real neighborhood boundaries and aliases, for the demo's
+//    neighborhood check (see src/demo/fakeBackend.ts). Coordinates are
+//    rounded to 6 decimal places (about 10 cm) to keep the page smaller.
+const dataDir = path.join(mobileDir, "..", "backend", "data");
+const geojson = JSON.parse(fs.readFileSync(path.join(dataDir, "denver_statistical_neighborhoods.geojson"), "utf8"));
+const round = (n) => Math.round(n * 1e6) / 1e6;
+const demoData = {
+  neighborhoods: geojson.features.map((f) => {
+    const polygons = f.geometry.type === "MultiPolygon" ? f.geometry.coordinates : [f.geometry.coordinates];
+    return {
+      id: Number(f.properties.NBHD_ID),
+      name: String(f.properties.NBHD_NAME).trim(),
+      rings: polygons.flat().map((ring) => ring.map(([lon, lat]) => [round(lon), round(lat)])),
+    };
+  }),
+  aliases: JSON.parse(fs.readFileSync(path.join(dataDir, "neighborhood_aliases.json"), "utf8")),
+};
+const demoDataScript = `globalThis.__DEMO_DATA__ = ${JSON.stringify(demoData).replace(/</g, "\\u003c")};`;
+
+// 5. Wrap it in a page: a phone-sized frame on wide screens, full screen on phones.
 const page = `<title>${appName} Join Flow</title>
 <style>
   /* Layout: explainer on the left, the app in a phone frame on the right; app only on phones. */
@@ -95,17 +114,20 @@ const page = `<title>${appName} Join Flow</title>
     <p>These are the real app screens, running in your browser. A pretend backend stands in for the server, so nothing you type leaves this page.</p>
     <ol>
       <li>Sign up with any email and a password of 8+ characters.</li>
-      <li>Tap a sample address, or type one with a neighborhood name in it.</li>
+      <li>Tap a sample address. It's checked against Denver's official neighborhood map.</li>
       <li>Try the LoHi sample to see the local-name choice.</li>
       <li>Set up your profile, then reload the page: you stay logged in.</li>
     </ol>
-    <p class="note">Neighborhood matching is simulated here. The real app finds the neighborhood from the address using Denver's official boundaries. Use Reset in the green bar to start over.</p>
+    <p class="note">The neighborhood check uses Denver's real boundaries. Only the address lookup is simulated: a web page can't reach the Census geocoder the real app uses, so the demo knows a few sample addresses and recognizes neighborhood names you type. Use Reset in the green bar to start over.</p>
   </section>
   <div class="phone"><div class="screen"><div id="root"></div></div></div>
 </div>
 <script>
   // The app picks its screen from the page's path; start it at "/".
   try { if (location.pathname !== "/") history.replaceState(null, "", "/"); } catch (e) {}
+</script>
+<script>
+${demoDataScript}
 </script>
 <script>
 ${bundle}

@@ -1,10 +1,13 @@
 /**
  * BROWSER DEMO ONLY: a pretend backend that runs inside the web page.
  *
- * It copies the real backend's rules and messages (see backend/), but the
- * neighborhood matching is SIMULATED: there is no geocoder and no boundary
- * map here. It recognizes a few public sample addresses, Denver
- * neighborhood names typed into the address, and nearby suburb names.
+ * It copies the real backend's rules and messages (see backend/). The
+ * neighborhood check uses Denver's REAL boundaries (the build script puts
+ * backend/data/denver_statistical_neighborhoods.geojson into the page), but
+ * turning an address into a location is SIMULATED, because a web page can't
+ * call the Census geocoder. So the demo knows the locations of a few public
+ * sample addresses, recognizes Denver neighborhood names typed into the
+ * address, and treats nearby suburb names as outside Denver.
  *
  * Like the real backend, it never keeps the address. Accounts and profiles
  * are saved in this browser's localStorage so a reload keeps you logged in.
@@ -16,29 +19,52 @@ import { ApiError, MatchResult, Profile, ProfileInput } from "../apiTypes";
 
 export const INTERESTS = ["Block parties", "Food drives", "Cleanups", "Live music", "Gardening"];
 
-// Real Denver Statistical Neighborhood names (a subset), with made-up IDs.
-const NEIGHBORHOODS = [
-  "Baker", "Berkeley", "Capitol Hill", "Cheesman Park", "Cherry Creek", "City Park",
-  "Civic Center", "Cole", "Congress Park", "Five Points", "Hale", "Highland",
-  "Jefferson Park", "Lincoln Park", "Montclair", "Platt Park", "Sloan Lake", "Speer",
-  "Sunnyside", "Union Station", "University", "Washington Park", "West Highland", "Whittier",
-].map((name, index) => ({ id: index + 1, name }));
+type Ring = [number, number][]; // [longitude, latitude] points
+type DemoNeighborhood = { id: number; name: string; rings: Ring[] };
+type DemoData = { neighborhoods: DemoNeighborhood[]; aliases: Record<string, string[]> };
 
-// Same file contents as backend/data/neighborhood_aliases.json.
-const ALIASES: Record<string, string[]> = { LoHi: ["Highland"] };
+// Put into the page by scripts/build-web-demo.mjs.
+const DATA: DemoData = (globalThis as { __DEMO_DATA__?: DemoData }).__DEMO_DATA__ ?? {
+  neighborhoods: [],
+  aliases: {},
+};
+const NEIGHBORHOODS = [...DATA.neighborhoods].sort((a, b) => a.id - b.id);
+const ALIASES = DATA.aliases;
 
-// Public places with well-known addresses, used as the demo's sample inputs.
-const KNOWN_ADDRESSES: { startsWith: string; neighborhood: string }[] = [
-  { startsWith: "1437 bannock", neighborhood: "Civic Center" }, // City and County Building
-  { startsWith: "2001 colorado", neighborhood: "City Park" }, // Museum of Nature & Science
-  { startsWith: "1701 wynkoop", neighborhood: "Union Station" }, // Union Station
-  { startsWith: "2620 16th", neighborhood: "Highland" }, // Little Man Ice Cream, LoHi
+// Public places and their real locations, used as the demo's sample inputs.
+const KNOWN_ADDRESSES: { startsWith: string; lat: number; lon: number }[] = [
+  { startsWith: "1437 bannock", lat: 39.73925, lon: -104.99036 }, // City and County Building
+  { startsWith: "2001 colorado", lat: 39.74753, lon: -104.9427 }, // Museum of Nature & Science
+  { startsWith: "1701 wynkoop", lat: 39.75277, lon: -105.00025 }, // Union Station
+  { startsWith: "2620 16th", lat: 39.75928, lon: -105.01103 }, // Little Man Ice Cream, LoHi
+  { startsWith: "2001 blake", lat: 39.75597, lon: -104.99415 }, // Coors Field
+  { startsWith: "15151 e alameda", lat: 39.71, lon: -104.8123 }, // Aurora Municipal Center
 ];
 
 const SUBURBS = [
   "aurora", "lakewood", "englewood", "littleton", "arvada", "golden", "westminster",
   "thornton", "centennial", "wheat ridge", "commerce city", "boulder",
 ];
+
+/**
+ * Which neighborhood contains this point? Uses the even-odd rule across all
+ * of a neighborhood's rings, so holes (including the one the city's file
+ * stores as a separate piece in Virginia Village) are left out, the same
+ * result as the backend's repaired shapes. Lowest ID wins, like the backend.
+ */
+function findNeighborhood(lat: number, lon: number) {
+  return NEIGHBORHOODS.find((n) => {
+    let inside = false;
+    for (const ring of n.rings) {
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [xi, yi] = ring[i];
+        const [xj, yj] = ring[j];
+        if (yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+      }
+    }
+    return inside;
+  });
+}
 
 // Typing this into the address simulates the lookup service being down.
 export const SIMULATE_OUTAGE = "#down";
@@ -102,6 +128,10 @@ function userFor(token: string | null): string {
   const email = token ? load().tokens[token] : undefined;
   if (!email) throw new ApiError("authentication_failed", "Invalid token.", 401);
   return email;
+}
+
+function escapeRegExp(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function neighborhoodById(id: number) {
@@ -179,21 +209,33 @@ export async function matchAddress(token: string, address: string): Promise<Matc
     );
   }
 
-  let name = KNOWN_ADDRESSES.find((k) => text.startsWith(k.startsWith))?.neighborhood;
-  if (!name && SUBURBS.some((suburb) => text.includes(suburb))) {
-    throw new ApiError("outside_denver", `${APP_NAME} is only in the City and County of Denver for now.`, 400);
-  }
-  if (!name) {
+  const outside = () =>
+    new ApiError("outside_denver", `${APP_NAME} is only in the City and County of Denver for now.`, 400);
+
+  let neighborhood: DemoNeighborhood | undefined;
+  const known = KNOWN_ADDRESSES.find((k) => text.startsWith(k.startsWith));
+  if (known) {
+    // Real location + real boundaries: the same check the backend does.
+    neighborhood = findNeighborhood(known.lat, known.lon);
+    if (!neighborhood) throw outside();
+  } else if (SUBURBS.some((suburb) => text.includes(suburb))) {
+    throw outside();
+  } else {
+    // Simulated: a Denver neighborhood name typed into the address.
     // Longest names first, so "West Highland" wins over "Highland".
     const byLength = [...NEIGHBORHOODS].sort((a, b) => b.name.length - a.name.length);
-    name = byLength.find((n) => text.includes(n.name.toLowerCase()))?.name;
-    if (!name && text.includes("lohi")) name = "Highland";
+    neighborhood = byLength.find((n) => new RegExp(`\\b${escapeRegExp(n.name.toLowerCase())}\\b`).test(text));
+    if (!neighborhood) {
+      const aliasTarget = Object.keys(ALIASES).find((alias) =>
+        new RegExp(`\\b${escapeRegExp(alias.toLowerCase())}\\b`).test(text),
+      );
+      if (aliasTarget) neighborhood = NEIGHBORHOODS.find((n) => n.name === ALIASES[aliasTarget][0]);
+    }
   }
-  if (!name) {
+  if (!neighborhood) {
     throw new ApiError("no_match", "We couldn't find that address. Check the spelling and try again.", 400);
   }
 
-  const neighborhood = NEIGHBORHOODS.find((n) => n.name === name)!;
   const db = load();
   db.matches[email] = neighborhood.id;
   save(db);
