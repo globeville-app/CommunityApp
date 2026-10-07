@@ -9,6 +9,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/config", views.app_config, name="app-config"),
     path("api/auth/", include("accounts.urls")),
+    path("api/join/", include("neighborhoods.urls")),
 ]
 
 if settings.DEBUG:
