@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+backend/db.sqlite3
+backend/media/
+
+# Node / Expo
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/.env
+mobile/expo-env.d.ts
+*.log
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+mobile/web-demo/
