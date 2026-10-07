@@ -14,7 +14,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from django.conf import settings
-from shapely import prepared
+from shapely import make_valid, prepared, unary_union
 from shapely.geometry import Point, shape
 
 # Property names in Denver's file. If the city renames them, change them here.
@@ -36,9 +36,11 @@ class Area:
 class Boundaries:
     """All of Denver's neighborhoods, ready for point lookups."""
 
-    def __init__(self, areas, source_version):
+    def __init__(self, areas, source_version, repaired=()):
         # Sorted by ID so the boundary rule below is deterministic.
         self.areas = sorted(areas, key=lambda a: a.id)
+        # Names of neighborhoods whose shape needed repairing (see repair_shape).
+        self.repaired = list(repaired)
         # Short fingerprint of the file, e.g. "a1b2c3d4e5f6".
         self.source_version = source_version
         # "Prepared" geometries make repeated point checks faster.
@@ -66,6 +68,28 @@ class Boundaries:
         return None
 
 
+def repair_shape(geometry):
+    """
+    Return a valid version of the shape, covering exactly the same ground.
+
+    The city's file isn't perfect: in 2026, Virginia Village has a small hole
+    (a patch that isn't part of any Denver neighborhood) stored as a separate
+    piece instead of as a hole in its main shape. That breaks the geometry
+    rules and can make point checks unreliable. make_valid reads a piece
+    inside another piece as a hole, which is what the city meant: the file
+    draws outlines clockwise and holes counter-clockwise, and this piece is
+    counter-clockwise. We never edit the city's file; we fix the shape in
+    memory when loading it.
+    """
+    if geometry.is_valid:
+        return geometry
+    fixed = make_valid(geometry)
+    if fixed.geom_type == "GeometryCollection":
+        # Keep only the area parts; drop any stray lines or points.
+        fixed = unary_union([g for g in fixed.geoms if g.geom_type in ("Polygon", "MultiPolygon")])
+    return fixed
+
+
 def _first_property(properties, names):
     for name in names:
         if properties.get(name) not in (None, ""):
@@ -87,6 +111,7 @@ def load_boundaries(path):
         raise NeighborhoodDataError(f"No features found in {path}.")
 
     areas = []
+    repaired = []
     for index, feature in enumerate(features):
         properties = feature.get("properties") or {}
         name = _first_property(properties, NAME_FIELDS)
@@ -95,10 +120,15 @@ def load_boundaries(path):
         raw_id = _first_property(properties, ID_FIELDS)
         if raw_id is None:
             raise NeighborhoodDataError(f"Feature '{name}' has no neighborhood ID.")
-        areas.append(Area(id=int(raw_id), name=str(name).strip(), geometry=shape(feature["geometry"])))
+        name = str(name).strip()
+        geometry = shape(feature["geometry"])
+        if not geometry.is_valid:
+            geometry = repair_shape(geometry)
+            repaired.append(name)
+        areas.append(Area(id=int(raw_id), name=name, geometry=geometry))
 
     version = hashlib.sha256(raw).hexdigest()[:12]
-    return Boundaries(areas=areas, source_version=version)
+    return Boundaries(areas=areas, source_version=version, repaired=repaired)
 
 
 @lru_cache(maxsize=1)

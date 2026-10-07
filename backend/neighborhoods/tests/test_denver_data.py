@@ -3,10 +3,15 @@ Checks against the real Denver file. These are skipped (with a reason
 printed) until backend/data/denver_statistical_neighborhoods.geojson exists.
 """
 
+import json
 from itertools import combinations
+from pathlib import Path
 from unittest import skipIf
 
+from django.conf import settings
 from django.test import SimpleTestCase
+from shapely import unary_union
+from shapely.geometry import Polygon
 
 from neighborhoods.aliases import get_alias_map
 from neighborhoods.geo import get_boundaries
@@ -37,6 +42,31 @@ class DenverDataTests(SimpleTestCase):
                 self.assertIn(area.geometry.geom_type, ("Polygon", "MultiPolygon"))
                 self.assertTrue(area.geometry.is_valid)
                 self.assertFalse(area.geometry.is_empty)
+
+    def test_repairs_follow_the_citys_outline_and_hole_drawing(self):
+        # In this file, outlines are drawn clockwise and holes counter-clockwise.
+        # A repaired shape must equal: clockwise pieces minus counter-clockwise ones.
+        raw = {
+            f["properties"]["NBHD_NAME"].strip(): f["geometry"]
+            for f in json.loads(Path(settings.NEIGHBORHOODS_GEOJSON).read_text())["features"]
+        }
+        for name in self.boundaries.repaired:
+            geometry = raw[name]
+            polys = geometry["coordinates"] if geometry["type"] == "MultiPolygon" else [geometry["coordinates"]]
+            rings = [Polygon(ring) for poly in polys for ring in poly]
+            outlines = unary_union([r for r in rings if not r.exterior.is_ccw])
+            holes = unary_union([r for r in rings if r.exterior.is_ccw])
+            expected = outlines.difference(holes)
+            fixed = self.boundaries.by_name(name).geometry
+            with self.subTest(name):
+                self.assertTrue(fixed.is_valid)
+                self.assertLess(fixed.symmetric_difference(expected).area, 1e-12)
+
+    def test_virginia_village_island_and_hole(self):
+        # The city's note: "Includes +/- 9.6 acre island per 2020 census tract".
+        self.assertEqual(self.boundaries.find(39.6990, -104.9330).name, "Virginia Village")  # island
+        self.assertEqual(self.boundaries.find(39.6828, -104.9265).name, "Virginia Village")  # main
+        self.assertIsNone(self.boundaries.find(39.68117, -104.90956))  # the hole
 
     def test_coordinates_are_latitude_longitude_around_denver(self):
         # Catches a file downloaded in the wrong coordinate system (EPSG:4326 needed).

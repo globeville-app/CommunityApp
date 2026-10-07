@@ -2,8 +2,10 @@
 
 from django.test import SimpleTestCase, TestCase
 
+from shapely.geometry import MultiPolygon, Polygon
+
 from neighborhoods.aliases import aliases_for, load_aliases
-from neighborhoods.geo import NeighborhoodDataError, load_boundaries
+from neighborhoods.geo import NeighborhoodDataError, load_boundaries, repair_shape
 from neighborhoods.models import Neighborhood
 from neighborhoods.testing import FIXTURE_GEOJSON, FixtureNeighborhoodsMixin
 
@@ -37,6 +39,24 @@ class FindNeighborhoodTests(SimpleTestCase):
     def test_missing_file_gives_a_helpful_error(self):
         with self.assertRaisesMessage(NeighborhoodDataError, "SOURCE.md"):
             load_boundaries("/no/such/file.geojson")
+
+
+class RepairShapeTests(SimpleTestCase):
+    def test_hole_stored_as_a_separate_piece_becomes_a_hole(self):
+        outer = Polygon([(0, 0), (4, 0), (4, 4), (0, 4)])
+        hole = Polygon([(1, 1), (2, 1), (2, 2), (1, 2)])
+        island = Polygon([(10, 10), (11, 10), (11, 11), (10, 11)])
+        broken = MultiPolygon([outer, hole, island])
+        self.assertFalse(broken.is_valid)
+        fixed = repair_shape(broken)
+        self.assertTrue(fixed.is_valid)
+        self.assertAlmostEqual(fixed.area, outer.area - hole.area + island.area)
+        self.assertFalse(fixed.covers(hole.centroid))
+        self.assertTrue(fixed.covers(island.centroid))
+
+    def test_valid_shape_is_returned_unchanged(self):
+        square = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
+        self.assertIs(repair_shape(square), square)
 
 
 class AliasTests(SimpleTestCase):
