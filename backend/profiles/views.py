@@ -1,3 +1,6 @@
+import logging
+import time
+
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
@@ -10,6 +13,8 @@ from neighborhoods.models import NeighborhoodMatch
 from .models import Profile
 from .photos import PhotoError, clean_photo
 from .serializers import ProfileInputSerializer, profile_json
+
+logger = logging.getLogger(__name__)
 
 
 def get_profile_or_404(user):
@@ -72,10 +77,19 @@ class ProfilePhotoView(APIView):
         upload = request.FILES.get("photo")
         if upload is None:
             raise ApiError("photo_missing", "Choose a photo to upload.")
+        # Size and timing only (never the image or its metadata), to help
+        # diagnose slow uploads.
+        started = time.monotonic()
         try:
             cleaned = clean_photo(upload)
         except PhotoError as error:
+            logger.info("Profile photo rejected (%s), %.1f MB", error.code, upload.size / 1e6)
             raise ApiError(error.code, error.message) from None
+        logger.info(
+            "Profile photo received: %.1f MB, cleaned in %.1f s",
+            upload.size / 1e6,
+            time.monotonic() - started,
+        )
 
         old_photo = profile.photo.name if profile.photo else None
         profile.photo.save(cleaned.name, cleaned, save=True)

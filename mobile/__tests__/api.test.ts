@@ -1,5 +1,12 @@
 /** The API client: headers, error shapes, and offline handling (fetch is faked). */
-import { ApiError, NETWORK_ERROR_MESSAGE, getMyProfile, matchAddress } from "../src/api";
+import {
+  ApiError,
+  NETWORK_ERROR_MESSAGE,
+  TIMEOUT_ERROR_MESSAGE,
+  getMyProfile,
+  matchAddress,
+  uploadPhoto,
+} from "../src/api";
 
 const fetchMock = jest.fn();
 globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -52,4 +59,40 @@ it("never logs the address", async () => {
     expect(JSON.stringify(spy.mock.calls)).not.toContain("Example");
     spy.mockRestore();
   }
+});
+
+describe("timeouts", () => {
+  // A fake server that never answers; the request ends only when the app gives up.
+  function hang(_url: string, options: { signal: AbortSignal }) {
+    return new Promise((_resolve, reject) => {
+      options.signal.addEventListener("abort", () => reject(new Error("aborted")));
+    });
+  }
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("reports a slow server as a timeout, not as being offline", async () => {
+    fetchMock.mockImplementation(hang);
+    const result = getMyProfile("tok").catch((e) => e);
+    jest.advanceTimersByTime(15000);
+    const error = await result;
+    expect(error.code).toBe("timeout");
+    expect(error.message).toBe(TIMEOUT_ERROR_MESSAGE);
+  });
+
+  it("gives photo uploads much longer than other requests", async () => {
+    fetchMock.mockImplementation(hang);
+    let settled = false;
+    const result = uploadPhoto("tok", { uri: "file:///p.jpg", mimeType: "image/jpeg" })
+      .catch((e) => e)
+      .finally(() => {
+        settled = true;
+      });
+    jest.advanceTimersByTime(60000);
+    await Promise.resolve();
+    expect(settled).toBe(false); // still waiting after a minute
+    jest.advanceTimersByTime(30000);
+    expect((await result).code).toBe("timeout");
+  });
 });

@@ -19,6 +19,9 @@ export class ApiError extends Error {
 export const NETWORK_ERROR_MESSAGE =
   "Can't reach the server. Check your internet connection and try again.";
 
+export const TIMEOUT_ERROR_MESSAGE =
+  "The server is taking too long to answer. Check your connection and try again.";
+
 // ---- Types the backend sends back ----
 
 export type AppConfig = { app_name: string; interests: string[] };

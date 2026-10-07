@@ -12,10 +12,11 @@ import {
   AppConfig,
   MatchResult,
   NETWORK_ERROR_MESSAGE,
+  TIMEOUT_ERROR_MESSAGE,
   Profile,
   ProfileInput,
 } from "./apiTypes";
-import { API_BASE_URL, REQUEST_TIMEOUT_MS } from "./config";
+import { API_BASE_URL, REQUEST_TIMEOUT_MS, UPLOAD_TIMEOUT_MS } from "./config";
 
 export * from "./apiTypes";
 
@@ -24,6 +25,7 @@ type RequestOptions = {
   token?: string | null;
   json?: unknown;
   form?: FormData;
+  timeoutMs?: number;
 };
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -39,7 +41,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, options.timeoutMs ?? REQUEST_TIMEOUT_MS);
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
@@ -49,7 +55,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       signal: controller.signal,
     });
   } catch {
-    // Offline, wrong API_BASE_URL, backend not running, or timed out.
+    if (timedOut) throw new ApiError("timeout", TIMEOUT_ERROR_MESSAGE);
+    // Offline, wrong API_BASE_URL, or the backend isn't running.
     throw new ApiError("network", NETWORK_ERROR_MESSAGE);
   } finally {
     clearTimeout(timer);
@@ -105,7 +112,7 @@ export function uploadPhoto(token: string, photo: { uri: string; mimeType: strin
   const extension = photo.mimeType === "image/png" ? "png" : "jpg";
   // React Native's FormData accepts this {uri, name, type} shape for files.
   form.append("photo", { uri: photo.uri, name: `photo.${extension}`, type: photo.mimeType } as any);
-  return request<Profile>("/api/profile/photo", { method: "POST", token, form });
+  return request<Profile>("/api/profile/photo", { method: "POST", token, form, timeoutMs: UPLOAD_TIMEOUT_MS });
 }
 
 export function getMyProfile(token: string) {

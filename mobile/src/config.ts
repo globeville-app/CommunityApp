@@ -10,3 +10,6 @@ export const API_BASE_URL: string = String(
 
 /** How long to wait for the backend before giving up. */
 export const REQUEST_TIMEOUT_MS = 15000;
+
+/** Photo uploads are much bigger than other requests, so they get longer. */
+export const UPLOAD_TIMEOUT_MS = 90000;

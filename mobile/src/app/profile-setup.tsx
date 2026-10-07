@@ -22,6 +22,8 @@ export default function ProfileSetup() {
   const [interests, setInterests] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // True once the profile is saved but the photo upload failed.
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   useEffect(() => {
     // Interests are optional, so if this fails we just show none.
@@ -43,8 +45,9 @@ export default function ProfileSetup() {
       allowsEditing: true,
       aspect: [1, 1],
       // Compressing makes both iPhone and Android hand back a JPEG, so
-      // iPhone HEIC photos are converted before upload.
-      quality: 0.8,
+      // iPhone HEIC photos are converted before upload. 0.6 keeps a phone
+      // photo to roughly 1 MB, which uploads quickly over home Wi-Fi.
+      quality: 0.6,
       preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
       // Don't give EXIF to the app. (This does NOT clean the file itself;
       // the backend strips EXIF/GPS from every photo it receives.)
@@ -63,6 +66,7 @@ export default function ProfileSetup() {
     if (!token) return;
     setBusy(true);
     setError(null);
+    setPhotoFailed(false);
     try {
       await saveProfile(token, {
         first_name: firstName.trim(),
@@ -70,8 +74,6 @@ export default function ProfileSetup() {
         alias,
         interests,
       });
-      if (photo) await uploadPhoto(token, photo);
-      resetTo("/profile");
     } catch (e) {
       const err = e as ApiError;
       if (err.code === "match_required") {
@@ -80,7 +82,21 @@ export default function ProfileSetup() {
       }
       setError(err.message);
       setBusy(false);
+      return;
     }
+
+    if (photo) {
+      try {
+        await uploadPhoto(token, photo);
+      } catch (e) {
+        // The profile itself is saved; only the photo is missing.
+        setError(`Your profile is saved, but the photo didn't upload. ${(e as ApiError).message}`);
+        setPhotoFailed(true);
+        setBusy(false);
+        return;
+      }
+    }
+    resetTo("/profile");
   }
 
   return (
@@ -121,7 +137,15 @@ export default function ProfileSetup() {
       ) : null}
 
       <ErrorMessage message={error} />
-      <Button title="Save profile" onPress={onSave} busy={busy} disabled={!firstName.trim() || !lastName.trim()} />
+      <Button
+        title={photoFailed ? "Try the photo again" : "Save profile"}
+        onPress={onSave}
+        busy={busy}
+        disabled={!firstName.trim() || !lastName.trim()}
+      />
+      {photoFailed ? (
+        <Button title="Continue without photo" variant="secondary" onPress={() => resetTo("/profile")} />
+      ) : null}
     </Screen>
   );
 }

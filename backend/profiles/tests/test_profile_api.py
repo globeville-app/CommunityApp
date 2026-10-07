@@ -189,6 +189,12 @@ class PhotoTests(ProfileTestCase):
         self.assertNotEqual(old_path, new_path)
         self.assertFalse(old_path.exists())
 
+    def test_upload_logs_size_and_time_only(self):
+        with self.assertLogs("profiles.views", level="INFO") as logs:
+            self.post_photo(upload(image_bytes("JPEG", exif=exif_with_gps())))
+        self.assertRegex(logs.output[0], r"Profile photo received: [0-9.]+ MB, cleaned in [0-9.]+ s")
+        self.assertNotIn("TestPhone", logs.output[0])
+
     def test_missing_photo_field(self):
         response = self.client.post("/api/profile/photo", {}, format="multipart")
         self.assertEqual(response.data["code"], "photo_missing")

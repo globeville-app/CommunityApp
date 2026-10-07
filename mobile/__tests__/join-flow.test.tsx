@@ -228,6 +228,33 @@ describe("address → match → profile setup → profile", () => {
     );
   });
 
+  it("keeps the saved profile and offers to continue when the photo upload fails", async () => {
+    mocked.matchAddress.mockResolvedValue({ neighborhood_id: 1, name: "Hale", aliases: [] });
+    mocked.saveProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, alias: null });
+    mocked.uploadPhoto.mockRejectedValue(new ApiError("timeout", api.TIMEOUT_ERROR_MESSAGE));
+    (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({
+      canceled: false,
+      assets: [{ uri: "file:///photo.jpg", mimeType: "image/jpeg", fileSize: 900000 }],
+    });
+    renderApp();
+    await submitAddress();
+    fireEvent.press(await screen.findByRole("button", { name: "Join Hale" }));
+    fireEvent.changeText(await screen.findByLabelText("First name"), "Ana");
+    fireEvent.changeText(screen.getByLabelText("Last name"), "Rivera");
+    await pressAndSettle(screen.getByRole("button", { name: "Add a photo" }));
+    await pressAndSettle(screen.getByRole("button", { name: "Save profile" }));
+
+    expect(
+      await screen.findByText(`Your profile is saved, but the photo didn't upload. ${api.TIMEOUT_ERROR_MESSAGE}`),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Try the photo again" })).toBeTruthy();
+
+    mocked.getMyProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, alias: null });
+    await pressAndSettle(screen.getByRole("button", { name: "Continue without photo" }));
+    expect(await screen.findByText("Ana R.")).toBeTruthy();
+    expect(mocked.saveProfile).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects a photo over 5 MB before uploading", async () => {
     mocked.matchAddress.mockResolvedValue({ neighborhood_id: 1, name: "Hale", aliases: [] });
     (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({
