@@ -165,8 +165,8 @@ PHOTO_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
 
 # --- Logging ----------------------------------------------------------------
 # PRIVACY: httpx logs every request URL at INFO level, and the geocoder URL
-# contains the street address. We raise httpx/httpcore to WARNING so the
-# address can never reach the logs.
+# contains the street address. Pillow logs photo EXIF tags (including GPS)
+# at DEBUG level. We raise these to WARNING so neither can reach the logs.
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -175,6 +175,7 @@ LOGGING = {
     "loggers": {
         "httpx": {"level": "WARNING"},
         "httpcore": {"level": "WARNING"},
+        "PIL": {"level": "WARNING"},
     },
 }
 
