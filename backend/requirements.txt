@@ -1,0 +1,6 @@
+# Backend dependencies. Install with: pip install -r requirements.txt
+Django==5.2.18              # web framework (5.2 is the long-term-support release)
+djangorestframework==3.18.3 # JSON API + token login
+shapely==2.2.0              # "is this point inside this polygon?"
+httpx==0.28.1               # calls the geocoder, with a timeout
+pillow==12.3.0              # checks photos and strips EXIF metadata

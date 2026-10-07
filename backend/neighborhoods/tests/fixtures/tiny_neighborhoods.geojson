@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "_comment": "TEST FIXTURE ONLY - three made-up squares, not real neighborhoods. West and East Square share an edge at longitude -104.9. Listed out of ID order on purpose.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "NBHD_ID": 2, "NBHD_NAME": "West Square" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-105.0, 39.7], [-104.9, 39.7], [-104.9, 39.8], [-105.0, 39.8], [-105.0, 39.7]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "NBHD_ID": 1, "NBHD_NAME": "East Square" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-104.9, 39.7], [-104.8, 39.7], [-104.8, 39.8], [-104.9, 39.8], [-104.9, 39.7]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "NBHD_ID": 3, "NBHD_NAME": "Highland" },
+      "geometry": { "type": "Polygon", "coordinates": [[[-105.0, 39.8], [-104.9, 39.8], [-104.9, 39.9], [-105.0, 39.9], [-105.0, 39.8]]] }
+    }
+  ]
+}
