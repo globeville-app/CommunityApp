@@ -52,6 +52,33 @@ const SUBURBS = [
  * stores as a separate piece in Virginia Village) are left out, the same
  * result as the backend's repaired shapes. Lowest ID wins, like the backend.
  */
+/**
+ * "39.75928, -105.01103" (as Google Maps and Apple Maps show a dropped pin)
+ * → { lat, lon }. Also accepts the two numbers the other way round, since
+ * Denver's longitude (about -105) can't be a latitude.
+ */
+export function parseMapPoint(text: string): { lat: number; lon: number } | null {
+  const t = text.trim().toLowerCase();
+  // "39.75928, -105.01103" or "(39.75928 -105.01103)"
+  const plain = t.match(/^\(?\s*(-?\d{1,3}(?:\.\d+)?)\s*[,\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*\)?$/);
+  // "39.75928° N, 105.01103° W"
+  const compass = t.match(/^(\d{1,3}(?:\.\d+)?)\s*°?\s*([ns])\s*,?\s*(\d{1,3}(?:\.\d+)?)\s*°?\s*([ew])$/);
+  let lat: number;
+  let lon: number;
+  if (plain) {
+    lat = Number(plain[1]);
+    lon = Number(plain[2]);
+    if (Math.abs(lat) > 90) [lat, lon] = [lon, lat];
+  } else if (compass) {
+    lat = Number(compass[1]) * (compass[2] === "s" ? -1 : 1);
+    lon = Number(compass[3]) * (compass[4] === "w" ? -1 : 1);
+  } else {
+    return null;
+  }
+  if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+  return { lat, lon };
+}
+
 function findNeighborhood(lat: number, lon: number) {
   return NEIGHBORHOODS.find((n) => {
     let inside = false;
@@ -214,7 +241,12 @@ export async function matchAddress(token: string, address: string): Promise<Matc
 
   let neighborhood: DemoNeighborhood | undefined;
   const known = KNOWN_ADDRESSES.find((k) => text.startsWith(k.startsWith));
-  if (known) {
+  const point = parseMapPoint(text);
+  if (point) {
+    // A map point pasted from Google/Apple Maps: real location, real boundaries.
+    neighborhood = findNeighborhood(point.lat, point.lon);
+    if (!neighborhood) throw outside();
+  } else if (known) {
     // Real location + real boundaries: the same check the backend does.
     neighborhood = findNeighborhood(known.lat, known.lon);
     if (!neighborhood) throw outside();

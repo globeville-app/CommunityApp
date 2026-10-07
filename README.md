@@ -174,7 +174,10 @@ boundaries (the build embeds `backend/data/denver_statistical_neighborhoods.geoj
 but the address lookup is **simulated**, because a web page can't reach the
 Census geocoder. The demo knows the locations of a few public sample
 addresses, recognizes Denver neighborhood names typed into the address, and
-treats nearby suburb names as outside Denver. Everything stays in that browser.
+treats nearby suburb names as outside Denver. To check any real spot, paste a
+map point (a dropped pin's coordinates from Google or Apple Maps, e.g.
+`39.75928, -105.01103` or `39.75928° N, 105.01103° W`) into the address field.
+Everything stays in that browser.
 
 Only the browser uses the demo files (`*.web.ts`, `*.web.tsx`); the phone app
 never loads them.
