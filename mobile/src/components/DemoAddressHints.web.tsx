@@ -26,12 +26,6 @@ export function DemoAddressHints({ onPick }: { onPick: (address: string) => void
         Samples use their real locations and Denver's official neighborhood map. The demo can't look up
         other addresses, but it recognizes Denver neighborhood names you type, like "Five Points".
       </Text>
-      <Text style={styles.heading}>Or check your own spot with a map point</Text>
-      <Text style={styles.note}>
-        In Google Maps or Apple Maps, press and hold on your home to drop a pin, copy the coordinates it
-        shows (like 39.75928, -105.01103), and paste them in the box above. The point is checked against
-        Denver's real boundaries, never leaves this browser, and is not saved.
-      </Text>
       <View style={styles.list}>
         {SAMPLES.map((sample) => (
           <Pressable
