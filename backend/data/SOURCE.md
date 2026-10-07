@@ -52,4 +52,22 @@ does nothing.
   the export is named `ODC_ADMN_NEIGHBORHOOD_A`)
 - **Downloaded on:** 2026-10-07
 - **Fields used:** `NBHD_ID`, `NBHD_NAME` (others kept as-is: `OBJECTID`, `TYPOLOGY`, `NOTES`, `GLOBALID`)
-- **License:** to confirm on the dataset page (Denver's open data is usually CC BY 3.0)
+- **License / use constraints** (from the dataset page's About section, 2026-10-07):
+  no named license is shown. The page states these use constraints:
+
+  > The City and County of Denver is not responsible and shall not be liable to any user or
+  > recipient for damages of any kind arising out of the use of data or information provided by
+  > the City and County of Denver, including the installation of the data or information, its use,
+  > or the results obtained from its use. ANY DATA OR INFORMATION PROVIDED BY THE City and County of
+  > Denver IS PROVIDED AS IS WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AND THE
+  > RECIPIENT HEREBY WAIVES ANY AND ALL SUCH WARRANTIES, INCLUDING, BUT NOT LIMITED TO, ANY WARANTY AS
+  > TO THE ACCURACY OR COMPLETENESS OF THE INFORMATION AND THE IMPLIED WARRANTIES OF MERCHANTABILITY
+  > AND FITNESS FOR A PARTICULAR PURPOSE. Data or information provided by the City and County of
+  > Denver shall be used and relied upon only at the user's sole risk, and the user agrees to
+  > indemnify and hold harmless the City and County of Denver, its officials, officers and employees
+  > from any liability arising out of the use, reproduction or dissemination of the
+  > data/information provided. NOT FOR ENGINEERING PURPOSES
+
+  In plain terms: the data is free to use as-is, with no accuracy guarantee, and
+  the user (us) takes responsibility for how it's used. Worth a lawyer's look
+  before launch, alongside the other open items (see docs/MILESTONE_1.md).
