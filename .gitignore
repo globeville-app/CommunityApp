@@ -18,3 +18,4 @@ mobile/expo-env.d.ts
 .DS_Store
 .vscode/
 .idea/
+mobile/web-demo/

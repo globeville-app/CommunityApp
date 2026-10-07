@@ -158,6 +158,26 @@ Do this once with the backend running and the Denver file loaded:
 
 ---
 
+## Browser demo (for showing people)
+
+`mobile/` can also build a clickable demo that runs in any web browser, with no
+backend and no phone needed:
+
+```bash
+cd mobile
+npm run demo:build      # writes mobile/web-demo/index.html (one self-contained file)
+```
+
+The demo uses the real screens, with a pretend backend inside the page
+(`src/demo/fakeBackend.ts`). Neighborhood matching is **simulated**: it knows a
+few public sample addresses, Denver neighborhood names typed into the address,
+and nearby suburb names. Everything stays in that browser.
+
+Only the browser uses the demo files (`*.web.ts`, `*.web.tsx`); the phone app
+never loads them.
+
+---
+
 ## How it works
 
 **Address → neighborhood.** The phone sends the address once to

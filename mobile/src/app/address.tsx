@@ -10,6 +10,7 @@ import { useState } from "react";
 
 import { ApiError, matchAddress } from "../api";
 import { useAuth } from "../auth";
+import { DemoAddressHints } from "../components/DemoAddressHints";
 import { Body, Button, ErrorMessage, Field, Screen, Title } from "../ui";
 
 // Errors where trying the same address again might work.
@@ -57,6 +58,7 @@ export default function Address() {
         returnKeyType="search"
         onSubmitEditing={onSubmit}
       />
+      <DemoAddressHints onPick={setAddress} />
       <ErrorMessage message={error?.message ?? null} />
       {error && RETRYABLE.has(error.code) ? (
         <Button title="Try again" onPress={onSubmit} busy={busy} />

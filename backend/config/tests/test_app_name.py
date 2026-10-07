@@ -8,7 +8,7 @@ import json
 from django.conf import settings
 from django.test import SimpleTestCase
 
-SKIP_DIRS = {"node_modules", ".venv", "__pycache__", ".expo", ".git", "media", "dist", "coverage"}
+SKIP_DIRS = {"node_modules", ".venv", "__pycache__", ".expo", ".git", "media", "dist", "coverage", "web-demo"}
 SKIP_FILES = {"package-lock.json", "yarn.lock", "db.sqlite3"}
 SKIP_SUFFIXES = {".md", ".geojson", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".ttf", ".pyc", ".sqlite3"}
 
