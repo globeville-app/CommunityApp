@@ -16,10 +16,12 @@ Do not substitute another dataset. The neighborhood IDs and names come from this
 
 ## How to download it
 
-1. Go to Denver's Open Data Catalog: <https://opendata-geospatialdenver.hub.arcgis.com/>
-   (also linked from <https://www.denvergov.org/opendata>).
-2. Search for **Statistical Neighborhoods**.
-3. Choose **Download → GeoJSON**. GeoJSON from the hub is already in WGS84
+1. Open the dataset page:
+   <https://opendata-geospatialdenver.hub.arcgis.com/datasets/3e57d472afbf4326867c1a4c9d4e7c91_13/explore>
+   (in Denver's Open Data Catalog, titled "Statistical Neighborhood", 78 records).
+2. Choose **Download**.
+3. Under **GeoJSON**, choose **Download**. (Download links the site generates expire
+   after about an hour, so record the page above, not the download link.) GeoJSON from the hub is already in WGS84
    (EPSG:4326, plain latitude/longitude), which is what we need.
 4. Save it here as `denver_statistical_neighborhoods.geojson`.
 5. Check it: from `backend/`, run `python manage.py test neighborhoods`. The
@@ -33,7 +35,8 @@ The code expects each feature to have `NBHD_ID` and `NBHD_NAME` properties
 
 ## Details (fill in after downloading)
 
-- **Page URL:**
-- **Download URL:**
+- **Page URL:** <https://opendata-geospatialdenver.hub.arcgis.com/datasets/3e57d472afbf4326867c1a4c9d4e7c91_13/explore>
+- **Dataset:** Statistical Neighborhood (item `3e57d472afbf4326867c1a4c9d4e7c91`, layer 13;
+  the export is named `ODC_ADMN_NEIGHBORHOOD_A`)
 - **Downloaded on:**
 - **License:** (shown on the dataset page; Denver's open data is usually CC BY 3.0)
