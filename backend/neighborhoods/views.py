@@ -19,7 +19,7 @@ from config.errors import ApiError
 from geocoding.client import GeocoderUnavailable, geocode
 
 from .aliases import aliases_for, get_alias_map
-from .geo import get_boundaries
+from .geo import NeighborhoodDataError, get_boundaries
 from .models import Neighborhood, NeighborhoodMatch
 
 logger = logging.getLogger(__name__)
@@ -87,6 +87,12 @@ class MatchView(APIView):
 
         try:
             neighborhood, problem = find_neighborhood(data.validated_data["address"])
+        except (NeighborhoodDataError, Neighborhood.DoesNotExist):
+            logger.error(
+                "Neighborhood data isn't set up. See backend/data/SOURCE.md, "
+                "then run: python manage.py load_neighborhoods"
+            )
+            problem = SERVER_PROBLEM
         except Exception as error:  # deliberately broad, see below
             # Any unexpected error here could carry the address or the
             # coordinates in its message. Log only the error's type, never

@@ -105,6 +105,23 @@ class MatchApiTests(FixtureNeighborhoodsMixin, APITestCase):
         self.assertIn("ValueError", "\n".join(logs.output))
 
 
+class MatchWithoutDataTests(APITestCase):
+    def test_missing_neighborhood_file_logs_how_to_fix_it(self):
+        from neighborhoods.testing import clear_caches
+
+        user = get_user_model().objects.create_user(username="cy@example.com", password="x")
+        self.client.force_authenticate(user)
+        clear_caches()
+        with override_settings(NEIGHBORHOODS_GEOJSON="/no/such/file.geojson"), fake_geocoder(
+            census_reply(39.75, -104.85)
+        ), self.assertLogs("neighborhoods.views", level="ERROR") as logs:
+            response = self.client.post("/api/join/match", {"address": ADDRESS}, format="json")
+        clear_caches()
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("load_neighborhoods", logs.output[0])
+        self.assertNotIn("Example", logs.output[0])
+
+
 class MatchThrottleTests(FixtureNeighborhoodsMixin, APITestCase):
     @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
     def test_too_many_matches_are_slowed_down(self):
