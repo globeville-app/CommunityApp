@@ -176,6 +176,9 @@ LOGGING = {
         "httpx": {"level": "WARNING"},
         "httpcore": {"level": "WARNING"},
         "PIL": {"level": "WARNING"},
+        # Send Django's messages through the root handler only (so they print
+        # once, and the privacy tests, which watch the root logger, see them).
+        "django": {"handlers": [], "level": "INFO"},
     },
 }
 
