@@ -12,7 +12,11 @@
  */
 import type { ExpoConfig } from "expo/config";
 
-const shared = require("../shared/app_config.json") as { app_name: string };
+const shared = require("../shared/app_config.json") as {
+  app_name: string;
+  privacy_url: string;
+  terms_url: string;
+};
 
 const appName = shared.app_name;
 const slug = appName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
@@ -21,12 +25,15 @@ const config: ExpoConfig = {
   name: appName,
   slug,
   scheme: slug,
+  // Shown at the bottom of Settings as "Version 1.0.0 (1)". Raise the build
+  // number for every build sent to the stores.
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/brand/icon.png",
   userInterfaceStyle: "dark",
   ios: {
     supportsTablet: false,
+    buildNumber: "1",
   },
   android: {
     adaptiveIcon: {
@@ -35,6 +42,7 @@ const config: ExpoConfig = {
       backgroundImage: "./assets/brand/adaptive-icon-background.png",
     },
     predictiveBackGestureEnabled: false,
+    versionCode: 1,
   },
   web: {
     favicon: "./assets/brand/favicon.png",
@@ -63,6 +71,9 @@ const config: ExpoConfig = {
   extra: {
     // Your computer's address on your Wi-Fi, e.g. http://192.168.1.23:8000
     apiBaseUrl: process.env.API_BASE_URL ?? "http://localhost:8000",
+    // Empty until the real pages exist; Settings then shows "Coming soon".
+    privacyUrl: shared.privacy_url,
+    termsUrl: shared.terms_url,
   },
 };
 

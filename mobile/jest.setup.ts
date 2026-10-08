@@ -33,7 +33,14 @@ jest.mock("expo-constants", () => {
   const shared = require("../shared/app_config.json");
   return {
     __esModule: true,
-    default: { expoConfig: { name: shared.app_name, extra: { apiBaseUrl: "http://test-server:8000" } } },
+    default: {
+      expoConfig: {
+        name: shared.app_name,
+        version: "1.0.0",
+        ios: { buildNumber: "12" },
+        extra: { apiBaseUrl: "http://test-server:8000", privacyUrl: shared.privacy_url, termsUrl: shared.terms_url },
+      },
+    },
   };
 });
 
