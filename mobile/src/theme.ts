@@ -21,6 +21,14 @@ export const colors = {
   secondaryBorder: "rgba(255,255,255,0.5)",
 };
 
+/** The dark purple gradient under the glow (design/BRAND.md), about 110°. */
+export const baseGradient = {
+  colors: ["#1A0F3D", "#1C1240", "#2E1747"] as const,
+  locations: [0, 0.6, 1] as const,
+  start: { x: 0, y: 0.32 },
+  end: { x: 1, y: 0.68 },
+};
+
 /**
  * How dark the base overlay over the glow is. The design doc suggests 30%;
  * 45% is what keeps soft-white body text at 4.5:1 where the brightest glows
@@ -35,10 +43,11 @@ export const fonts = {
   semibold: "Outfit_600SemiBold",
 };
 
-// Sizes in points, with letter spacing from the design doc's percentages.
+// Sizes in points. Titles are SemiBold with -0.02em letter spacing
+// (design/BRAND.md); React Native wants points, so -0.02 × font size.
 export const type = {
-  hero: { fontFamily: fonts.medium, fontSize: 58, lineHeight: 60, letterSpacing: -2.6 },
-  title: { fontFamily: fonts.medium, fontSize: 42, lineHeight: 46, letterSpacing: -1.5 },
+  hero: { fontFamily: fonts.semibold, fontSize: 58, lineHeight: 60, letterSpacing: -0.02 * 58 },
+  title: { fontFamily: fonts.semibold, fontSize: 42, lineHeight: 46, letterSpacing: -0.02 * 42 },
   section: { fontFamily: fonts.medium, fontSize: 20, lineHeight: 26 },
   body: { fontFamily: fonts.regular, fontSize: 16, lineHeight: 23 },
   intro: { fontFamily: fonts.light, fontSize: 17, lineHeight: 25 },

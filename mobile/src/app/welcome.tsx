@@ -1,14 +1,15 @@
 import { router } from "expo-router";
 import { View } from "react-native";
 
-import { APP_NAME } from "../config";
-import { Button, Hero, Intro, Screen, styles } from "../ui";
+import { Wordmark } from "../components/brand/Wordmark";
+import { Button, Intro, Screen, styles } from "../ui";
 
 export default function Welcome() {
   return (
     <Screen>
-      <View style={[styles.flex, { justifyContent: "flex-end", gap: 12, paddingBottom: 24 }]}>
-        <Hero>{APP_NAME}</Hero>
+      {/* Logo centered, with clear space around it (design/BRAND.md). */}
+      <View style={[styles.flex, { justifyContent: "center", alignItems: "center", gap: 32 }]}>
+        <Wordmark height={44} />
         <Intro>Meet your neighbors in Denver.</Intro>
       </View>
       <Button title="Sign up" onPress={() => router.push("/signup")} />

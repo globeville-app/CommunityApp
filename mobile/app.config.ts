@@ -4,6 +4,9 @@
  * The app name comes from ../shared/app_config.json, the one place it is
  * written. Rename the app there, not here.
  *
+ * Icons and the splash screen use the brand files in assets/brand/
+ * (see design/BRAND.md).
+ *
  * The backend address comes from the API_BASE_URL setting in mobile/.env
  * (see the README). Screens read both values through src/config.ts.
  */
@@ -20,22 +23,33 @@ const config: ExpoConfig = {
   scheme: slug,
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/icon.png",
-  userInterfaceStyle: "light",
+  icon: "./assets/brand/icon.png",
+  userInterfaceStyle: "dark",
   ios: {
     supportsTablet: false,
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: "#FFFFFF",
-      foregroundImage: "./assets/android-icon-foreground.png",
-      backgroundImage: "./assets/android-icon-background.png",
-      monochromeImage: "./assets/android-icon-monochrome.png",
+      backgroundColor: "#1A0F3D",
+      foregroundImage: "./assets/brand/adaptive-icon.png",
+      backgroundImage: "./assets/brand/adaptive-icon-background.png",
     },
     predictiveBackGestureEnabled: false,
   },
+  web: {
+    favicon: "./assets/brand/favicon.png",
+  },
   plugins: [
     "expo-router",
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/brand/splash-icon.png",
+        imageWidth: 160,
+        resizeMode: "contain",
+        backgroundColor: "#1A0F3D",
+      },
+    ],
     "expo-secure-store",
     [
       "expo-image-picker",

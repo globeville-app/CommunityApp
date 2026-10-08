@@ -1,6 +1,8 @@
 import { useFonts } from "expo-font";
 import { DarkTheme, Stack, ThemeProvider } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { View } from "react-native";
 
 import { Outfit_300Light } from "@expo-google-fonts/outfit/300Light";
@@ -12,6 +14,9 @@ import { AuthProvider } from "../auth";
 import { DemoBanner } from "../components/DemoBanner";
 import { GlowBackground } from "../components/GlowBackground";
 import { colors } from "../theme";
+
+// Keep the native splash (the gb mark) up until the fonts are ready.
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 // Navigation paints its own background behind screens by default; make it
 // see-through so the glow shows.
@@ -31,6 +36,10 @@ export default function RootLayout() {
     Outfit_500Medium,
     Outfit_600SemiBold,
   });
+
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync().catch(() => undefined);
+  }, [fontsLoaded]);
 
   return (
     <ThemeProvider value={theme}>

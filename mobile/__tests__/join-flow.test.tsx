@@ -54,9 +54,9 @@ function everythingStored() {
 }
 
 describe("starting the app", () => {
-  it("shows Welcome with the app name when logged out", async () => {
+  it("shows Welcome with the logo, read aloud as the app name, when logged out", async () => {
     renderApp();
-    expect(await screen.findByText(APP_NAME)).toBeTruthy();
+    expect(await screen.findByLabelText(APP_NAME)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Sign up" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Log in" })).toBeTruthy();
   });

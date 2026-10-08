@@ -1,7 +1,8 @@
 /**
  * The signature ambient glow: five soft blobs of color drifting behind the
  * whole app, each on its own slow loop so the colors blend without visibly
- * repeating. A dark overlay on top keeps text readable.
+ * repeating, over the brand's dark purple gradient. A dark overlay on top
+ * keeps text readable.
  *
  * Built the "cheaper" way the design doc describes: one pre-blurred white
  * blob image (assets/glow-blob.png), tinted per color and moved with
@@ -20,7 +21,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { colors, GLOW_DIM } from "../theme";
+import { LinearGradient } from "expo-linear-gradient";
+
+import { baseGradient, colors, GLOW_DIM } from "../theme";
 
 const blob = require("../../assets/glow-blob.png");
 
@@ -99,6 +102,7 @@ export function GlowBackground() {
       style={styles.container}
       onLayout={(e) => setSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
     >
+      <LinearGradient {...baseGradient} style={styles.gradient} />
       {GLOWS.map((glow) => (
         <GlowBlob key={glow.color} glow={glow} width={size.width} height={size.height} still={still} />
       ))}
@@ -111,5 +115,6 @@ const styles = StyleSheet.create({
   container: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: colors.base, overflow: "hidden" },
   blob: { position: "absolute", left: 0, top: 0 },
   fill: { width: "100%", height: "100%" },
+  gradient: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0 },
   dim: { position: "absolute", left: 0, top: 0, backgroundColor: colors.base, opacity: GLOW_DIM },
 });

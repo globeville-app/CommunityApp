@@ -65,9 +65,18 @@ const demoData = {
 };
 const demoDataScript = `globalThis.__DEMO_DATA__ = ${JSON.stringify(demoData).replace(/</g, "\\u003c")};`;
 
-// 5. Wrap it in a page: a phone-sized frame on wide screens, full screen on phones.
+// 5. Brand files (design/BRAND.md): the wordmark as vector art and the favicon.
+const brandDir = path.join(mobileDir, "assets", "brand");
+const wordmarkSvg = fs
+  .readFileSync(path.join(brandDir, "globeville-wordmark-white.svg"), "utf8")
+  .replace("<svg ", '<svg class="wordmark" ')
+  .replace(/aria-label="[^"]*"/, `aria-label="${appName}"`); // read aloud as the name
+const favicon = `data:image/png;base64,${fs.readFileSync(path.join(brandDir, "favicon.png")).toString("base64")}`;
+
+// 6. Wrap it in a page: a phone-sized frame on wide screens, full screen on phones.
 const page = `<meta charset="utf-8">
 <title>${appName} Join Flow</title>
+<link rel="icon" type="image/png" href="${favicon}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap">
 <style>
@@ -90,6 +99,7 @@ const page = `<meta charset="utf-8">
   .stage { height: 100%; display: grid; grid-template-columns: minmax(0, 420px) auto; justify-content: center;
     align-items: center; gap: 56px; padding-inline: 24px; box-sizing: border-box; }
   .about { display: grid; gap: 18px; max-width: 420px; min-width: 0; }
+  .wordmark { height: 44px; width: auto; display: block; margin-bottom: 8px; }
   .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0; }
   h1 { font-size: 40px; font-weight: 600; line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
   .about p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--muted); }
@@ -108,8 +118,9 @@ const page = `<meta charset="utf-8">
 </style>
 <div class="stage">
   <section class="about" aria-label="About this demo">
+    ${wordmarkSvg}
     <p class="eyebrow">Milestone 1 &middot; Demo</p>
-    <h1>${appName}: join your Denver neighborhood</h1>
+    <h1>Join your Denver neighborhood</h1>
     <p>These are the real app screens, running in your browser. A pretend backend stands in for the server, so nothing you type leaves this page.</p>
     <ol>
       <li>Sign up with any email and a password of 8+ characters.</li>
