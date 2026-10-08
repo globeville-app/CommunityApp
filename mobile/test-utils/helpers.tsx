@@ -1,4 +1,6 @@
 /** Shared setup for screen tests. */
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Localization from "expo-localization";
 import * as SecureStore from "expo-secure-store";
 import { renderRouter } from "expo-router/testing-library";
 
@@ -32,15 +34,33 @@ export function renderApp(initialUrl = "/") {
   );
 }
 
-export const notFound = () => new ApiError("profile_not_found", "You haven't finished joining yet.", 404);
+export const notFound = () => new ApiError("profile_not_found", 404);
+
+/** Pretend the phone's language setting is `tag`, e.g. "es-US". */
+export function setDeviceLocale(tag: string) {
+  (Localization as unknown as { __setLocale: (tag: string) => void }).__setLocale(tag);
+}
+
+/** A fresh phone: no saved language, set to US English. */
+export async function resetLanguage() {
+  await AsyncStorage.clear();
+  setDeviceLocale("en-US");
+}
+
+/** Everything in the language preference store, as {key: value}. */
+export async function languageStore() {
+  const keys = await AsyncStorage.getAllKeys();
+  return Object.fromEntries(await AsyncStorage.multiGet(keys));
+}
 
 export const HIGHLAND_PROFILE: ProfileData = {
   display_name: "Ana R.",
   first_name: "Ana",
   last_initial: "R",
   photo_url: null,
-  interests: ["Block parties", "Gardening"],
+  interests: ["block_parties", "gardening"],
   neighborhood: { id: 3, name: "Highland" },
   alias: "LoHi",
+  language: "en",
   joined_at: "2026-10-07T12:00:00Z",
 };

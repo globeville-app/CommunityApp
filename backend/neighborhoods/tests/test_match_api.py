@@ -2,7 +2,6 @@ import logging
 from unittest import mock
 
 import httpx
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import override_settings
@@ -57,21 +56,14 @@ class MatchApiTests(FixtureNeighborhoodsMixin, APITestCase):
         with fake_geocoder(census_reply(*self.OUTSIDE)):
             response = self.match()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["code"], "outside_denver")
-        self.assertEqual(
-            response.data["detail"],
-            f"{settings.APP_NAME} is only in the City and County of Denver for now.",
-        )
+        self.assertEqual(response.data, {"code": "outside_denver"})
         self.assertFalse(NeighborhoodMatch.objects.exists())
 
     def test_no_match(self):
         with fake_geocoder(NO_MATCH_REPLY):
             response = self.match()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["code"], "no_match")
-        self.assertEqual(
-            response.data["detail"], "We couldn't find that address. Check the spelling and try again."
-        )
+        self.assertEqual(response.data, {"code": "no_match"})
 
     def test_geocoder_timeout_is_a_friendly_503(self):
         with fake_geocoder(error=httpx.ReadTimeout):

@@ -1,27 +1,20 @@
 /**
  * Every call to the backend goes through this file.
  *
- * Errors always arrive as an ApiError with a `code` (what happened, for the
- * code) and a `message` (what to show the person).
+ * Errors always arrive as an ApiError with a `code`, never a sentence; the
+ * screens turn the code into words in the person's language.
  *
  * PRIVACY: nothing here logs requests or stores responses. The address is
  * sent to /api/join/match and then forgotten.
  */
-import {
-  ApiError,
-  AppConfig,
-  MatchResult,
-  NETWORK_ERROR_MESSAGE,
-  TIMEOUT_ERROR_MESSAGE,
-  Profile,
-  ProfileInput,
-} from "./apiTypes";
+import { ApiError, AppConfig, AuthResult, MatchResult, Profile, ProfileInput } from "./apiTypes";
 import { API_BASE_URL, REQUEST_TIMEOUT_MS, UPLOAD_TIMEOUT_MS } from "./config";
+import type { Language } from "./i18n";
 
 export * from "./apiTypes";
 
 type RequestOptions = {
-  method?: "GET" | "POST" | "PUT";
+  method?: "GET" | "POST" | "PUT" | "PATCH";
   token?: string | null;
   json?: unknown;
   form?: FormData;
@@ -55,9 +48,9 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       signal: controller.signal,
     });
   } catch {
-    if (timedOut) throw new ApiError("timeout", TIMEOUT_ERROR_MESSAGE);
+    if (timedOut) throw new ApiError("timeout");
     // Offline, wrong API_BASE_URL, or the backend isn't running.
-    throw new ApiError("network", NETWORK_ERROR_MESSAGE);
+    throw new ApiError("network");
   } finally {
     clearTimeout(timer);
   }
@@ -71,12 +64,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     data = null;
   }
   if (!response.ok) {
-    throw new ApiError(
-      data?.code ?? "server_error",
-      data?.detail ?? "Something went wrong on our side. Please try again.",
-      response.status,
-      data?.fields,
-    );
+    throw new ApiError(data?.code ?? "server_error", response.status, data?.fields);
   }
   return data as T;
 }
@@ -87,12 +75,17 @@ export function getConfig() {
   return request<AppConfig>("/api/config");
 }
 
-export function signup(email: string, password: string) {
-  return request<{ token: string }>("/api/auth/signup", { method: "POST", json: { email, password } });
+export function signup(email: string, password: string, language: Language) {
+  return request<AuthResult>("/api/auth/signup", { method: "POST", json: { email, password, language } });
 }
 
 export function login(email: string, password: string) {
-  return request<{ token: string }>("/api/auth/login", { method: "POST", json: { email, password } });
+  return request<AuthResult>("/api/auth/login", { method: "POST", json: { email, password } });
+}
+
+/** Save the member's language on the server (works before the profile exists). */
+export function updateLanguage(token: string, language: Language) {
+  return request<{ language: Language }>("/api/profile/me", { method: "PATCH", token, json: { language } });
 }
 
 export function logout(token: string) {

@@ -1,0 +1,112 @@
+{
+  "common": {
+    "back": "Atrás",
+    "try_again": "Intentar otra vez",
+    "loading": "Cargando"
+  },
+  "language": {
+    "toggle_label": "Idioma",
+    "settings_row": "Language / Idioma"
+  },
+  "welcome": {
+    "tagline": "Conoce a tus vecinos en Denver.",
+    "sign_up": "Crear cuenta",
+    "log_in": "Iniciar sesión"
+  },
+  "auth": {
+    "email_label": "Correo electrónico",
+    "password_label": "Contraseña",
+    "signup_title": "Crea tu cuenta",
+    "signup_button": "Crear cuenta",
+    "password_hint": "Al menos 8 caracteres. Evita contraseñas comunes.",
+    "login_title": "¡Qué gusto verte otra vez!",
+    "login_button": "Iniciar sesión"
+  },
+  "start": {
+    "error_title": "Mmm.",
+    "error_hint": "Asegúrate de que el servidor esté funcionando y de que tu teléfono esté en la misma red Wi-Fi."
+  },
+  "join": {
+    "title": "¿Dónde vives?",
+    "intro": "Usamos tu dirección una sola vez para encontrar tu vecindario y luego la olvidamos.",
+    "address_label": "Dirección",
+    "address_placeholder": "1234 Main St, Denver, CO",
+    "find_button": "Buscar mi vecindario",
+    "youre_in": "Tu vecindario es",
+    "which_name": "¿Qué nombre usas?",
+    "join_button": "Unirme a {{name}}",
+    "edit_address": "Cambiar dirección",
+    "address_forgotten": "Usamos tu dirección una sola vez para encontrar tu vecindario y no la guardamos."
+  },
+  "setup": {
+    "title": "Crea tu perfil",
+    "add_photo": "Agregar una foto",
+    "change_photo": "Cambiar la foto",
+    "selected_photo": "Foto elegida",
+    "first_name_label": "Nombre",
+    "last_name_label": "Apellido",
+    "joining": "Te unes a {{name}}",
+    "privacy_note": "Tus vecinos solo ven tu nombre y la inicial de tu apellido.",
+    "interests_title": "Intereses",
+    "finish_button": "Terminar",
+    "retry_photo_button": "Intentar la foto otra vez",
+    "skip_photo_button": "Seguir sin foto",
+    "photo_failed": "Tu perfil se guardó, pero la foto no se subió. {{reason}}"
+  },
+  "profile": {
+    "photo_label": "Foto de perfil",
+    "joined": "Te uniste el {{date}}",
+    "interests_title": "Intereses",
+    "log_out_button": "Cerrar sesión"
+  },
+  "interests": {
+    "block_parties": "Fiestas de cuadra",
+    "food_drives": "Colectas de comida",
+    "cleanups": "Limpiezas del barrio",
+    "live_music": "Música en vivo",
+    "gardening": "Jardinería"
+  },
+  "errors": {
+    "generic": "Algo salió mal. Inténtalo otra vez.",
+    "network": "No podemos conectar con el servidor. Revisa tu conexión a internet e inténtalo otra vez.",
+    "timeout": "El servidor está tardando mucho en responder. Revisa tu conexión e inténtalo otra vez.",
+    "server_error": "Algo salió mal de nuestro lado. Inténtalo otra vez.",
+    "throttled": "Hiciste muchos intentos en poco tiempo. Espera un minuto e inténtalo otra vez.",
+    "not_authenticated": "Vuelve a iniciar sesión, por favor.",
+    "authentication_failed": "Vuelve a iniciar sesión, por favor.",
+    "invalid": "Revisa lo que escribiste e inténtalo otra vez.",
+    "no_match": "No encontramos esa dirección. Revisa cómo está escrita e inténtalo otra vez.",
+    "outside_denver": "Por ahora, {{app}} solo está en la Ciudad y Condado de Denver.",
+    "geocoder_unavailable": "Ahora mismo no podemos buscar direcciones. Inténtalo otra vez en un minuto.",
+    "invalid_address": "Escribe tu dirección.",
+    "invalid_credentials": "El correo o la contraseña no son correctos.",
+    "email_taken": "Ya existe una cuenta con este correo. Intenta iniciar sesión.",
+    "invalid_email": "Escribe un correo electrónico válido.",
+    "invalid_password": "Escribe una contraseña.",
+    "password_too_short": "Tu contraseña necesita al menos 8 caracteres.",
+    "password_too_common": "Esa contraseña es muy común. Prueba con una frase más larga.",
+    "password_entirely_numeric": "Tu contraseña no puede tener solo números.",
+    "password_too_similar": "Tu contraseña se parece demasiado a tu correo.",
+    "invalid_first_name": "Escribe tu nombre.",
+    "invalid_last_name": "Escribe tu apellido.",
+    "invalid_language": "Elige inglés o español.",
+    "invalid_alias": "Ese no es uno de los nombres de este vecindario.",
+    "unknown_interest": "Uno de esos intereses no está en la lista.",
+    "match_required": "Primero escribe tu dirección.",
+    "profile_not_found": "Todavía no terminas de unirte.",
+    "photo_too_large": "Las fotos deben pesar 5 MB o menos.",
+    "photo_wrong_type": "Las fotos deben ser JPEG o PNG.",
+    "photo_missing": "Elige una foto para subir."
+  },
+  "demo": {
+    "banner_label": "Demo",
+    "banner_text": "mapa real de Denver · direcciones de ejemplo · todo se queda en este navegador",
+    "reset_button": "Reiniciar",
+    "reset_label": "Reiniciar la demo",
+    "samples_title": "Prueba una dirección de ejemplo",
+    "samples_body": "Los ejemplos usan su ubicación real y el mapa oficial de vecindarios de Denver. La demo no puede buscar otras direcciones, pero reconoce los nombres de vecindarios de Denver que escribas, como \"Five Points\".",
+    "use_sample": "Usar ejemplo: {{name}}",
+    "sample_misspelled": "Una dirección mal escrita",
+    "sample_outage": "Servicio de búsqueda caído"
+  }
+}

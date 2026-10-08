@@ -1,21 +1,26 @@
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 // Only the one icon set; the package root would pull in every icon font.
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ApiError, getConfig, saveProfile, uploadPhoto } from "../api";
 import { useAuth } from "../auth";
+import { errorMessage } from "../i18n/errors";
+import { useLanguage } from "../language";
 import { resetTo } from "../navigation";
 import { colors, type } from "../theme";
-import { Avatar, BackButton, Button, Choice, ErrorMessage, Field, GlassCard, Screen, Section, Title, styles } from "../ui";
+import { Avatar, Button, Choice, ErrorMessage, Field, GlassCard, JoinHeader, Screen, Section, Title, styles } from "../ui";
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 type PickedPhoto = { uri: string; mimeType: string };
 
 export default function ProfileSetup() {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
   const { token } = useAuth();
   const { alias = "", neighborhood = "" } = useLocalSearchParams<{ alias?: string; neighborhood?: string }>();
   const [firstName, setFirstName] = useState("");
@@ -24,7 +29,8 @@ export default function ProfileSetup() {
   const [interestOptions, setInterestOptions] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Errors are kept as codes so they re-translate if the language changes.
+  const [error, setError] = useState<ApiError | null>(null);
   // True once the profile is saved but the photo upload failed.
   const [photoFailed, setPhotoFailed] = useState(false);
 
@@ -59,7 +65,7 @@ export default function ProfileSetup() {
     if (result.canceled || !result.assets?.length) return;
     const asset = result.assets[0];
     if (asset.fileSize && asset.fileSize > MAX_PHOTO_BYTES) {
-      setError("Photos must be 5 MB or smaller.");
+      setError(new ApiError("photo_too_large"));
       return;
     }
     setPhoto({ uri: asset.uri, mimeType: asset.mimeType === "image/png" ? "image/png" : "image/jpeg" });
@@ -76,6 +82,7 @@ export default function ProfileSetup() {
         last_name: lastName.trim(),
         alias,
         interests,
+        language,
       });
     } catch (e) {
       const err = e as ApiError;
@@ -83,7 +90,7 @@ export default function ProfileSetup() {
         resetTo("/address");
         return;
       }
-      setError(err.message);
+      setError(err);
       setBusy(false);
       return;
     }
@@ -93,7 +100,7 @@ export default function ProfileSetup() {
         await uploadPhoto(token, photo);
       } catch (e) {
         // The profile itself is saved; only the photo is missing.
-        setError(`Your profile is saved, but the photo didn't upload. ${(e as ApiError).message}`);
+        setError(e as ApiError);
         setPhotoFailed(true);
         setBusy(false);
         return;
@@ -106,15 +113,15 @@ export default function ProfileSetup() {
 
   return (
     <Screen>
-      <BackButton />
-      <Title>Set up your profile</Title>
+      <JoinHeader back />
+      <Title>{t("setup.title")}</Title>
 
       <View style={local.avatarWrap}>
         <Avatar uri={photo?.uri} initial={firstName.trim().slice(0, 1).toUpperCase() || undefined} />
-        {photo ? <Text style={local.hidden} accessibilityLabel="Selected photo" /> : null}
+        {photo ? <Text style={local.hidden} accessibilityLabel={t("setup.selected_photo")} /> : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={photo ? "Change photo" : "Add a photo"}
+          accessibilityLabel={photo ? t("setup.change_photo") : t("setup.add_photo")}
           onPress={pickPhoto}
           style={({ pressed }) => [local.addPhoto, pressed && styles.pressed]}
         >
@@ -122,27 +129,39 @@ export default function ProfileSetup() {
         </Pressable>
       </View>
 
-      <Field label="First name" icon="person-outline" value={firstName} onChangeText={setFirstName} textContentType="givenName" />
-      <Field label="Last name" icon="person-outline" value={lastName} onChangeText={setLastName} textContentType="familyName" />
+      <Field
+        label={t("setup.first_name_label")}
+        icon="person-outline"
+        value={firstName}
+        onChangeText={setFirstName}
+        textContentType="givenName"
+      />
+      <Field
+        label={t("setup.last_name_label")}
+        icon="person-outline"
+        value={lastName}
+        onChangeText={setLastName}
+        textContentType="familyName"
+      />
 
       {joining ? (
         <GlassCard style={local.joiningCard}>
           <Ionicons name="home" size={18} color={colors.glowTurquoise} />
-          <Text style={[type.label, { color: colors.glowTurquoise, flex: 1 }]}>Joining {joining}</Text>
+          <Text style={[type.label, { color: colors.glowTurquoise, flex: 1 }]}>
+            {t("setup.joining", { name: joining })}
+          </Text>
         </GlassCard>
       ) : null}
-      <Text style={[type.caption, { color: colors.textSoft }]}>
-        Neighbors see your first name and last initial only.
-      </Text>
+      <Text style={[type.caption, { color: colors.textSoft }]}>{t("setup.privacy_note")}</Text>
 
       {interestOptions.length > 0 ? (
         <>
-          <Section>Interests</Section>
+          <Section>{t("setup.interests_title")}</Section>
           <View style={styles.row}>
             {interestOptions.map((item) => (
               <Choice
                 key={item}
-                label={item}
+                label={t(`interests.${item}`, { defaultValue: item })}
                 selected={interests.includes(item)}
                 onPress={() => toggleInterest(item)}
               />
@@ -151,15 +170,17 @@ export default function ProfileSetup() {
         </>
       ) : null}
 
-      <ErrorMessage message={error} />
+      <ErrorMessage
+        message={photoFailed ? t("setup.photo_failed", { reason: errorMessage(t, error) }) : errorMessage(t, error)}
+      />
       <Button
-        title={photoFailed ? "Try the photo again" : "Finish"}
+        title={photoFailed ? t("setup.retry_photo_button") : t("setup.finish_button")}
         onPress={onSave}
         busy={busy}
         disabled={!firstName.trim() || !lastName.trim()}
       />
       {photoFailed ? (
-        <Button title="Continue without photo" variant="secondary" onPress={() => resetTo("/profile")} />
+        <Button title={t("setup.skip_photo_button")} variant="secondary" onPress={() => resetTo("/profile")} />
       ) : null}
     </Screen>
   );

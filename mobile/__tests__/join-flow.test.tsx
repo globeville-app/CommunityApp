@@ -1,13 +1,14 @@
 /**
  * Screen tests for the whole join flow, with the backend API mocked.
  */
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
 import { act, fireEvent, screen, waitFor } from "expo-router/testing-library";
 
 import * as api from "../src/api";
 import { ApiError } from "../src/api";
-import { APP_NAME, HIGHLAND_PROFILE, fakeStore, notFound, renderApp } from "../test-utils/helpers";
+import { APP_NAME, HIGHLAND_PROFILE, fakeStore, notFound, renderApp, resetLanguage } from "../test-utils/helpers";
 
 jest.mock("../src/api", () => {
   const actual = jest.requireActual("../src/api");
@@ -21,19 +22,26 @@ jest.mock("../src/api", () => {
     saveProfile: jest.fn(),
     uploadPhoto: jest.fn(),
     getMyProfile: jest.fn(),
+    updateLanguage: jest.fn(),
   };
 });
 
 const mocked = api as jest.Mocked<typeof api>;
 const ADDRESS = "3300 Example Blvd Apt 2, Denver, CO 80211";
 
-beforeEach(() => {
+const NETWORK_MESSAGE = "Can't reach the server. Check your internet connection and try again.";
+const TIMEOUT_MESSAGE = "The server is taking too long to answer. Check your connection and try again.";
+
+beforeEach(async () => {
   jest.clearAllMocks();
   fakeStore.clear();
+  await resetLanguage();
   mocked.getConfig.mockResolvedValue({
     app_name: APP_NAME,
-    interests: ["Block parties", "Food drives", "Cleanups", "Live music", "Gardening"],
+    interests: ["block_parties", "food_drives", "cleanups", "live_music", "gardening"],
+    languages: ["en", "es"],
   });
+  mocked.updateLanguage.mockImplementation(async (_token, language) => ({ language }));
 });
 
 function loggedIn() {
@@ -79,7 +87,7 @@ describe("starting the app", () => {
 
   it("logs out and shows Welcome when the saved token is no longer valid", async () => {
     loggedIn();
-    mocked.getMyProfile.mockRejectedValue(new ApiError("authentication_failed", "Invalid token.", 401));
+    mocked.getMyProfile.mockRejectedValue(new ApiError("authentication_failed", 401));
     renderApp();
     expect(await screen.findByRole("button", { name: "Sign up" })).toBeTruthy();
     expect(fakeStore.has("auth_token")).toBe(false);
@@ -87,9 +95,9 @@ describe("starting the app", () => {
 
   it("shows a retry when the backend can't be reached", async () => {
     loggedIn();
-    mocked.getMyProfile.mockRejectedValueOnce(new ApiError("network", api.NETWORK_ERROR_MESSAGE));
+    mocked.getMyProfile.mockRejectedValueOnce(new ApiError("network"));
     renderApp();
-    expect(await screen.findByText(api.NETWORK_ERROR_MESSAGE)).toBeTruthy();
+    expect(await screen.findByText(NETWORK_MESSAGE)).toBeTruthy();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
     await pressAndSettle(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByText("Ana R.")).toBeTruthy();
@@ -98,7 +106,7 @@ describe("starting the app", () => {
 
 describe("sign up and log in", () => {
   it("signs up, saves the token securely, and moves to Address", async () => {
-    mocked.signup.mockResolvedValue({ token: "new-token" });
+    mocked.signup.mockResolvedValue({ token: "new-token", language: "en" });
     mocked.getMyProfile.mockRejectedValue(notFound());
     renderApp();
     fireEvent.press(await screen.findByRole("button", { name: "Sign up" }));
@@ -108,12 +116,12 @@ describe("sign up and log in", () => {
     await pressAndSettle(screen.getByRole("button", { name: "Sign up" }));
 
     expect(await screen.findByText("Where's home?")).toBeTruthy();
-    expect(mocked.signup).toHaveBeenCalledWith("ana@example.com", "a long pass phrase");
+    expect(mocked.signup).toHaveBeenCalledWith("ana@example.com", "a long pass phrase", "en");
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith("auth_token", "new-token");
   });
 
-  it("shows the server's message when login fails", async () => {
-    mocked.login.mockRejectedValue(new ApiError("invalid_credentials", "Email or password is incorrect.", 400));
+  it("explains the server's error code when login fails", async () => {
+    mocked.login.mockRejectedValue(new ApiError("invalid_credentials", 400));
     renderApp("/login");
     fireEvent.changeText(await screen.findByLabelText("Email"), "ana@example.com");
     fireEvent.changeText(screen.getByLabelText("Password"), "wrong");
@@ -164,7 +172,8 @@ describe("address → match → profile setup → profile", () => {
       first_name: "Ana",
       last_name: "Rivera",
       alias: "LoHi",
-      interests: ["Gardening", "Block parties"],
+      interests: ["gardening", "block_parties"],
+      language: "en",
     });
     expect(mocked.uploadPhoto).not.toHaveBeenCalled();
   });
@@ -201,9 +210,13 @@ describe("address → match → profile setup → profile", () => {
     expect(JSON.stringify(app.getSearchParams())).not.toContain("Example");
     expect(app.getSearchParams()).toMatchObject({ neighborhood: "Highland" });
 
-    // Storage only ever held the login token.
+    // Secure storage only ever held the login token, and the language store
+    // only the language.
     expect(everythingStored()).not.toContain("Example");
     expect([...fakeStore.keys()]).toEqual(["auth_token"]);
+    const languageKeys = await AsyncStorage.getAllKeys();
+    expect(JSON.stringify(await AsyncStorage.multiGet(languageKeys))).not.toContain("Example");
+    expect(languageKeys.every((key) => key.startsWith("app.language"))).toBe(true);
   });
 
   it("sends the photo picked from the library as JPEG", async () => {
@@ -239,7 +252,7 @@ describe("address → match → profile setup → profile", () => {
   it("keeps the saved profile and offers to continue when the photo upload fails", async () => {
     mocked.matchAddress.mockResolvedValue({ neighborhood_id: 1, name: "Hale", aliases: [] });
     mocked.saveProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, alias: null });
-    mocked.uploadPhoto.mockRejectedValue(new ApiError("timeout", api.TIMEOUT_ERROR_MESSAGE));
+    mocked.uploadPhoto.mockRejectedValue(new ApiError("timeout"));
     (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({
       canceled: false,
       assets: [{ uri: "file:///photo.jpg", mimeType: "image/jpeg", fileSize: 900000 }],
@@ -253,7 +266,7 @@ describe("address → match → profile setup → profile", () => {
     await pressAndSettle(screen.getByRole("button", { name: "Finish" }));
 
     expect(
-      await screen.findByText(`Your profile is saved, but the photo didn't upload. ${api.TIMEOUT_ERROR_MESSAGE}`),
+      await screen.findByText(`Your profile is saved, but the photo didn't upload. ${TIMEOUT_MESSAGE}`),
     ).toBeTruthy();
     expect(screen.getByRole("button", { name: "Try the photo again" })).toBeTruthy();
 
@@ -282,11 +295,11 @@ describe("address → match → profile setup → profile", () => {
       ["outside_denver", `${APP_NAME} is only in the City and County of Denver for now.`, false],
       ["no_match", "We couldn't find that address. Check the spelling and try again.", false],
       ["geocoder_unavailable", "We can't look up addresses right now. Please try again in a minute.", true],
-      ["network", api.NETWORK_ERROR_MESSAGE, true],
+      ["network", NETWORK_MESSAGE, true],
     ];
 
     it.each(cases)("shows the %s message", async (code, message, offersRetry) => {
-      mocked.matchAddress.mockRejectedValue(new ApiError(code, message, 400));
+      mocked.matchAddress.mockRejectedValue(new ApiError(code, 400));
       renderApp();
       await submitAddress();
       expect(await screen.findByText(message)).toBeTruthy();
@@ -296,7 +309,7 @@ describe("address → match → profile setup → profile", () => {
 
     it("retries the same address after a network error", async () => {
       mocked.matchAddress
-        .mockRejectedValueOnce(new ApiError("network", api.NETWORK_ERROR_MESSAGE))
+        .mockRejectedValueOnce(new ApiError("network"))
         .mockResolvedValueOnce({ neighborhood_id: 1, name: "Hale", aliases: [] });
       renderApp();
       await submitAddress();
@@ -322,7 +335,7 @@ describe("profile screen", () => {
   it("still logs out on the phone if the server can't be reached", async () => {
     loggedIn();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
-    mocked.logout.mockRejectedValue(new ApiError("network", api.NETWORK_ERROR_MESSAGE));
+    mocked.logout.mockRejectedValue(new ApiError("network"));
     renderApp();
     await pressAndSettle(await screen.findByRole("button", { name: "Log out" }));
     expect(await screen.findByRole("button", { name: "Sign up" })).toBeTruthy();

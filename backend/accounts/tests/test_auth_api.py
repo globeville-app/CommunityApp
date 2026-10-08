@@ -26,15 +26,17 @@ class SignupTests(APITestCase):
             "/api/auth/signup", {"email": "ANA@example.com", "password": PASSWORD}, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["code"], "invalid")
-        self.assertIn("already exists", response.data["detail"])
+        self.assertEqual(response.data["code"], "email_taken")
+        self.assertEqual(response.data["fields"], {"email": ["email_taken"]})
 
     def test_weak_password_is_rejected(self):
         response = self.client.post(
             "/api/auth/signup", {"email": "ana@example.com", "password": "12345678"}, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("password", response.data["fields"])
+        # Django's own rule codes, which the app translates.
+        self.assertIn("password_entirely_numeric", response.data["fields"]["password"])
+        self.assertIn(response.data["code"], response.data["fields"]["password"])
 
     def test_bad_email_is_rejected(self):
         response = self.client.post("/api/auth/signup", {"email": "nope", "password": PASSWORD}, format="json")
@@ -59,7 +61,7 @@ class LoginLogoutTests(APITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["code"], "invalid_credentials")
-        self.assertEqual(response.data["detail"], "Email or password is incorrect.")
+        self.assertEqual(response.data, {"code": "invalid_credentials"})
 
     def test_logout_deletes_the_token(self):
         token = self.client.post(
@@ -84,5 +86,6 @@ class ConfigTests(APITestCase):
         self.assertEqual(response.data["app_name"], settings.APP_NAME)
         self.assertEqual(
             response.data["interests"],
-            ["Block parties", "Food drives", "Cleanups", "Live music", "Gardening"],
+            ["block_parties", "food_drives", "cleanups", "live_music", "gardening"],
         )
+        self.assertEqual(response.data["languages"], ["en", "es"])

@@ -1,6 +1,9 @@
+import { useTranslation } from "react-i18next";
+
 import { login } from "../api";
 import { EmailPasswordForm } from "../components/EmailPasswordForm";
 
 export default function Login() {
-  return <EmailPasswordForm title="Welcome back" buttonTitle="Log in" submit={login} />;
+  const { t } = useTranslation();
+  return <EmailPasswordForm title={t("auth.login_title")} buttonTitle={t("auth.login_button")} submit={login} />;
 }

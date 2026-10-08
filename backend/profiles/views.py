@@ -6,13 +6,14 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.models import language_of, set_language
 from config.errors import ApiError
 from neighborhoods.aliases import aliases_for, get_alias_map
 from neighborhoods.models import NeighborhoodMatch
 
 from .models import Profile
 from .photos import PhotoError, clean_photo
-from .serializers import ProfileInputSerializer, profile_json
+from .serializers import LanguageSerializer, ProfileInputSerializer, profile_json
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +23,7 @@ def get_profile_or_404(user):
         return Profile.objects.select_related("neighborhood").get(user=user)
     except Profile.DoesNotExist:
         # The app uses this code to send the person to the Address screen.
-        raise ApiError(
-            "profile_not_found",
-            "You haven't finished joining yet.",
-            status_code=status.HTTP_404_NOT_FOUND,
-        ) from None
+        raise ApiError("profile_not_found", status_code=status.HTTP_404_NOT_FOUND) from None
 
 
 class ProfileView(APIView):
@@ -40,13 +37,14 @@ class ProfileView(APIView):
         # from the app, so nobody can join a neighborhood they didn't match.
         match = NeighborhoodMatch.objects.filter(user=request.user).select_related("neighborhood").first()
         if match is None:
-            raise ApiError(
-                "match_required", "Enter your address first.", status_code=status.HTTP_409_CONFLICT
-            )
+            raise ApiError("match_required", status_code=status.HTTP_409_CONFLICT)
+
+        if "language" in values:
+            set_language(request.user, values["language"])
 
         alias = values["alias"].strip()
         if alias and alias not in aliases_for(match.neighborhood.name, get_alias_map()):
-            raise ApiError("invalid_alias", f"{alias} isn't a name for {match.neighborhood.name}.")
+            raise ApiError("invalid_alias")
 
         profile, created = Profile.objects.update_or_create(
             user=request.user,
@@ -68,6 +66,17 @@ class MyProfileView(APIView):
     def get(self, request):
         return Response(profile_json(get_profile_or_404(request.user), request))
 
+    def patch(self, request):
+        """
+        Change the member's language: {"language": "es"}. This also works
+        part-way through joining, before the profile exists, because the
+        language is kept on the account from signup on.
+        """
+        data = LanguageSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        set_language(request.user, data.validated_data["language"])
+        return Response({"language": language_of(request.user)})
+
 
 class ProfilePhotoView(APIView):
     parser_classes = [MultiPartParser]
@@ -76,7 +85,7 @@ class ProfilePhotoView(APIView):
         profile = get_profile_or_404(request.user)
         upload = request.FILES.get("photo")
         if upload is None:
-            raise ApiError("photo_missing", "Choose a photo to upload.")
+            raise ApiError("photo_missing")
         # Size and timing only (never the image or its metadata), to help
         # diagnose slow uploads.
         started = time.monotonic()
@@ -84,7 +93,7 @@ class ProfilePhotoView(APIView):
             cleaned = clean_photo(upload)
         except PhotoError as error:
             logger.info("Profile photo rejected (%s), %.1f MB", error.code, upload.size / 1e6)
-            raise ApiError(error.code, error.message) from None
+            raise ApiError(error.code) from None
         logger.info(
             "Profile photo received: %.1f MB, cleaned in %.1f s",
             upload.size / 1e6,

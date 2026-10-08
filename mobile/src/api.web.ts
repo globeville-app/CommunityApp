@@ -16,9 +16,10 @@ export {
   matchAddress,
   saveProfile,
   signup,
+  updateLanguage,
   uploadPhoto,
 } from "./demo/fakeBackend";
 
 export async function getConfig(): Promise<AppConfig> {
-  return { app_name: APP_NAME, interests: INTERESTS };
+  return { app_name: APP_NAME, interests: INTERESTS, languages: ["en", "es"] };
 }

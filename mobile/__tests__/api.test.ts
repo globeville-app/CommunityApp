@@ -1,12 +1,5 @@
 /** The API client: headers, error shapes, and offline handling (fetch is faked). */
-import {
-  ApiError,
-  NETWORK_ERROR_MESSAGE,
-  TIMEOUT_ERROR_MESSAGE,
-  getMyProfile,
-  matchAddress,
-  uploadPhoto,
-} from "../src/api";
+import { ApiError, getMyProfile, login, matchAddress, signup, updateLanguage, uploadPhoto } from "../src/api";
 
 const fetchMock = jest.fn();
 globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -27,13 +20,28 @@ it("sends the token and JSON body to the configured server", async () => {
   expect(JSON.parse(options.body)).toEqual({ address: "1 Main St" });
 });
 
-it("turns backend errors into ApiError with code and message", async () => {
-  fetchMock.mockReturnValue(reply(404, { code: "profile_not_found", detail: "You haven't finished joining yet." }));
-  await expect(getMyProfile("tok")).rejects.toMatchObject({
-    code: "profile_not_found",
-    message: "You haven't finished joining yet.",
-    status: 404,
+it("turns backend errors into ApiError with the code and field codes", async () => {
+  fetchMock.mockReturnValue(reply(400, { code: "email_taken", fields: { email: ["email_taken"] } }));
+  await expect(login("a@b.co", "x")).rejects.toMatchObject({
+    code: "email_taken",
+    status: 400,
+    fields: { email: ["email_taken"] },
   });
+});
+
+it("sends the chosen language at signup", async () => {
+  fetchMock.mockReturnValue(reply(201, { token: "t", language: "es" }));
+  await expect(signup("a@b.co", "pw", "es")).resolves.toEqual({ token: "t", language: "es" });
+  expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ email: "a@b.co", password: "pw", language: "es" });
+});
+
+it("saves a language change with PATCH /api/profile/me", async () => {
+  fetchMock.mockReturnValue(reply(200, { language: "es" }));
+  await updateLanguage("tok", "es");
+  const [url, options] = fetchMock.mock.calls[0];
+  expect(url).toBe("http://test-server:8000/api/profile/me");
+  expect(options.method).toBe("PATCH");
+  expect(JSON.parse(options.body)).toEqual({ language: "es" });
 });
 
 it("turns a failed connection into a friendly network error", async () => {
@@ -41,7 +49,6 @@ it("turns a failed connection into a friendly network error", async () => {
   const error = await getMyProfile("tok").catch((e) => e);
   expect(error).toBeInstanceOf(ApiError);
   expect(error.code).toBe("network");
-  expect(error.message).toBe(NETWORK_ERROR_MESSAGE);
 });
 
 it("copes with an error reply that isn't JSON", async () => {
@@ -78,7 +85,6 @@ describe("timeouts", () => {
     jest.advanceTimersByTime(15000);
     const error = await result;
     expect(error.code).toBe("timeout");
-    expect(error.message).toBe(TIMEOUT_ERROR_MESSAGE);
   });
 
   it("gives photo uploads much longer than other requests", async () => {

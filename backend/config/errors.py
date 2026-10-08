@@ -1,22 +1,42 @@
 """
-One shape for every API error: {"code": "some_code", "detail": "Message for people."}
+One shape for every API error: {"code": "some_code"}, plus "fields" for form
+errors: {"code": "email_taken", "fields": {"email": ["email_taken"]}}.
 
-The phone shows `detail` to the person and uses `code` to decide what to do
-(e.g. "profile_not_found" → go to the Address screen).
+The server never sends sentences for people to read. The app turns each code
+into a message in the person's language (mobile/src/i18n/*.json, under
+"errors"), and shows a generic message for any code it doesn't know.
 """
 
 from rest_framework import status
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
+# DRF's built-in field codes say *what* went wrong but not *where* ("blank",
+# "invalid"). For these, the top-level code names the field instead, e.g.
+# "invalid_email" or "invalid_first_name", so the app can say something useful.
+GENERIC_FIELD_CODES = {
+    "invalid",
+    "required",
+    "blank",
+    "null",
+    "max_length",
+    "min_length",
+    "max_value",
+    "min_value",
+    "invalid_choice",
+    "not_a_list",
+    "empty",
+}
+
 
 class ApiError(APIException):
-    """Raise this from a view to send a friendly error with a stable code."""
+    """Raise this from a view to send an error code the app can translate."""
 
-    def __init__(self, code, detail, status_code=status.HTTP_400_BAD_REQUEST):
+    def __init__(self, code, status_code=status.HTTP_400_BAD_REQUEST):
         self.status_code = status_code
-        super().__init__(detail=detail, code=code)
+        # DRF needs some detail text; it's only used in server logs.
+        super().__init__(detail=code, code=code)
 
 
 def api_exception_handler(exc, context):
@@ -27,32 +47,36 @@ def api_exception_handler(exc, context):
         # first, so no address can end up in that traceback.
         return None
 
-    if isinstance(exc, ApiError):
-        return Response(
-            {"code": exc.get_codes(), "detail": str(exc.detail)},
-            status=response.status_code,
-        )
+    if isinstance(exc, ValidationError):
+        fields = _field_codes(exc.get_codes())
+        return Response({"code": _top_code(fields), "fields": fields}, status=response.status_code)
 
-    data = response.data
-    if isinstance(data, dict) and "detail" in data and len(data) == 1:
-        # Built-in DRF errors: not logged in, throttled, etc.
-        codes = exc.get_codes() if hasattr(exc, "get_codes") else "error"
-        code = codes if isinstance(codes, str) else "error"
-        return Response({"code": code, "detail": str(data["detail"])}, status=response.status_code)
-
-    # Form validation errors: {"field": ["message", ...]}. Keep the per-field
-    # messages so the app can show them, and add a readable summary.
-    first_message = _first_message(data)
-    return Response(
-        {"code": "invalid", "detail": first_message, "fields": data},
-        status=response.status_code,
-    )
+    # ApiError and DRF's built-in errors (not logged in, throttled, ...).
+    codes = exc.get_codes() if hasattr(exc, "get_codes") else "error"
+    code = codes if isinstance(codes, str) else "error"
+    return Response({"code": code}, status=response.status_code)
 
 
-def _first_message(data):
-    if isinstance(data, dict):
-        for value in data.values():
-            return _first_message(value)
-    if isinstance(data, list) and data:
-        return _first_message(data[0])
-    return str(data) if data else "Something went wrong."
+def _field_codes(codes):
+    """{"email": ["invalid"]} with nested lists flattened; a bare list → "non_field"."""
+    if isinstance(codes, dict):
+        return {field: _flatten(value) for field, value in codes.items()}
+    return {"non_field": _flatten(codes)}
+
+
+def _flatten(value):
+    if isinstance(value, dict):
+        return [code for item in value.values() for code in _flatten(item)]
+    if isinstance(value, list):
+        return [code for item in value for code in _flatten(item)]
+    return [str(value)]
+
+
+def _top_code(fields):
+    for field, codes in fields.items():
+        for code in codes:
+            if code not in GENERIC_FIELD_CODES:
+                return code
+        if codes and field not in ("non_field", "non_field_errors"):
+            return f"invalid_{field}"
+    return "invalid"

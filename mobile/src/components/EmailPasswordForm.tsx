@@ -1,45 +1,53 @@
 /** The shared form behind the Sign up and Log in screens. */
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { ApiError } from "../api";
+import { ApiError, AuthResult } from "../api";
 import { useAuth } from "../auth";
+import { errorMessage } from "../i18n/errors";
+import { useLanguage } from "../language";
 import { resetTo } from "../navigation";
-import { BackButton, Button, Caption, ErrorMessage, Field, Screen, Title } from "../ui";
+import { Button, Caption, ErrorMessage, Field, JoinHeader, Screen, Title } from "../ui";
 
 type Props = {
   title: string;
   buttonTitle: string;
   hint?: string;
-  submit: (email: string, password: string) => Promise<{ token: string }>;
+  submit: (email: string, password: string) => Promise<AuthResult>;
 };
 
 export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
+  const { t } = useTranslation();
   const { signIn } = useAuth();
+  const { syncAfterLogin } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Kept as the error itself, not its words, so it re-translates if the
+  // language is switched while it's showing.
+  const [error, setError] = useState<ApiError | null>(null);
 
   async function onSubmit() {
     setBusy(true);
     setError(null);
     try {
-      const { token } = await submit(email.trim(), password);
+      const { token, language } = await submit(email.trim(), password);
+      await syncAfterLogin(token, language);
       await signIn(token);
       // The start screen works out where to go next.
       resetTo("/");
     } catch (e) {
-      setError((e as ApiError).message);
+      setError(e as ApiError);
       setBusy(false);
     }
   }
 
   return (
     <Screen>
-      <BackButton />
+      <JoinHeader back />
       <Title>{title}</Title>
       <Field
-        label="Email"
+        label={t("auth.email_label")}
         icon="mail-outline"
         value={email}
         onChangeText={setEmail}
@@ -49,7 +57,7 @@ export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
         textContentType="emailAddress"
       />
       <Field
-        label="Password"
+        label={t("auth.password_label")}
         icon="lock-closed-outline"
         value={password}
         onChangeText={setPassword}
@@ -59,7 +67,7 @@ export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
         onSubmitEditing={onSubmit}
       />
       {hint ? <Caption>{hint}</Caption> : null}
-      <ErrorMessage message={error} />
+      <ErrorMessage message={errorMessage(t, error)} />
       <Button title={buttonTitle} onPress={onSubmit} busy={busy} disabled={!email || !password} />
     </Screen>
   );

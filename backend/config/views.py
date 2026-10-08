@@ -12,5 +12,6 @@ def app_config(request):
         {
             "app_name": settings.APP_NAME,
             "interests": settings.INTEREST_CHOICES,
+            "languages": settings.LANGUAGES_AVAILABLE,
         }
     )

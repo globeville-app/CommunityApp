@@ -1,0 +1,112 @@
+{
+  "common": {
+    "back": "Back",
+    "try_again": "Try again",
+    "loading": "Loading"
+  },
+  "language": {
+    "toggle_label": "Language",
+    "settings_row": "Language / Idioma"
+  },
+  "welcome": {
+    "tagline": "Meet your neighbors in Denver.",
+    "sign_up": "Sign up",
+    "log_in": "Log in"
+  },
+  "auth": {
+    "email_label": "Email",
+    "password_label": "Password",
+    "signup_title": "Create your account",
+    "signup_button": "Sign up",
+    "password_hint": "At least 8 characters. Avoid common passwords.",
+    "login_title": "Welcome back",
+    "login_button": "Log in"
+  },
+  "start": {
+    "error_title": "Hmm.",
+    "error_hint": "Make sure the backend is running and your phone is on the same Wi-Fi."
+  },
+  "join": {
+    "title": "Where's home?",
+    "intro": "We use your address once to find your neighborhood, then forget it.",
+    "address_label": "Street address",
+    "address_placeholder": "1234 Main St, Denver, CO",
+    "find_button": "Find my neighborhood",
+    "youre_in": "You're in",
+    "which_name": "Which name do you use?",
+    "join_button": "Join {{name}}",
+    "edit_address": "Edit address",
+    "address_forgotten": "Your address was used once to find your neighborhood and wasn't saved."
+  },
+  "setup": {
+    "title": "Set up your profile",
+    "add_photo": "Add a photo",
+    "change_photo": "Change photo",
+    "selected_photo": "Selected photo",
+    "first_name_label": "First name",
+    "last_name_label": "Last name",
+    "joining": "Joining {{name}}",
+    "privacy_note": "Neighbors see your first name and last initial only.",
+    "interests_title": "Interests",
+    "finish_button": "Finish",
+    "retry_photo_button": "Try the photo again",
+    "skip_photo_button": "Continue without photo",
+    "photo_failed": "Your profile is saved, but the photo didn't upload. {{reason}}"
+  },
+  "profile": {
+    "photo_label": "Profile photo",
+    "joined": "Joined {{date}}",
+    "interests_title": "Interests",
+    "log_out_button": "Log out"
+  },
+  "interests": {
+    "block_parties": "Block parties",
+    "food_drives": "Food drives",
+    "cleanups": "Cleanups",
+    "live_music": "Live music",
+    "gardening": "Gardening"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Can't reach the server. Check your internet connection and try again.",
+    "timeout": "The server is taking too long to answer. Check your connection and try again.",
+    "server_error": "Something went wrong on our side. Please try again.",
+    "throttled": "That's a lot of tries in a short time. Wait a minute, then try again.",
+    "not_authenticated": "Please log in again.",
+    "authentication_failed": "Please log in again.",
+    "invalid": "Please check what you entered and try again.",
+    "no_match": "We couldn't find that address. Check the spelling and try again.",
+    "outside_denver": "{{app}} is only in the City and County of Denver for now.",
+    "geocoder_unavailable": "We can't look up addresses right now. Please try again in a minute.",
+    "invalid_address": "Enter your street address.",
+    "invalid_credentials": "Email or password is incorrect.",
+    "email_taken": "An account with this email already exists. Try logging in.",
+    "invalid_email": "Enter a valid email address.",
+    "invalid_password": "Enter a password.",
+    "password_too_short": "Your password needs at least 8 characters.",
+    "password_too_common": "That password is too common. Try a longer phrase.",
+    "password_entirely_numeric": "Your password can't be only numbers.",
+    "password_too_similar": "Your password is too much like your email.",
+    "invalid_first_name": "Enter your first name.",
+    "invalid_last_name": "Enter your last name.",
+    "invalid_language": "Choose English or Spanish.",
+    "invalid_alias": "That isn't one of this neighborhood's names.",
+    "unknown_interest": "One of those interests isn't on the list.",
+    "match_required": "Enter your address first.",
+    "profile_not_found": "You haven't finished joining yet.",
+    "photo_too_large": "Photos must be 5 MB or smaller.",
+    "photo_wrong_type": "Photos must be JPEG or PNG.",
+    "photo_missing": "Choose a photo to upload."
+  },
+  "demo": {
+    "banner_label": "Demo",
+    "banner_text": "real Denver map · sample addresses · stays in this browser",
+    "reset_button": "Reset",
+    "reset_label": "Reset demo",
+    "samples_title": "Try a sample address",
+    "samples_body": "Samples use their real locations and Denver's official neighborhood map. The demo can't look up other addresses, but it recognizes Denver neighborhood names you type, like \"Five Points\".",
+    "use_sample": "Use sample: {{name}}",
+    "sample_misspelled": "A misspelled address",
+    "sample_outage": "Lookup service down"
+  }
+}

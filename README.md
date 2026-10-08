@@ -212,6 +212,15 @@ photos). The server only accepts JPEG/PNG up to 5 MB, copies just the pixels int
 a fresh image (removing EXIF data, which can include GPS location), and saves it
 under a random filename.
 
+**English and Spanish.** The rules are in `docs/LANGUAGE.md`. Every word
+the app shows is in `mobile/src/i18n/en.json` and `es.json`; a lint rule
+(`npm run lint`, also run by `npm test`) fails on any text typed straight into
+a screen. The **English | Español** toggle is at the top right of every
+screen before joining, and on the profile. The choice is kept on the phone
+(AsyncStorage key `app.language`) and on the account, which is created at
+signup, before the profile exists, so that's where the server keeps it. The
+Spanish is a first draft: see `docs/RELEASE_CHECKLIST.md`.
+
 **Look and feel.** The design rules are in `design/DESIGN.md`, and the logo
 rules in `design/BRAND.md`. The logo, app icons and splash image are the brand
 files in `mobile/assets/brand/`; the logo is drawn by
@@ -233,23 +242,26 @@ badges and the bottom tab bar from the design come in later milestones.
 | Unexpected errors log only the error type | `backend/neighborhoods/tests/test_match_api.py` |
 | EXIF/GPS stripped from JPEG and PNG | `backend/profiles/tests/test_profile_api.py` |
 | Address field cleared after a match, never stored or passed between screens | `mobile/__tests__/join-flow.test.tsx` |
-| No storage or analytics libraries on the phone | `mobile/__tests__/privacy.test.ts` |
+| No analytics libraries on the phone; AsyncStorage only for the language, in one file | `mobile/__tests__/privacy.test.ts` |
 | App name only in `shared/app_config.json` | `backend/config/tests/test_app_name.py` |
 
 ### API
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/api/config` | app name and the interests list |
-| POST | `/api/auth/signup` | email + password → token |
-| POST | `/api/auth/login` | email + password → token |
+| GET | `/api/config` | app name, interest keys, languages |
+| POST | `/api/auth/signup` | email + password (+ `language`) → token and language |
+| POST | `/api/auth/login` | email + password → token and the account's language |
 | POST | `/api/auth/logout` | deletes the token |
 | POST | `/api/join/match` | address → neighborhood (rate-limited: 10/min per user) |
-| PUT | `/api/profile` | first name, last name, alias, interests |
+| PUT | `/api/profile` | first name, last name, alias, interest keys (+ `language`) |
 | POST | `/api/profile/photo` | photo upload (multipart, field `photo`) |
 | GET | `/api/profile/me` | your profile, or 404 `profile_not_found` |
+| PATCH | `/api/profile/me` | `{"language": "en" \| "es"}`; works before the profile exists |
 
-Every error looks like `{"code": "...", "detail": "message for people"}`.
+Every error is a code, never a sentence: `{"code": "outside_denver"}`, plus
+`"fields": {"email": ["email_taken"]}` for form errors. The app shows each code
+in the person's language (`mobile/src/i18n/*.json`, under `errors`).
 
 ---
 

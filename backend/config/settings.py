@@ -22,14 +22,21 @@ REPO_ROOT = BASE_DIR.parent
 with open(REPO_ROOT / "shared" / "app_config.json", encoding="utf-8") as f:
     APP_NAME = json.load(f)["app_name"]
 
-# The fixed list of interests a person can pick on their profile.
+# The fixed list of interests a person can pick on their profile. These are
+# keys, not display text: the app shows each one in the person's language
+# (mobile/src/i18n/*.json, under "interests").
 INTEREST_CHOICES = [
-    "Block parties",
-    "Food drives",
-    "Cleanups",
-    "Live music",
-    "Gardening",
+    "block_parties",
+    "food_drives",
+    "cleanups",
+    "live_music",
+    "gardening",
 ]
+
+# Languages the app is available in (docs/LANGUAGE.md). New members default
+# to English until they pick.
+LANGUAGES_AVAILABLE = ["en", "es"]
+DEFAULT_LANGUAGE_CODE = "en"
 
 
 # --- Security (DEV ONLY) ----------------------------------------------------

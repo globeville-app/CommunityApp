@@ -1,7 +1,7 @@
 /**
  * BROWSER DEMO ONLY: a pretend backend that runs inside the web page.
  *
- * It copies the real backend's rules and messages (see backend/). The
+ * It copies the real backend's rules and error codes (see backend/). The
  * neighborhood check uses Denver's REAL boundaries (the build script puts
  * backend/data/denver_statistical_neighborhoods.geojson into the page), but
  * turning an address into a location is SIMULATED, because a web page can't
@@ -12,12 +12,13 @@
  * Like the real backend, it never keeps the address. Accounts and profiles
  * are saved in this browser's localStorage so a reload keeps you logged in.
  */
-import { APP_NAME } from "../config";
-import { ApiError, MatchResult, Profile, ProfileInput } from "../apiTypes";
+import { ApiError, AuthResult, MatchResult, Profile, ProfileInput } from "../apiTypes";
+import { isLanguage, Language } from "../i18n";
 
 // ---- Sample data -----------------------------------------------------------
 
-export const INTERESTS = ["Block parties", "Food drives", "Cleanups", "Live music", "Gardening"];
+// Keys, like the real backend; the app shows them translated.
+export const INTERESTS = ["block_parties", "food_drives", "cleanups", "live_music", "gardening"];
 
 type Ring = [number, number][]; // [longitude, latitude] points
 type DemoNeighborhood = { id: number; name: string; rings: Ring[] };
@@ -72,13 +73,13 @@ export const SIMULATE_OUTAGE = "#down";
 // ---- Pretend database, saved in this browser -------------------------------
 
 type Db = {
-  users: Record<string, { password: string }>;
+  users: Record<string, { password: string; language?: Language }>;
   tokens: Record<string, string>; // token → email
   matches: Record<string, number>; // email → neighborhood id (never the address)
-  profiles: Record<string, Omit<Profile, "neighborhood"> & { neighborhoodId: number }>;
+  profiles: Record<string, Omit<Profile, "neighborhood" | "language"> & { neighborhoodId: number }>;
 };
 
-const DB_KEY = "demo_db_v1";
+const DB_KEY = "demo_db_v2"; // v2: interests are keys, accounts have a language
 
 function emptyDb(): Db {
   return { users: {}, tokens: {}, matches: {}, profiles: {} };
@@ -120,14 +121,19 @@ function pause(ms = 450) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function invalid(field: string, message: string): never {
-  throw new ApiError("invalid", message, 400, { [field]: [message] });
+/** A form error, shaped like the backend's: a top code plus per-field codes. */
+function invalid(field: string, code: string): never {
+  throw new ApiError(code, 400, { [field]: [code] });
 }
 
 function userFor(token: string | null): string {
   const email = token ? load().tokens[token] : undefined;
-  if (!email) throw new ApiError("authentication_failed", "Invalid token.", 401);
+  if (!email) throw new ApiError("authentication_failed", 401);
   return email;
+}
+
+function languageOf(db: Db, email: string): Language {
+  return db.users[email]?.language ?? "en";
 }
 
 function escapeRegExp(text: string) {
@@ -150,42 +156,53 @@ function newToken() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function toProfile(stored: Db["profiles"][string]): Profile {
-  const { neighborhoodId, ...rest } = stored;
+function toProfile(db: Db, email: string): Profile {
+  const { neighborhoodId, ...rest } = db.profiles[email];
   const neighborhood = neighborhoodById(neighborhoodId);
-  return { ...rest, neighborhood: { id: neighborhood.id, name: neighborhood.name } };
+  return {
+    ...rest,
+    neighborhood: { id: neighborhood.id, name: neighborhood.name },
+    language: languageOf(db, email),
+  };
 }
 
 // ---- The endpoints ---------------------------------------------------------
 
-export async function signup(emailInput: string, password: string) {
+export async function signup(emailInput: string, password: string, language: Language): Promise<AuthResult> {
   await pause();
   const email = emailInput.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) invalid("email", "Enter a valid email address.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) invalid("email", "invalid_email");
   const db = load();
-  if (db.users[email]) invalid("email", "An account with this email already exists. Try logging in.");
-  if (password.length < 8) {
-    invalid("password", "This password is too short. It must contain at least 8 characters.");
-  }
-  if (/^\d+$/.test(password)) invalid("password", "This password is entirely numeric.");
+  if (db.users[email]) invalid("email", "email_taken");
+  if (password.length < 8) invalid("password", "password_too_short");
+  if (/^\d+$/.test(password)) invalid("password", "password_entirely_numeric");
+  if (!isLanguage(language)) invalid("language", "invalid_language");
   const token = newToken();
-  db.users[email] = { password };
+  db.users[email] = { password, language };
   db.tokens[token] = email;
   save(db);
-  return { token };
+  return { token, language };
 }
 
-export async function login(emailInput: string, password: string) {
+export async function login(emailInput: string, password: string): Promise<AuthResult> {
   await pause();
   const email = emailInput.trim().toLowerCase();
   const db = load();
-  if (db.users[email]?.password !== password) {
-    throw new ApiError("invalid_credentials", "Email or password is incorrect.", 400);
-  }
+  if (db.users[email]?.password !== password) throw new ApiError("invalid_credentials", 400);
   const token = newToken();
   db.tokens[token] = email;
   save(db);
-  return { token };
+  return { token, language: languageOf(db, email) };
+}
+
+export async function updateLanguage(token: string, language: Language) {
+  await pause(200);
+  const email = userFor(token);
+  if (!isLanguage(language)) invalid("language", "invalid_language");
+  const db = load();
+  db.users[email] = { ...db.users[email], language };
+  save(db);
+  return { language };
 }
 
 export async function logout(token: string) {
@@ -202,15 +219,10 @@ export async function matchAddress(token: string, address: string): Promise<Matc
   const text = address.trim().toLowerCase();
 
   if (text.includes(SIMULATE_OUTAGE)) {
-    throw new ApiError(
-      "geocoder_unavailable",
-      "We can't look up addresses right now. Please try again in a minute.",
-      503,
-    );
+    throw new ApiError("geocoder_unavailable", 503);
   }
 
-  const outside = () =>
-    new ApiError("outside_denver", `${APP_NAME} is only in the City and County of Denver for now.`, 400);
+  const outside = () => new ApiError("outside_denver", 400);
 
   let neighborhood: DemoNeighborhood | undefined;
   const known = KNOWN_ADDRESSES.find((k) => text.startsWith(k.startsWith));
@@ -233,7 +245,7 @@ export async function matchAddress(token: string, address: string): Promise<Matc
     }
   }
   if (!neighborhood) {
-    throw new ApiError("no_match", "We couldn't find that address. Check the spelling and try again.", 400);
+    throw new ApiError("no_match", 400);
   }
 
   const db = load();
@@ -247,16 +259,16 @@ export async function saveProfile(token: string, input: ProfileInput): Promise<P
   const email = userFor(token);
   const db = load();
   const neighborhoodId = db.matches[email];
-  if (!neighborhoodId) throw new ApiError("match_required", "Enter your address first.", 409);
+  if (!neighborhoodId) throw new ApiError("match_required", 409);
 
   const firstName = input.first_name.trim();
   const lastName = input.last_name.trim();
-  if (!firstName) invalid("first_name", "This field may not be blank.");
-  if (!lastName) invalid("last_name", "This field may not be blank.");
+  if (!firstName) invalid("first_name", "invalid_first_name");
+  if (!lastName) invalid("last_name", "invalid_last_name");
   const neighborhood = neighborhoodById(neighborhoodId);
   const alias = input.alias.trim();
   if (alias && !aliasesFor(neighborhood.name).includes(alias)) {
-    throw new ApiError("invalid_alias", `${alias} isn't a name for ${neighborhood.name}.`, 400);
+    throw new ApiError("invalid_alias", 400);
   }
 
   const lastInitial = lastName.slice(0, 1).toUpperCase();
@@ -271,27 +283,26 @@ export async function saveProfile(token: string, input: ProfileInput): Promise<P
     alias: alias || null,
     joined_at: existing?.joined_at ?? new Date().toISOString(),
   };
+  if (input.language && isLanguage(input.language)) db.users[email] = { ...db.users[email], language: input.language };
   save(db);
-  return toProfile(db.profiles[email]);
+  return toProfile(db, email);
 }
 
 export async function uploadPhoto(token: string, photo: { uri: string; mimeType: string }): Promise<Profile> {
   const email = userFor(token);
   const db = load();
-  if (!db.profiles[email]) {
-    throw new ApiError("profile_not_found", "You haven't finished joining yet.", 404);
-  }
+  if (!db.profiles[email]) throw new ApiError("profile_not_found", 404);
   db.profiles[email].photo_url = await shrinkPhoto(photo.uri);
   save(db);
-  return toProfile(db.profiles[email]);
+  return toProfile(db, email);
 }
 
 export async function getMyProfile(token: string): Promise<Profile> {
   await pause(250);
   const email = userFor(token);
-  const stored = load().profiles[email];
-  if (!stored) throw new ApiError("profile_not_found", "You haven't finished joining yet.", 404);
-  return toProfile(stored);
+  const db = load();
+  if (!db.profiles[email]) throw new ApiError("profile_not_found", 404);
+  return toProfile(db, email);
 }
 
 /**

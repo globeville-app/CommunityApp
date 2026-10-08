@@ -8,17 +8,20 @@
  */
 import { Redirect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { ApiError, getMyProfile } from "../api";
 import { useAuth } from "../auth";
+import { errorMessage } from "../i18n/errors";
 import { Button, ErrorMessage, Intro, Loading, Screen, Title } from "../ui";
 
 type Destination = "/welcome" | "/address" | "/profile";
 
 export default function Start() {
+  const { t } = useTranslation();
   const { token, isLoading, signOut } = useAuth();
   const [destination, setDestination] = useState<Destination | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
 
   const decide = useCallback(async () => {
     setError(null);
@@ -37,7 +40,7 @@ export default function Start() {
         await signOut(); // token no longer valid
         setDestination("/welcome");
       } else {
-        setError(err.message);
+        setError(err);
       }
     }
   }, [token, signOut]);
@@ -50,10 +53,10 @@ export default function Start() {
   if (error) {
     return (
       <Screen>
-        <Title>Hmm.</Title>
-        <ErrorMessage message={error} />
-        <Intro>Make sure the backend is running and your phone is on the same Wi-Fi.</Intro>
-        <Button title="Try again" onPress={decide} />
+        <Title>{t("start.error_title")}</Title>
+        <ErrorMessage message={errorMessage(t, error)} />
+        <Intro>{t("start.error_hint")}</Intro>
+        <Button title={t("common.try_again")} onPress={decide} />
       </Screen>
     );
   }

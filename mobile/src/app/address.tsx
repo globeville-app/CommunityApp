@@ -11,18 +11,21 @@
  */
 import { router } from "expo-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import Animated, { SlideInDown } from "react-native-reanimated";
 
 import { ApiError, MatchResult, matchAddress } from "../api";
 import { useAuth } from "../auth";
 import { DemoAddressHints } from "../components/DemoAddressHints";
-import { Button, Caption, Choice, ErrorMessage, Field, Hero, Intro, Screen, Sheet, Title, styles } from "../ui";
+import { errorMessage } from "../i18n/errors";
+import { Button, Caption, Choice, ErrorMessage, Field, Hero, Intro, JoinHeader, Screen, Sheet, Title, styles } from "../ui";
 
 // Errors where trying the same address again might work.
 const RETRYABLE = new Set(["network", "timeout", "geocoder_unavailable", "server_error", "throttled"]);
 
 export default function Address() {
+  const { t } = useTranslation();
   const { token } = useAuth();
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
@@ -57,11 +60,12 @@ export default function Address() {
   const sheet = match ? (
     <Animated.View entering={SlideInDown.duration(350)}>
       <Sheet>
-        <Caption onGlass>You're in</Caption>
+        <Caption onGlass>{t("join.youre_in")}</Caption>
+        {/* Neighborhood names and their local names are never translated. */}
         <Hero fit>{match.name}</Hero>
         {match.aliases.length > 0 ? (
           <>
-            <Caption onGlass>Which name do you use?</Caption>
+            <Caption onGlass>{t("join.which_name")}</Caption>
             <View style={styles.row}>
               {[match.name, ...match.aliases].map((option) => (
                 <Choice
@@ -74,21 +78,22 @@ export default function Address() {
             </View>
           </>
         ) : null}
-        <Button title={`Join ${chosenName}`} onPress={onJoin} />
-        <Button title="Edit address" variant="secondary" onPress={() => setMatch(null)} />
-        <Caption onGlass>Your address was used once to find your neighborhood and wasn't saved.</Caption>
+        <Button title={t("join.join_button", { name: chosenName })} onPress={onJoin} />
+        <Button title={t("join.edit_address")} variant="secondary" onPress={() => setMatch(null)} />
+        <Caption onGlass>{t("join.address_forgotten")}</Caption>
       </Sheet>
     </Animated.View>
   ) : null;
 
   return (
     <Screen footer={sheet}>
-      <Title>Where's home?</Title>
-      <Intro>We use your address once to find your neighborhood, then forget it.</Intro>
+      <JoinHeader />
+      <Title>{t("join.title")}</Title>
+      <Intro>{t("join.intro")}</Intro>
       <Field
-        label="Street address"
+        label={t("join.address_label")}
         icon="location-outline"
-        placeholder="1234 Main St, Denver, CO"
+        placeholder={t("join.address_placeholder")}
         value={address}
         onChangeText={setAddress}
         autoComplete="off"
@@ -100,11 +105,11 @@ export default function Address() {
       {match ? null : (
         <>
           <DemoAddressHints onPick={setAddress} />
-          <ErrorMessage message={error?.message ?? null} />
+          <ErrorMessage message={errorMessage(t, error)} />
           {error && RETRYABLE.has(error.code) ? (
-            <Button title="Try again" onPress={onSubmit} busy={busy} />
+            <Button title={t("common.try_again")} onPress={onSubmit} busy={busy} />
           ) : (
-            <Button title="Find my neighborhood" onPress={onSubmit} busy={busy} disabled={!address.trim()} />
+            <Button title={t("join.find_button")} onPress={onSubmit} busy={busy} disabled={!address.trim()} />
           )}
         </>
       )}

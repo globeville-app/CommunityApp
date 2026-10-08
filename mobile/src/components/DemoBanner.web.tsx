@@ -1,4 +1,5 @@
 /** BROWSER DEMO ONLY: a strip saying this is a demo, with a reset button. */
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth";
@@ -7,6 +8,7 @@ import { resetTo } from "../navigation";
 import { colors, fonts } from "../theme";
 
 export function DemoBanner() {
+  const { t } = useTranslation();
   const { signOut } = useAuth();
 
   async function onReset() {
@@ -18,10 +20,10 @@ export function DemoBanner() {
   return (
     <View style={styles.banner}>
       <Text style={styles.text}>
-        <Text style={styles.strong}>Demo</Text> · real Denver map · sample addresses · stays in this browser
+        <Text style={styles.strong}>{t("demo.banner_label")}</Text> · {t("demo.banner_text")}
       </Text>
-      <Pressable accessibilityRole="button" accessibilityLabel="Reset demo" onPress={onReset} style={styles.reset}>
-        <Text style={styles.resetText}>Reset</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel={t("demo.reset_label")} onPress={onReset} style={styles.reset}>
+        <Text style={styles.resetText}>{t("demo.reset_button")}</Text>
       </Pressable>
     </View>
   );

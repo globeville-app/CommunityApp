@@ -8,7 +8,6 @@ neighborhood is remembered (in NeighborhoodMatch).
 
 import logging
 
-from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from rest_framework import serializers, status
@@ -30,30 +29,12 @@ class MatchRequestSerializer(serializers.Serializer):
     address = serializers.CharField(max_length=300)
 
 
-# The four outcomes, as (code, message, HTTP status).
-NO_MATCH = (
-    "no_match",
-    "We couldn't find that address. Check the spelling and try again.",
-    status.HTTP_400_BAD_REQUEST,
-)
-GEOCODER_DOWN = (
-    "geocoder_unavailable",
-    "We can't look up addresses right now. Please try again in a minute.",
-    status.HTTP_503_SERVICE_UNAVAILABLE,
-)
-SERVER_PROBLEM = (
-    "server_error",
-    "Something went wrong on our side. Please try again.",
-    status.HTTP_500_INTERNAL_SERVER_ERROR,
-)
-
-
-def outside_denver():
-    return (
-        "outside_denver",
-        f"{settings.APP_NAME} is only in the City and County of Denver for now.",
-        status.HTTP_400_BAD_REQUEST,
-    )
+# The ways a match can fail, as (code, HTTP status). The app shows each code
+# as a message in the person's language.
+NO_MATCH = ("no_match", status.HTTP_400_BAD_REQUEST)
+GEOCODER_DOWN = ("geocoder_unavailable", status.HTTP_503_SERVICE_UNAVAILABLE)
+SERVER_PROBLEM = ("server_error", status.HTTP_500_INTERNAL_SERVER_ERROR)
+OUTSIDE_DENVER = ("outside_denver", status.HTTP_400_BAD_REQUEST)
 
 
 @sensitive_variables("address", "location", "lat", "lon")
@@ -73,7 +54,7 @@ def find_neighborhood(address):
     lat, lon = location
     area = get_boundaries().find(lat, lon)
     if area is None:
-        return None, outside_denver()
+        return None, OUTSIDE_DENVER
     return Neighborhood.objects.get(id=area.id), None
 
 
@@ -101,8 +82,8 @@ class MatchView(APIView):
             problem = SERVER_PROBLEM
 
         if problem:
-            code, message, http_status = problem
-            raise ApiError(code, message, status_code=http_status) from None
+            code, http_status = problem
+            raise ApiError(code, status_code=http_status) from None
 
         NeighborhoodMatch.objects.update_or_create(
             user=request.user, defaults={"neighborhood": neighborhood}

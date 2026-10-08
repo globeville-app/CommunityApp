@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 
 from config.errors import ApiError
 
+from .models import language_of
 from .serializers import LoginSerializer, SignupSerializer, normalize_email
 
 
@@ -26,7 +27,7 @@ class SignupView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         token = Token.objects.create(user=user)
-        return Response({"token": token.key}, status=status.HTTP_201_CREATED)
+        return Response({"token": token.key, "language": language_of(user)}, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -43,9 +44,11 @@ class LoginView(APIView):
         )
         if user is None:
             # Same message whether the email or the password was wrong.
-            raise ApiError("invalid_credentials", "Email or password is incorrect.")
+            raise ApiError("invalid_credentials")
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({"token": token.key})
+        # The saved language lets a phone with no choice of its own start in
+        # the member's language (docs/LANGUAGE.md).
+        return Response({"token": token.key, "language": language_of(user)})
 
 
 class LogoutView(APIView):

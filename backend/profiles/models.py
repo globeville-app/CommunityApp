@@ -28,7 +28,8 @@ class Profile(models.Model):
     # Only the initial of the last name is kept: "Ana R."
     last_initial = models.CharField(max_length=1)
     photo = models.ImageField(upload_to=random_photo_path, blank=True)
-    # A list of names from settings.INTEREST_CHOICES, e.g. ["Gardening"].
+    # A list of keys from settings.INTEREST_CHOICES, e.g. ["gardening"].
+    # The app shows them in the person's language.
     interests = models.JSONField(default=list, blank=True)
     neighborhood = models.ForeignKey(Neighborhood, on_delete=models.PROTECT)
     # The local name the person picked, e.g. "LoHi" for Highland. Blank = official name.

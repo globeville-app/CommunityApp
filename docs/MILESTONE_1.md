@@ -2,6 +2,7 @@
 
 **App name:** Globeville. The logo is always lowercase, "globeville" (see `design/BRAND.md`); in sentences write "Globeville". Renamed from the working name Kinward on 2026-10-08; lives in ONE shared config file, see below.
 **Scope:** this milestone only. Do not build the rest of the app.
+**Languages:** English and Spanish are required at launch. `docs/LANGUAGE.md` adds to this milestone (Part A, built) and wins on anything about language. One difference from it: the language is stored on the account (created at signup) rather than on Profile, because the profile only exists once joining is finished.
 
 ## Context
 

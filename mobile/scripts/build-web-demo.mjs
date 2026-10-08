@@ -123,6 +123,7 @@ const page = `<meta charset="utf-8">
     <h1>Join your Denver neighborhood</h1>
     <p>These are the real app screens, running in your browser. A pretend backend stands in for the server, so nothing you type leaves this page.</p>
     <ol>
+      <li>Tap <strong>Español</strong> at the top right to use the app in Spanish. It stays that way on every screen, after a reload, and after logging out.</li>
       <li>Sign up with any email and a password of 8+ characters.</li>
       <li>Tap a sample address. It's checked against Denver's official neighborhood map.</li>
       <li>Try the LoHi sample to see the local-name choice.</li>

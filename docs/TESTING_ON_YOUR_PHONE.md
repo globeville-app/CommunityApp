@@ -159,6 +159,11 @@ If the firewall asks about **Node.js**, again choose **Private networks** only.
    should still be logged in on your profile.
 7. Optional: an address in Aurora or Lakewood should say the app is
    "only in the City and County of Denver for now".
+8. **Spanish:** tap **Español** at the top right (it's on every screen
+   before you join, and in the "Language / Idioma" row on your profile).
+   The whole app switches at once, and anything you've typed stays. Close
+   and reopen Expo Go, log out and back in: it stays in Spanish. If your
+   iPhone itself is set to Spanish, a brand-new install starts in Spanish.
 
 Watching the **server window** while you test is useful: each action
 appears as a line such as `"PUT /api/profile HTTP/1.1" 201`. Photo uploads

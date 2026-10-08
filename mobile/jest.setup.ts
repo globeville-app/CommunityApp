@@ -43,3 +43,20 @@ jest.mock("expo-font", () => ({
   isLoaded: () => true,
   loadAsync: jest.fn(async () => undefined),
 }));
+
+// The language preference store (src/i18n/languageStorage.ts): in memory.
+jest.mock("@react-native-async-storage/async-storage", () =>
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
+);
+
+// The phone's language settings. Tests change __setLocale to simulate a
+// Spanish phone.
+jest.mock("expo-localization", () => {
+  let tag = "en-US";
+  return {
+    __setLocale: (next: string) => {
+      tag = next;
+    },
+    getLocales: () => [{ languageTag: tag, languageCode: tag.split("-")[0] }],
+  };
+});

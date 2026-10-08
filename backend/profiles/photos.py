@@ -19,30 +19,31 @@ MAX_SIDE_PIXELS = 2048
 
 
 class PhotoError(Exception):
-    def __init__(self, code, message):
-        super().__init__(message)
+    """A code such as "photo_too_large"; the app explains it to the person."""
+
+    def __init__(self, code):
+        super().__init__(code)
         self.code = code
-        self.message = message
 
 
 def clean_photo(upload):
     """
     Check an uploaded file and return a ContentFile of the cleaned image.
-    Raises PhotoError with a friendly message if the file isn't acceptable.
+    Raises PhotoError with a code if the file isn't acceptable.
     """
     if upload.size > settings.PHOTO_MAX_BYTES:
-        raise PhotoError("photo_too_large", "Photos must be 5 MB or smaller.")
+        raise PhotoError("photo_too_large")
 
     try:
         image = Image.open(upload)
         image_format = image.format
         if image_format not in ALLOWED_FORMATS:
-            raise PhotoError("photo_wrong_type", "Photos must be JPEG or PNG.")
+            raise PhotoError("photo_wrong_type")
         image.load()
     except PhotoError:
         raise
     except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError):
-        raise PhotoError("photo_wrong_type", "Photos must be JPEG or PNG.") from None
+        raise PhotoError("photo_wrong_type") from None
 
     # Phones often save photos sideways and use an EXIF "orientation" flag to
     # say which way is up. Apply it now, because the flag is about to go.

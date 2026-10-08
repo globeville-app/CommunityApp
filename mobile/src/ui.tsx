@@ -12,6 +12,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import { ComponentProps, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Image,
@@ -28,6 +29,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { LanguageToggle } from "./components/LanguageToggle";
 import { BUTTON_HEIGHT, MIN_TOUCH, SCREEN_PADDING, colors, fonts, radius, space, type } from "./theme";
 
 export { colors } from "./theme";
@@ -69,12 +71,27 @@ export function Screen({ children, footer }: { children: ReactNode; footer?: Rea
   );
 }
 
+/**
+ * The top row of the welcome and join screens: an optional Back button, and
+ * the English | Español toggle on the right, so the language can be changed
+ * at every step before joining.
+ */
+export function JoinHeader({ back }: { back?: boolean }) {
+  return (
+    <View style={styles.header}>
+      {back ? <BackButton /> : <View />}
+      <LanguageToggle />
+    </View>
+  );
+}
+
 /** A round glass back button for the top of a screen. */
 export function BackButton() {
+  const { t } = useTranslation();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Back"
+      accessibilityLabel={t("common.back")}
       onPress={() => router.back()}
       style={({ pressed }) => [styles.round, pressed && styles.pressed]}
     >
@@ -178,7 +195,9 @@ export function Button({ title, onPress, disabled, busy, variant = "primary" }: 
       {busy ? (
         <ActivityIndicator color={isPrimary ? colors.base : colors.textPrimary} />
       ) : (
-        <Text style={[type.button, { color: isPrimary ? colors.base : colors.textPrimary }]}>{title}</Text>
+        <Text style={[type.button, styles.buttonText, { color: isPrimary ? colors.base : colors.textPrimary }]}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );
@@ -245,6 +264,7 @@ export function ErrorMessage({ message }: { message: string | null }) {
 
 /** Round glass avatar: a photo, or the first letter of the name. */
 export function Avatar({ uri, initial, size = 112 }: { uri?: string | null; initial?: string; size?: number }) {
+  const { t } = useTranslation();
   return (
     <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}>
       <Frost intensity={20} style={{ borderRadius: size / 2 }} />
@@ -252,7 +272,7 @@ export function Avatar({ uri, initial, size = 112 }: { uri?: string | null; init
         <Image
           source={{ uri }}
           style={{ width: size, height: size, borderRadius: size / 2 }}
-          accessibilityLabel="Profile photo"
+          accessibilityLabel={t("profile.photo_label")}
         />
       ) : (
         <Text style={[type.title, styles.white]}>{initial}</Text>
@@ -300,13 +320,18 @@ export const styles = StyleSheet.create({
   // glass would otherwise blur the typed text.
   inputIcon: { marginRight: 10, zIndex: 1 },
   inputText: { flex: 1, height: "100%", zIndex: 1, fontFamily: fonts.regular, fontSize: 17, color: colors.textPrimary },
+  // minHeight, not height: Spanish runs 20-30% longer, so a label may wrap
+  // to two lines and the button grows instead of cutting it off.
   button: {
-    height: BUTTON_HEIGHT,
+    minHeight: BUTTON_HEIGHT,
     borderRadius: BUTTON_HEIGHT / 2,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: space.l,
+    paddingVertical: 10,
   },
+  buttonText: { textAlign: "center" },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: MIN_TOUCH },
   primary: {
     backgroundColor: colors.glowYellow,
     shadowColor: colors.glowYellow,

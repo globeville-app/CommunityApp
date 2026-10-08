@@ -3,7 +3,7 @@ import { DarkTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import { Outfit_300Light } from "@expo-google-fonts/outfit/300Light";
 import { Outfit_400Regular } from "@expo-google-fonts/outfit/400Regular";
@@ -13,9 +13,11 @@ import { Outfit_600SemiBold } from "@expo-google-fonts/outfit/600SemiBold";
 import { AuthProvider } from "../auth";
 import { DemoBanner } from "../components/DemoBanner";
 import { GlowBackground } from "../components/GlowBackground";
+import { LanguageProvider, useLanguage } from "../language";
 import { colors } from "../theme";
 
-// Keep the native splash (the gb mark) up until the fonts are ready.
+// Keep the native splash (the gb mark) up until the fonts and the language
+// are ready.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 // Navigation paints its own background behind screens by default; make it
@@ -37,10 +39,6 @@ export default function RootLayout() {
     Outfit_600SemiBold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync().catch(() => undefined);
-  }, [fontsLoaded]);
-
   return (
     <ThemeProvider value={theme}>
       <AuthProvider>
@@ -48,18 +46,36 @@ export default function RootLayout() {
         <View style={{ flex: 1, backgroundColor: colors.base }}>
           {/* One shared glow behind every screen; screens are see-through. */}
           <GlowBackground />
-          <DemoBanner />
-          {fontsLoaded ? (
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                animation: "fade",
-                contentStyle: { backgroundColor: "transparent" },
-              }}
-            />
-          ) : null}
+          <LanguageProvider>{fontsLoaded ? <AppShell /> : null}</LanguageProvider>
         </View>
       </AuthProvider>
     </ThemeProvider>
+  );
+}
+
+/** Everything that shows once fonts and language are ready. */
+function AppShell() {
+  const { language } = useLanguage();
+
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => undefined);
+  }, []);
+
+  // Tell browsers and screen readers which language the text is in.
+  useEffect(() => {
+    if (Platform.OS === "web" && typeof document !== "undefined") document.documentElement.lang = language;
+  }, [language]);
+
+  return (
+    <View style={{ flex: 1 }} accessibilityLanguage={language}>
+      <DemoBanner />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      />
+    </View>
   );
 }
