@@ -1,12 +1,14 @@
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ApiError, getConfig, saveProfile, uploadPhoto } from "../api";
 import { useAuth } from "../auth";
 import { resetTo } from "../navigation";
-import { Body, Button, Choice, ErrorMessage, Field, Screen, Title, styles } from "../ui";
+import { colors, type } from "../theme";
+import { Avatar, BackButton, Button, Choice, ErrorMessage, Field, GlassCard, Screen, Section, Title, styles } from "../ui";
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
@@ -14,7 +16,7 @@ type PickedPhoto = { uri: string; mimeType: string };
 
 export default function ProfileSetup() {
   const { token } = useAuth();
-  const { alias = "" } = useLocalSearchParams<{ alias?: string }>();
+  const { alias = "", neighborhood = "" } = useLocalSearchParams<{ alias?: string; neighborhood?: string }>();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
@@ -99,30 +101,42 @@ export default function ProfileSetup() {
     resetTo("/profile");
   }
 
+  const joining = alias || neighborhood;
+
   return (
     <Screen>
+      <BackButton />
       <Title>Set up your profile</Title>
-      <Field label="First name" value={firstName} onChangeText={setFirstName} textContentType="givenName" />
-      <Field label="Last name" value={lastName} onChangeText={setLastName} textContentType="familyName" />
-      <Body muted>Neighbors see your first name and last initial only.</Body>
 
-      <Body>Photo (optional)</Body>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-        {photo ? (
-          <Image
-            source={{ uri: photo.uri }}
-            style={{ width: 72, height: 72, borderRadius: 36 }}
-            accessibilityLabel="Selected photo"
-          />
-        ) : null}
-        <View style={styles.flex}>
-          <Button title={photo ? "Change photo" : "Add a photo"} variant="secondary" onPress={pickPhoto} />
-        </View>
+      <View style={local.avatarWrap}>
+        <Avatar uri={photo?.uri} initial={firstName.trim().slice(0, 1).toUpperCase() || undefined} />
+        {photo ? <Text style={local.hidden} accessibilityLabel="Selected photo" /> : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={photo ? "Change photo" : "Add a photo"}
+          onPress={pickPhoto}
+          style={({ pressed }) => [local.addPhoto, pressed && styles.pressed]}
+        >
+          <Ionicons name="camera" size={20} color={colors.base} />
+        </Pressable>
       </View>
+
+      <Field label="First name" icon="person-outline" value={firstName} onChangeText={setFirstName} textContentType="givenName" />
+      <Field label="Last name" icon="person-outline" value={lastName} onChangeText={setLastName} textContentType="familyName" />
+
+      {joining ? (
+        <GlassCard style={local.joiningCard}>
+          <Ionicons name="home" size={18} color={colors.glowTurquoise} />
+          <Text style={[type.label, { color: colors.glowTurquoise, flex: 1 }]}>Joining {joining}</Text>
+        </GlassCard>
+      ) : null}
+      <Text style={[type.caption, { color: colors.textSoft }]}>
+        Neighbors see your first name and last initial only.
+      </Text>
 
       {interestOptions.length > 0 ? (
         <>
-          <Body>Interests (optional)</Body>
+          <Section>Interests</Section>
           <View style={styles.row}>
             {interestOptions.map((item) => (
               <Choice
@@ -138,7 +152,7 @@ export default function ProfileSetup() {
 
       <ErrorMessage message={error} />
       <Button
-        title={photoFailed ? "Try the photo again" : "Save profile"}
+        title={photoFailed ? "Try the photo again" : "Finish"}
         onPress={onSave}
         busy={busy}
         disabled={!firstName.trim() || !lastName.trim()}
@@ -149,3 +163,25 @@ export default function ProfileSetup() {
     </Screen>
   );
 }
+
+const local = StyleSheet.create({
+  avatarWrap: { alignSelf: "center", marginVertical: 8 },
+  addPhoto: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.glowYellow,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: colors.glowYellow,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 5,
+  },
+  joiningCard: { flexDirection: "row", alignItems: "center", paddingVertical: 14 },
+  hidden: { position: "absolute", width: 1, height: 1, opacity: 0 },
+});

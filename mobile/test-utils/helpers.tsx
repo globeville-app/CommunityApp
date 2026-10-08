@@ -6,7 +6,6 @@ import Address from "../src/app/address";
 import Start from "../src/app/index";
 import RootLayout from "../src/app/_layout";
 import Login from "../src/app/login";
-import Match from "../src/app/match";
 import Profile from "../src/app/profile";
 import ProfileSetup from "../src/app/profile-setup";
 import Signup from "../src/app/signup";
@@ -26,7 +25,6 @@ export function renderApp(initialUrl = "/") {
       signup: Signup,
       login: Login,
       address: Address,
-      match: Match,
       "profile-setup": ProfileSetup,
       profile: Profile,
     },

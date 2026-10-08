@@ -1,31 +1,56 @@
-import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
+import { DarkTheme, Stack, ThemeProvider } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 
+import { Outfit_300Light } from "@expo-google-fonts/outfit/300Light";
+import { Outfit_400Regular } from "@expo-google-fonts/outfit/400Regular";
+import { Outfit_500Medium } from "@expo-google-fonts/outfit/500Medium";
+import { Outfit_600SemiBold } from "@expo-google-fonts/outfit/600SemiBold";
+
 import { AuthProvider } from "../auth";
 import { DemoBanner } from "../components/DemoBanner";
-import { colors } from "../ui";
+import { GlowBackground } from "../components/GlowBackground";
+import { colors } from "../theme";
+
+// Navigation paints its own background behind screens by default; make it
+// see-through so the glow shows.
+const theme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: "transparent",
+    card: "transparent",
+  },
+};
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Outfit_300Light,
+    Outfit_400Regular,
+    Outfit_500Medium,
+    Outfit_600SemiBold,
+  });
+
   return (
-    <AuthProvider>
-      <StatusBar style="dark" />
-      <View style={{ flex: 1 }}>
-        <DemoBanner />
-        <Stack
-          screenOptions={{
-            headerShadowVisible: false,
-            headerTintColor: colors.text,
-            headerTitle: "",
-            headerBackButtonDisplayMode: "minimal",
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        >
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="welcome" options={{ headerShown: false }} />
-          <Stack.Screen name="profile" options={{ headerShown: false }} />
-        </Stack>
-      </View>
-    </AuthProvider>
+    <ThemeProvider value={theme}>
+      <AuthProvider>
+        <StatusBar style="light" />
+        <View style={{ flex: 1, backgroundColor: colors.base }}>
+          {/* One shared glow behind every screen; screens are see-through. */}
+          <GlowBackground />
+          <DemoBanner />
+          {fontsLoaded ? (
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: "fade",
+                contentStyle: { backgroundColor: "transparent" },
+              }}
+            />
+          ) : null}
+        </View>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

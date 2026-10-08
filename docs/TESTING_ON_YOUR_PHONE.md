@@ -150,9 +150,10 @@ If the firewall asks about **Node.js**, again choose **Private networks** only.
 1. **Sign up** with an email and a password of 8+ characters.
 2. Enter **your real address**. It goes to the Census address lookup and
    Denver's official neighborhood map.
-3. If offered (e.g. Highland/LoHi), pick the name you use, then **Join**.
+3. A panel slides up with your neighborhood. If offered (e.g. Highland/LoHi),
+   pick the name you use, then **Join**.
 4. Enter your first and last name, optionally a photo and interests, then
-   **Save profile**.
+   **Finish**.
 5. Your profile shows "First L.", your neighborhood and interests.
 6. **Close Expo Go completely** (swipe it away), reopen the project: you
    should still be logged in on your profile.

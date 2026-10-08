@@ -74,7 +74,7 @@ describe("starting the app", () => {
     loggedIn();
     mocked.getMyProfile.mockRejectedValue(notFound());
     renderApp();
-    expect(await screen.findByText("Where do you live?")).toBeTruthy();
+    expect(await screen.findByText("Where's home?")).toBeTruthy();
   });
 
   it("logs out and shows Welcome when the saved token is no longer valid", async () => {
@@ -107,7 +107,7 @@ describe("sign up and log in", () => {
     fireEvent.changeText(screen.getByLabelText("Password"), "a long pass phrase");
     await pressAndSettle(screen.getByRole("button", { name: "Sign up" }));
 
-    expect(await screen.findByText("Where do you live?")).toBeTruthy();
+    expect(await screen.findByText("Where's home?")).toBeTruthy();
     expect(mocked.signup).toHaveBeenCalledWith("ana@example.com", "a long pass phrase");
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith("auth_token", "new-token");
   });
@@ -154,7 +154,7 @@ describe("address → match → profile setup → profile", () => {
     fireEvent.press(await screen.findByRole("checkbox", { name: "Gardening" }));
     fireEvent.press(screen.getByRole("checkbox", { name: "Block parties" }));
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
-    await pressAndSettle(screen.getByRole("button", { name: "Save profile" }));
+    await pressAndSettle(screen.getByRole("button", { name: "Finish" }));
 
     // Profile
     expect(await screen.findByText("Ana R.")).toBeTruthy();
@@ -183,15 +183,23 @@ describe("address → match → profile setup → profile", () => {
     await submitAddress();
     expect(await screen.findByRole("header", { name: "Highland" })).toBeTruthy();
 
-    // The address isn't in the navigation URL or params of the Match screen.
-    expect(app.getPathname()).toBe("/match");
+    // The match shows on the same screen, and the field is already empty.
+    expect(app.getPathname()).toBe("/address");
+    expect((await screen.findByLabelText("Street address")).props.value).toBe("");
+
+    // "Edit address" closes the sheet; the field is still empty.
+    fireEvent.press(screen.getByRole("button", { name: "Edit address" }));
+    expect(screen.queryByRole("button", { name: "Join Highland" })).toBeNull();
+    expect(screen.getByLabelText("Street address").props.value).toBe("");
+
+    // Joining passes only the neighborhood on, never the address.
+    await submitAddress();
+    fireEvent.press(await screen.findByRole("button", { name: "Join Highland" }));
+    await screen.findByText("Set up your profile");
+    expect(app.getPathname()).toBe("/profile-setup");
     expect(app.getPathnameWithParams()).not.toContain("Example");
     expect(JSON.stringify(app.getSearchParams())).not.toContain("Example");
-
-    // Back on the Address screen ("Edit address"), the field is empty.
-    fireEvent.press(screen.getByRole("button", { name: "Edit address" }));
-    const field = await screen.findByLabelText("Street address");
-    expect(field.props.value).toBe("");
+    expect(app.getSearchParams()).toMatchObject({ neighborhood: "Highland" });
 
     // Storage only ever held the login token.
     expect(everythingStored()).not.toContain("Example");
@@ -219,7 +227,7 @@ describe("address → match → profile setup → profile", () => {
     expect(options.quality).toBeLessThan(1);
 
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
-    await pressAndSettle(screen.getByRole("button", { name: "Save profile" }));
+    await pressAndSettle(screen.getByRole("button", { name: "Finish" }));
     await waitFor(() =>
       expect(mocked.uploadPhoto).toHaveBeenCalledWith("tok-123", {
         uri: "file:///photo.jpg",
@@ -242,7 +250,7 @@ describe("address → match → profile setup → profile", () => {
     fireEvent.changeText(await screen.findByLabelText("First name"), "Ana");
     fireEvent.changeText(screen.getByLabelText("Last name"), "Rivera");
     await pressAndSettle(screen.getByRole("button", { name: "Add a photo" }));
-    await pressAndSettle(screen.getByRole("button", { name: "Save profile" }));
+    await pressAndSettle(screen.getByRole("button", { name: "Finish" }));
 
     expect(
       await screen.findByText(`Your profile is saved, but the photo didn't upload. ${api.TIMEOUT_ERROR_MESSAGE}`),
@@ -282,7 +290,7 @@ describe("address → match → profile setup → profile", () => {
       renderApp();
       await submitAddress();
       expect(await screen.findByText(message)).toBeTruthy();
-      expect(screen.getByText("Where do you live?")).toBeTruthy();
+      expect(screen.getByText("Where's home?")).toBeTruthy();
       expect(!!screen.queryByRole("button", { name: "Try again" })).toBe(offersRetry);
     });
 

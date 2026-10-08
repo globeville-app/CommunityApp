@@ -36,3 +36,10 @@ jest.mock("expo-constants", () => {
     default: { expoConfig: { name: shared.app_name, extra: { apiBaseUrl: "http://test-server:8000" } } },
   };
 });
+
+// Fonts load instantly in tests.
+jest.mock("expo-font", () => ({
+  useFonts: () => [true, null],
+  isLoaded: () => true,
+  loadAsync: jest.fn(async () => undefined),
+}));

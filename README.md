@@ -151,9 +151,10 @@ Tests never call the real geocoder or need a phone.
 Do this once with the backend running and the Denver file loaded:
 
 1. Open the app → **Sign up** with an email and password.
-2. Type a Denver address (e.g. a public building, not your home) → see the neighborhood.
-3. If the address is in Highland, you're offered "Highland" or "LoHi". Pick one.
-4. Enter your first and last name, add a photo, pick some interests → **Save profile**.
+2. Under **Where's home?**, type a Denver address (e.g. a public building, not your home).
+   A panel slides up with your neighborhood.
+3. If the address is in Highland, you're offered "Highland" or "LoHi". Pick one, then **Join**.
+4. Enter your first and last name, add a photo, pick some interests → **Finish**.
 5. The profile shows your photo, "First L.", the neighborhood, and your interests.
 6. **Close the app completely** (swipe it away) and reopen it from Expo Go → you're still
    logged in and land on your profile.
@@ -210,6 +211,13 @@ re-enter the address, because it's never saved.
 photos). The server only accepts JPEG/PNG up to 5 MB, copies just the pixels into
 a fresh image (removing EXIF data, which can include GPS location), and saves it
 under a random filename.
+
+**Look and feel.** The design rules are in `design/DESIGN.md`. Colors, fonts
+and spacing live in one place, `mobile/src/theme.ts`; the shared pieces
+(buttons, fields, glass cards, the slide-up panel) are in `mobile/src/ui.tsx`,
+and the moving glow behind every screen is `mobile/src/components/GlowBackground.tsx`.
+The glow holds still when the phone's Reduce Motion setting is on. Stats,
+badges and the bottom tab bar from the design come in later milestones.
 
 ### Privacy guarantees and the tests that check them
 

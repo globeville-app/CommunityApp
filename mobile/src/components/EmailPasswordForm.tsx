@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ApiError } from "../api";
 import { useAuth } from "../auth";
 import { resetTo } from "../navigation";
-import { Body, Button, ErrorMessage, Field, Screen, Title } from "../ui";
+import { BackButton, Button, Caption, ErrorMessage, Field, Screen, Title } from "../ui";
 
 type Props = {
   title: string;
@@ -36,9 +36,11 @@ export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
 
   return (
     <Screen>
+      <BackButton />
       <Title>{title}</Title>
       <Field
         label="Email"
+        icon="mail-outline"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -48,6 +50,7 @@ export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
       />
       <Field
         label="Password"
+        icon="lock-closed-outline"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -55,7 +58,7 @@ export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
         textContentType="password"
         onSubmitEditing={onSubmit}
       />
-      {hint ? <Body muted>{hint}</Body> : null}
+      {hint ? <Caption>{hint}</Caption> : null}
       <ErrorMessage message={error} />
       <Button title={buttonTitle} onPress={onSubmit} busy={busy} disabled={!email || !password} />
     </Screen>

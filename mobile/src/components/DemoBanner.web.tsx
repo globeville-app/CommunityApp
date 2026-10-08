@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../auth";
 import { resetDemo } from "../demo/fakeBackend";
 import { resetTo } from "../navigation";
-import { colors } from "../ui";
+import { colors, fonts } from "../theme";
 
 export function DemoBanner() {
   const { signOut } = useAuth();
@@ -34,10 +34,20 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 6,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.glassDarkSolid,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.glassDarkBorder,
+    zIndex: 2,
   },
-  text: { flex: 1, color: "#FFFFFF", fontSize: 12, lineHeight: 16 },
-  strong: { fontWeight: "700" },
-  reset: { minHeight: 32, paddingHorizontal: 10, justifyContent: "center", borderRadius: 6, borderWidth: 1, borderColor: "#FFFFFF80" },
-  resetText: { color: "#FFFFFF", fontSize: 12, fontWeight: "600" },
+  text: { flex: 1, color: colors.textSecondary, fontSize: 12, lineHeight: 16, fontFamily: fonts.regular },
+  strong: { color: colors.glowYellow, fontFamily: fonts.semibold },
+  reset: {
+    minHeight: 32,
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.secondaryBorder,
+  },
+  resetText: { color: colors.textPrimary, fontSize: 12, fontFamily: fonts.semibold },
 });

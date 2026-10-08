@@ -5,7 +5,8 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { SIMULATE_OUTAGE } from "../demo/fakeBackend";
-import { colors } from "../ui";
+import { colors, type } from "../theme";
+import { GlassCard } from "../ui";
 
 const SAMPLES = [
   { label: "City and County Building", address: "1437 Bannock St, Denver, CO 80202" },
@@ -20,9 +21,9 @@ const SAMPLES = [
 
 export function DemoAddressHints({ onPick }: { onPick: (address: string) => void }) {
   return (
-    <View style={styles.box}>
-      <Text style={styles.heading}>Try a sample address</Text>
-      <Text style={styles.note}>
+    <GlassCard>
+      <Text style={[type.label, { color: colors.glowTurquoise }]}>Try a sample address</Text>
+      <Text style={[type.caption, { color: colors.textSecondary }]}>
         Samples use their real locations and Denver's official neighborhood map. The demo can't look up
         other addresses, but it recognizes Denver neighborhood names you type, like "Five Points".
       </Text>
@@ -35,28 +36,24 @@ export function DemoAddressHints({ onPick }: { onPick: (address: string) => void
             onPress={() => onPick(sample.address)}
             style={({ pressed }) => [styles.chip, pressed && styles.pressed]}
           >
-            <Text style={styles.chipText}>{sample.label}</Text>
+            <Text style={[type.caption, { color: colors.textPrimary }]}>{sample.label}</Text>
           </Pressable>
         ))}
       </View>
-    </View>
+    </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
-  box: { gap: 8, padding: 14, borderRadius: 12, backgroundColor: colors.accentLight },
-  heading: { fontSize: 14, fontWeight: "700", color: colors.accent },
-  note: { fontSize: 13, lineHeight: 18, color: colors.text },
   list: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
     minHeight: 36,
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     borderRadius: 18,
-    backgroundColor: colors.background,
+    backgroundColor: colors.glass,
     borderWidth: 1,
-    borderColor: colors.accent,
+    borderColor: colors.glassBorder,
   },
   pressed: { opacity: 0.6 },
-  chipText: { fontSize: 13, color: colors.accent, fontWeight: "600" },
 });

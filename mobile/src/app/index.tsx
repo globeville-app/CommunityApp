@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ApiError, getMyProfile } from "../api";
 import { useAuth } from "../auth";
-import { Body, Button, ErrorMessage, Loading, Screen, Title } from "../ui";
+import { Button, ErrorMessage, Intro, Loading, Screen, Title } from "../ui";
 
 type Destination = "/welcome" | "/address" | "/profile";
 
@@ -52,7 +52,7 @@ export default function Start() {
       <Screen>
         <Title>Hmm.</Title>
         <ErrorMessage message={error} />
-        <Body muted>Make sure the backend is running and your phone is on the same Wi-Fi.</Body>
+        <Intro>Make sure the backend is running and your phone is on the same Wi-Fi.</Intro>
         <Button title="Try again" onPress={decide} />
       </Screen>
     );
