@@ -1,7 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
+// Only the one icon set; the package root would pull in every icon font.
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ApiError, getConfig, saveProfile, uploadPhoto } from "../api";

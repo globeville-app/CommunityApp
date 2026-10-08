@@ -7,7 +7,8 @@
  * directly on the glow; grey (textSecondary) and turquoise text only inside
  * dark glass (GlassCard, Sheet, ErrorMessage).
  */
-import { Ionicons } from "@expo/vector-icons";
+// Only the one icon set; the package root would pull in every icon font.
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import { ComponentProps, ReactNode } from "react";
