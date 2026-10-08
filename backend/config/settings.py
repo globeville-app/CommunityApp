@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "neighborhoods",
     "geocoding",
     "profiles",
+    "support",
 ]
 
 MIDDLEWARE = [
@@ -132,6 +133,9 @@ CACHES = {
 # Uploaded profile photos. Served by Django only while DEBUG is on.
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+# Problem report screenshots. Never served at a URL; only staff can see them,
+# through the Django admin (support/admin.py).
+PRIVATE_MEDIA_ROOT = BASE_DIR / "private_media"
 
 
 # --- API --------------------------------------------------------------------
@@ -154,6 +158,8 @@ REST_FRAMEWORK = {
         # Each match calls a free public geocoder; don't let one account
         # hammer it through our server.
         "join_match": "10/min",
+        # "Report a problem": per member, or per IP address when signed out.
+        "problem_report": "5/day",
     },
 }
 
@@ -168,6 +174,26 @@ GEOCODER_TIMEOUT_SECONDS = 8
 
 # --- Photos -----------------------------------------------------------------
 PHOTO_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+# --- Email ------------------------------------------------------------------
+# Development prints emails in the server window instead of sending them.
+# Production sets EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+# and the EMAIL_* settings below in the environment (see the README).
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "webmaster@localhost")
+
+# Who gets an email for each problem report: a comma-separated list in the
+# environment, e.g. PROBLEM_REPORT_EMAILS="ana@example.org,team@example.org".
+# Never write anyone's address in the code.
+PROBLEM_REPORT_EMAILS = [
+    address.strip() for address in os.environ.get("PROBLEM_REPORT_EMAILS", "").split(",") if address.strip()
+]
 
 
 # --- Logging ----------------------------------------------------------------

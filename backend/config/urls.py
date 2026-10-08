@@ -15,6 +15,7 @@ urlpatterns = [
     path("api/profile", profile_views.ProfileView.as_view(), name="profile"),
     path("api/profile/me", profile_views.MyProfileView.as_view(), name="profile-me"),
     path("api/profile/photo", profile_views.ProfilePhotoView.as_view(), name="profile-photo"),
+    path("api/support/", include("support.urls")),
 ]
 
 if settings.DEBUG:
