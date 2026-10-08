@@ -1,11 +1,11 @@
 # Milestone 1: Join — address in, neighborhood out, profile saved
 
-**App name:** Kinward (working name — lives in ONE shared config file, see below)
+**App name:** Globeville (renamed from the working name Kinward on 2026-10-08; lives in ONE shared config file, see below)
 **Scope:** this milestone only. Do not build the rest of the app.
 
 ## Context
 
-Kinward is a localized social network of communities, launching in Denver, delivered as a **mobile app** (iPhone and Android). A person types their address, we match it to one of Denver's official neighborhoods, link their profile to that neighborhood, and they set up a profile. This milestone builds only that join flow, end to end, with tests.
+Globeville is a localized social network of communities, launching in Denver, delivered as a **mobile app** (iPhone and Android). A person types their address, we match it to one of Denver's official neighborhoods, link their profile to that neighborhood, and they set up a profile. This milestone builds only that join flow, end to end, with tests.
 
 The product owner is learning Python. Prefer clear, conventional code over clever code, and explain non-obvious decisions in short comments or in your summary.
 
@@ -44,7 +44,7 @@ Media board, events, badges, community profiles, alumni, "Arriving soon" for mov
 | --- | --- |
 | Platform | Native mobile app via Expo (iOS + Android). No website. |
 | Backend language | Python |
-| App name | `shared/app_config.json` → `{"app_name": "Kinward"}`. The backend settings and the Expo `app.config.ts` both read this file. Never hard-code the name anywhere else. |
+| App name | `shared/app_config.json` → `{"app_name": "Globeville"}`. The backend settings and the Expo `app.config.ts` both read this file. Never hard-code the name anywhere else. |
 | Login | Email + password for v1. Backend issues a token; the app stores it in `expo-secure-store`. Phone login is v2 — keep auth isolated so it can be added later. |
 | Address | Never stored, on the server or the phone. Geocode in memory, find the neighborhood, keep only the neighborhood ID. |
 | Geography | Denver proper only: the City and County of Denver's official Statistical Neighborhoods. Suburbs are out. |
@@ -124,7 +124,7 @@ Design reference: clean white UI, one typeface, near-black primary buttons, gree
 
 ## Edge cases to handle
 
-- Address outside Denver city limits, including suburbs with "Denver" mailing addresses (Aurora, Lakewood, Englewood): "Kinward is only in the City and County of Denver for now."
+- Address outside Denver city limits, including suburbs with "Denver" mailing addresses (Aurora, Lakewood, Englewood): "Globeville is only in the City and County of Denver for now."
 - Geocoder finds no match: "We couldn't find that address. Check the spelling and try again."
 - Geocoder down or slow: friendly error, no crash; the app shows a retry.
 - Phone offline or backend unreachable: clear message, no crash.
