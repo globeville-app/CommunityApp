@@ -19,21 +19,24 @@ const shared = require("../shared/app_config.json") as {
 };
 
 const appName = shared.app_name;
+
+// Shown at the bottom of Settings as "Version 1.0.0 (1)". Raise the build
+// number for every build sent to the stores.
+const VERSION = "1.0.0";
+const BUILD_NUMBER = 1;
 const slug = appName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
 
 const config: ExpoConfig = {
   name: appName,
   slug,
   scheme: slug,
-  // Shown at the bottom of Settings as "Version 1.0.0 (1)". Raise the build
-  // number for every build sent to the stores.
-  version: "1.0.0",
+  version: VERSION,
   orientation: "portrait",
   icon: "./assets/brand/icon.png",
   userInterfaceStyle: "dark",
   ios: {
     supportsTablet: false,
-    buildNumber: "1",
+    buildNumber: String(BUILD_NUMBER),
   },
   android: {
     adaptiveIcon: {
@@ -42,7 +45,7 @@ const config: ExpoConfig = {
       backgroundImage: "./assets/brand/adaptive-icon-background.png",
     },
     predictiveBackGestureEnabled: false,
-    versionCode: 1,
+    versionCode: BUILD_NUMBER,
   },
   web: {
     favicon: "./assets/brand/favicon.png",
@@ -74,6 +77,8 @@ const config: ExpoConfig = {
     // Empty until the real pages exist; Settings then shows "Coming soon".
     privacyUrl: shared.privacy_url,
     termsUrl: shared.terms_url,
+    // The same number for every platform, so Settings can show it anywhere.
+    buildNumber: String(BUILD_NUMBER),
   },
 };
 

@@ -432,7 +432,17 @@ export const styles = StyleSheet.create({
   // zIndex keeps the icon and text above the frosted layer; in a browser the
   // glass would otherwise blur the typed text.
   inputIcon: { marginRight: 10, zIndex: 1 },
-  inputText: { flex: 1, height: "100%", zIndex: 1, fontFamily: fonts.regular, fontSize: 17, color: colors.textPrimary },
+  inputText: {
+    flex: 1,
+    height: "100%",
+    zIndex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 17,
+    color: colors.textPrimary,
+    // Browsers draw their own focus box inside the glass field; the field's
+    // border already shows where you're typing.
+    ...(Platform.OS === "web" ? { outlineWidth: 0 } : null),
+  },
   // minHeight, not height: Spanish runs 20-30% longer, so a label may wrap
   // to two lines and the button grows instead of cutting it off.
   button: {

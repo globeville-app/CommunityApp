@@ -37,8 +37,12 @@ jest.mock("expo-constants", () => {
       expoConfig: {
         name: shared.app_name,
         version: "1.0.0",
-        ios: { buildNumber: "12" },
-        extra: { apiBaseUrl: "http://test-server:8000", privacyUrl: shared.privacy_url, termsUrl: shared.terms_url },
+        extra: {
+          apiBaseUrl: "http://test-server:8000",
+          privacyUrl: shared.privacy_url,
+          termsUrl: shared.terms_url,
+          buildNumber: "12",
+        },
       },
     },
   };

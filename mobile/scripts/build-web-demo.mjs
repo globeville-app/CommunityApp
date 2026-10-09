@@ -128,6 +128,7 @@ const page = `<meta charset="utf-8">
       <li>Tap a sample address. It's checked against Denver's official neighborhood map.</li>
       <li>Try the LoHi sample to see the local-name choice.</li>
       <li>Set up your profile, then reload the page: you stay logged in.</li>
+      <li>Tap the gear on your profile for Settings: edit your profile, report a problem, log out or delete the account.</li>
     </ol>
     <p class="note">The neighborhood check uses Denver's real boundaries. Only the address lookup is simulated: a web page can't reach the Census geocoder the real app uses, so the demo knows a few sample addresses and recognizes neighborhood names you type. Use Reset in the banner at the top to start over.</p>
   </section>

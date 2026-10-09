@@ -18,9 +18,7 @@ export const TERMS_URL: string = String(Constants.expoConfig?.extra?.termsUrl ??
  * Expo Go (which would otherwise report Expo Go's own version).
  */
 export const APP_VERSION: string = Constants.expoConfig?.version ?? "0.0.0";
-export const BUILD_NUMBER: string = String(
-  Constants.expoConfig?.ios?.buildNumber ?? Constants.expoConfig?.android?.versionCode ?? "0",
-);
+export const BUILD_NUMBER: string = String(Constants.expoConfig?.extra?.buildNumber ?? "0");
 
 /** How long to wait for the backend before giving up. */
 export const REQUEST_TIMEOUT_MS = 15000;
