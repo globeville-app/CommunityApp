@@ -296,7 +296,7 @@ goes through `events/translation.py`; no provider is switched on yet.
 **Look and feel.** The design rules are in `design/DESIGN.md`, and the logo
 rules in `design/BRAND.md`. The logo, app icons and splash image are the brand
 files in `mobile/assets/brand/`; the logo is drawn by
-`mobile/src/components/brand/Wordmark.tsx` (and the small "gb" mark by `GbMark.tsx`).
+`mobile/src/components/brand/Wordmark.tsx` (and the small "gv" mark by `GvMark.tsx`).
 Your own icon only shows in a real build; Expo Go always shows its own icon. Colors, fonts
 and spacing live in one place, `mobile/src/theme.ts`; the shared pieces
 (buttons, fields, glass cards, the slide-up panel) are in `mobile/src/ui.tsx`,

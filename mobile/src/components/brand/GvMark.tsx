@@ -1,5 +1,5 @@
 /**
- * The small "gb" mark for tight spaces such as a tab bar (design/BRAND.md).
+ * The small "gv" mark (for globeville) for tight spaces such as a tab bar (design/BRAND.md).
  */
 import Svg, { Path } from "react-native-svg";
 
@@ -7,7 +7,7 @@ import { APP_NAME } from "../../config";
 import { colors } from "../../theme";
 import { MONOGRAM } from "./logoPaths";
 
-export function GbMark({ height = 20 }: { height?: number }) {
+export function GvMark({ height = 20 }: { height?: number }) {
   const width = (height * MONOGRAM.width) / MONOGRAM.height;
   return (
     <Svg

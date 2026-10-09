@@ -7,12 +7,12 @@ This file tells you how to implement the Globeville logo in the Expo app. It wor
 | Mark | What it is | Where it goes |
 |---|---|---|
 | **Wordmark** | "globeville", all lowercase, Outfit SemiBold (600), white | Splash screen, join/welcome screen, web/marketing, anywhere the full name is shown as a logo |
-| **gb icon** | Lowercase "gb" in Outfit SemiBold, white, on the midnight glow square | App icon, favicon, avatar for official accounts, small spaces |
+| **gv icon** | Lowercase "gv" (for **g**lobe**v**ille) in Outfit SemiBold, white, on the midnight glow square | App icon, favicon, avatar for official accounts, small spaces |
 
 Rules:
 - The name is always lowercase in the logo: **globeville**. In sentences, write "Globeville". Never write "GlobeVille" or "GLOBEVILLE".
 - The wordmark uses the normal letterforms, so the g hangs below the line. Do not raise or resize the g in the wordmark (we tried it and it reads like a 9).
-- The gb icon is the one exception. Its g is enlarged by about 3.7% and raised, so its top and bottom line up with the top and bottom of the b. This is already built into the icon files. Do not rebuild it from live text.
+- The gv icon uses the same normal letterforms as the wordmark: the g hangs below the line and the v sits on it. The letters are vector outlines in the icon files. Do not rebuild them from live text.
 - The logo is white on dark. On light backgrounds, use `globeville-wordmark-midnight.svg` (#1A0F3D).
 - No gradients, outlines, shadows, glows or animation on the letters themselves. The glow belongs to the background.
 
@@ -24,13 +24,13 @@ Rules:
 - Line height: 1.0 × font size
 - Color: #FFFFFF on dark; #1A0F3D on light
 - Clear space: keep empty space around the wordmark equal to the height of the "b" (about 0.72 × font size) on every side
-- Minimum size: 18px font size, or 90px wide. Below that, use the gb icon instead.
+- Minimum size: 18px font size, or 90px wide. Below that, use the gv icon instead.
 
 **Background behind the hero wordmark.** The splash and welcome screens use the dark purple gradient from the approved mock:
 `linear-gradient(110deg, #1A0F3D 0%, #1C1240 60%, #2E1747 100%)`.
 In React Native, use `expo-linear-gradient` with colors `['#1A0F3D', '#1C1240', '#2E1747']`, locations `[0, 0.6, 1]`, start `{x: 0, y: 0.32}` and end `{x: 1, y: 0.68}`, which is about 110°.
 
-## gb icon specs
+## gv icon specs
 
 - Canvas: 1024 × 1024
 - Background: #1A0F3D, plus three soft radial glows:
@@ -38,8 +38,7 @@ In React Native, use `expo-linear-gradient` with colors `['#1A0F3D', '#1C1240', 
   - pink #FF3EA5 at 55% opacity, centered (980, 980), radius 560
   - turquoise #2EE6D6 at 40% opacity, centered (960, 60), radius 420
   - Each glow fades to 0% at its edge.
-- Letters: white "gb" from the Outfit 600 outlines. The art box is 1168.3 × 733 and is placed at `translate(200 318) scale(0.537)`, which centers it at about 61% of the icon width.
-- The g is scaled 733/707 so it spans the same height as the b, from the b's top to the bottom of its bowl.
+- Letters: white "gv" from the Outfit 600 outlines, with the wordmark's letter spacing (−0.035em). The art box is 1039 × 707 font units and is placed at `translate(197.2 615.9) scale(0.577)`. That is about 600 px wide, centered horizontally and nudged slightly upward so the x-height sits at the optical center.
 - The rounded corners (radius 230 at 1024) appear only in previews and on the web. The iOS and Android app icons must be full-bleed squares, because the operating system applies its own mask.
 
 ## Files in `assets/brand/`
@@ -47,12 +46,12 @@ In React Native, use `expo-linear-gradient` with colors `['#1A0F3D', '#1C1240', 
 | File | Use |
 |---|---|
 | `icon.png` | 1024×1024, no transparency. Expo `icon` (iOS and default) |
-| `adaptive-icon.png` | Android adaptive foreground: gb on transparent, scaled to 0.45 so it sits inside the 66% safe zone |
+| `adaptive-icon.png` | Android adaptive foreground: gv on transparent, scaled to 0.5 so it sits inside the 66% safe zone |
 | `adaptive-icon-background.png` | Android adaptive background: the glow square without letters |
-| `splash-icon.png` | gb mark on transparent, for the native splash screen |
+| `splash-icon.png` | gv mark on transparent, for the native splash screen |
 | `favicon.png` | 48×48 rounded icon for web |
 | `globeville-icon.svg` / `globeville-icon-rounded.svg` | Vector masters (square and rounded preview) |
-| `gb-monogram-white.svg` | gb letters only, transparent, viewBox 1168.3 × 733 |
+| `gv-monogram-white.svg` | gv letters only, transparent, viewBox `26 -493 1039 707` |
 | `globeville-wordmark-white.svg` / `-midnight.svg` | Wordmark as vector outlines, viewBox `26 -723 3966 937` |
 
 The SVGs are vector outlines traced from Outfit 600, so they render the same everywhere, even before fonts load.
@@ -91,11 +90,11 @@ The SVGs are vector outlines traced from Outfit 600, so they render the same eve
    - Default: render `globeville-wordmark-white.svg` with `react-native-svg` and `react-native-svg-transformer`. Props: `height` (default 40), `color` (`'white' | 'midnight'`). Set the width from the viewBox ratio, 3966 / 937 ≈ 4.233 × height.
    - Use `accessibilityRole="image"` and `accessibilityLabel={appName}`, with the name from `shared/app_config.json`.
    - Do not use live `<Text>` for the logo. Live text shifts before the font loads, and that is not acceptable for the logo.
-4. **Add a `<GbMark />` component** for small in-app uses, such as a header badge. It renders `gb-monogram-white.svg` at a given height.
+4. **Add a `<GvMark />` component** for small in-app uses, such as a header badge. It renders `gv-monogram-white.svg` at a given height.
 5. **Where each mark appears:**
    - Splash: native splash with `splash-icon.png`, then fade into the Join screen.
    - Join/welcome screen: `<Wordmark height={44} />` centered above the address field, on the gradient background above.
-   - Signed-in screens: no wordmark in the header. Neighborhood names are the titles there. If the tab bar or settings needs a brand touch, use `<GbMark height={20} />`.
+   - Signed-in screens: no wordmark in the header. Neighborhood names are the titles there. If the tab bar or settings needs a brand touch, use `<GvMark height={20} />`.
 6. **Screen titles (not the logo):**
    - Outfit 600, letter spacing −0.02em, white.
    - Sizes come from `DESIGN.md`.
@@ -103,9 +102,20 @@ The SVGs are vector outlines traced from Outfit 600, so they render the same eve
 
 ## Acceptance checks
 
-- [ ] The iOS home-screen icon shows gb on the glow square, with no white or black corners showing.
+- [ ] The iOS home-screen icon shows gv on the glow square, with no white or black corners showing.
 - [ ] The Android adaptive icon stays readable under circle, squircle and teardrop masks. The letters are not clipped.
 - [ ] The splash and Join screens show the same wordmark with no font-swap flicker.
 - [ ] The wordmark keeps its proportions at heights 24, 44 and 80.
 - [ ] VoiceOver and TalkBack read the logo as "Globeville".
 - [ ] The app name appears in code only in `shared/app_config.json`. The logo art comes from the files above.
+
+## Change log
+
+**v1.1: the app icon changed from "gb" to "gv"** (gv for **g**lobe**v**ille).
+
+To apply this change in an existing codebase:
+1. Replace every file in `assets/brand/` with the new versions. Delete `gb-monogram-white.svg`; `gv-monogram-white.svg` replaces it.
+2. Rename the `GbMark` component to `GvMark`, point it at `gv-monogram-white.svg`, and update every import and usage. Search the codebase for `GbMark` and `gb-monogram`, and leave no references behind.
+3. `app.json` / `app.config.ts` needs no changes. The file names for `icon.png`, `adaptive-icon.png`, `adaptive-icon-background.png`, `splash-icon.png` and `favicon.png` are unchanged.
+4. Clear caches and rebuild so the new icon shows: `npx expo start -c`. Native builds also need `npx expo prebuild --clean` before the next build, because app icons are baked in at build time. Expo Go keeps showing its own icon.
+5. Re-run the acceptance checks above. Also check that the old gb no longer appears anywhere: the home screen, splash screen, favicon, and in-app headers.

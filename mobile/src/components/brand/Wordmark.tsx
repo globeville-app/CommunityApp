@@ -10,7 +10,7 @@ import { colors } from "../../theme";
 import { WORDMARK } from "./logoPaths";
 
 type Props = {
-  /** Height in points. Below 18 use <GbMark /> instead. */
+  /** Height in points. Below 18 use <GvMark /> instead. */
   height?: number;
   color?: "white" | "midnight";
 };

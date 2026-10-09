@@ -17,7 +17,7 @@ import { GlowBackground } from "../components/GlowBackground";
 import { LanguageProvider, useLanguage } from "../language";
 import { colors } from "../theme";
 
-// Keep the native splash (the gb mark) up until the fonts and the language
+// Keep the native splash (the gv mark) up until the fonts and the language
 // are ready.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 

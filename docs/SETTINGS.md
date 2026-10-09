@@ -151,7 +151,7 @@ It keeps:
 - Spanish labels wrap; they're never cut off.
 - Delete account is red text with no fill.
 - No other row uses color to stand out.
-- If the header needs a brand touch, `BRAND.md` allows `<GbMark height={20} />`.
+- If the header needs a brand touch, `BRAND.md` allows `<GvMark height={20} />`.
 
 ## Tests
 
