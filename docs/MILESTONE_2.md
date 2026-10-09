@@ -11,6 +11,20 @@
 
 **Scope:** this milestone only. Do not build the rest of the app.
 
+**Built.** Decisions made while building, for the owner to confirm:
+- No translation provider is switched on (owner's choice). The `Translator`
+  interface is ready; until a provider is set, the app hides "Ver en español"
+  / "See in English". Events with an organizer-written second language work
+  fully.
+- The search hints live in the app's language files, as asked; the server
+  reads them from there for the Partiful category suggestion, so they're
+  written once.
+- Two extra group accent colors (lavender, peach), since DESIGN.md has four.
+- Interests are picked on their own "What are you into?" screen, right after
+  profile setup and from the Profile tab, rather than inside the setup form.
+- The language is still stored on the account rather than `Profile`
+  (decided in Milestone 1), and members land on the Events tab.
+
 ## Context
 
 Partiful already handles invitations well: invite pages, guest lists and reminders. Globeville should not rebuild that.

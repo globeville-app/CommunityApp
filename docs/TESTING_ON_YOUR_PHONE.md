@@ -180,6 +180,10 @@ If the firewall asks about **Node.js**, again choose **Private networks** only.
 11. **Delete account:** sign up a second, test account, then Settings →
     **Delete account**, enter its password. You'll see "Your account was
     deleted." and can't log in with it any more.
+12. **Events (Milestone 2):** after joining you land on **Events**. Post an
+    event, tap **I'm going**, try the filters. To see an event from a
+    neighbor's side, log out and sign up a second test account at the same
+    address; the README section "Test accounts" has addresses and tips.
 
 Watching the **server window** while you test is useful: each action
 appears as a line such as `"PUT /api/profile HTTP/1.1" 201`. Photo uploads

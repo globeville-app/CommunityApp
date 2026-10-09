@@ -21,7 +21,16 @@ with the date and who did it.
 - [ ] **Reply promise.** Decide whether people who report a problem get a
       reply, and how fast.
 
-## Before Milestone 2 (events)
+## Events (Milestone 2)
 
-- [ ] Choose the translation provider for event text (Google Cloud
-      Translation or DeepL), before any event text is sent to a third party.
+- [ ] **Translation provider.** Choose Google Cloud Translation or DeepL
+      before any event text is sent to a third party, then set
+      `TRANSLATOR_CLASS` (see the README).
+- [ ] **Spanish category names.** The reviewer also checks `categories`,
+      `category_groups`, `category_groups_short` and `category_hints` in
+      `es.json`.
+- [ ] **Group colors.** DESIGN.md has four accent colors; lavender and peach
+      were added for the fifth and sixth groups. Confirm with design.
+- [ ] **Moderation.** Decide who reviews event reports in the admin.
+- [ ] **Attendance and names.** Decide whether "I'm going" is enough for
+      badges, and whether neighbors should ever see who's going.

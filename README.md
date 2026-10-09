@@ -171,10 +171,12 @@ Do this once with the backend running and the Denver file loaded:
 2. Under **Where's home?**, type a Denver address (e.g. a public building, not your home).
    A panel slides up with your neighborhood.
 3. If the address is in Highland, you're offered "Highland" or "LoHi". Pick one, then **Join**.
-4. Enter your first and last name, add a photo, pick some interests → **Finish**.
-5. The profile shows your photo, "First L.", the neighborhood, and your interests.
+4. Enter your first and last name, add a photo → **Finish**. Pick a few interests
+   on **What are you into?** (or **Skip for now**).
+5. You land on the **Events** tab. The **Profile** tab shows your photo, "First L.",
+   the neighborhood, and your interests.
 6. **Close the app completely** (swipe it away) and reopen it from Expo Go → you're still
-   logged in and land on your profile.
+   logged in and land on Events.
 7. Bonus: try an Aurora or Lakewood address. You should see the
    "only in the City and County of Denver" message.
 
@@ -191,6 +193,38 @@ step 2, and create an admin login with `createsuperuser`):
 5. Sign up a test account, then Settings → **Delete account** with its
    password. You land on the welcome screen with "Your account was deleted."
    Logging in with it now fails.
+
+Neighborhood calendar (Milestone 2). You need more than one account; see
+"Test accounts" just below.
+
+1. With account A, switch to **Español** (Profile → gear). On **Eventos**, tap
+   **Publicar un evento**, pick a category, paste a Partiful link, fill in the
+   details and **Publicar**.
+2. Log out. Sign up account B with an address in the **same** neighborhood,
+   leave it in English, and find the event. Tap **See in English** (it only
+   works once a translation provider is set up; until then the button hides
+   itself) and **I'm going**.
+3. Log out. Sign up account C with an address in a **different** neighborhood.
+   The event isn't there.
+4. Log back in as A. Open the event, **Edit** it, then **Cancel event**.
+
+### Test accounts
+
+Each account needs its own email, but it doesn't have to be real: nothing
+is emailed at sign-up. Use made-up ones like `ana.test1@example.com`,
+`ana.test2@example.com`. To switch accounts on one phone: Profile → gear →
+**Log out**, then **Sign up** (or **Log in**) as the other one.
+
+To put accounts in the same or different neighborhoods, use public places
+(two accounts can use the same address; it is never stored):
+
+| Address | Neighborhood |
+| --- | --- |
+| `2620 16th St, Denver, CO 80211` (Little Man Ice Cream) | Highland |
+| `1701 Wynkoop St, Denver, CO 80202` (Union Station) | Union Station |
+
+To see accounts, events and reports, open <http://localhost:8000/admin/> with
+the admin login from `createsuperuser`.
 
 ---
 
@@ -252,6 +286,13 @@ screen before joining, and on the profile. The choice is kept on the phone
 signup, before the profile exists, so that's where the server keeps it. The
 Spanish is a first draft: see `docs/RELEASE_CHECKLIST.md`.
 
+**Events (Milestone 2).** `backend/events/`. The category list is defined once
+in `events/categories.py` and sent to the app by `/api/config`; the words and
+search hints are in the app's language files. Interests are the same category
+keys. A Partiful link is only ever fetched from `https://partiful.com`, with a
+3-second timeout and a 500 KB cap, to read the page title. Machine translation
+goes through `events/translation.py`; no provider is switched on yet.
+
 **Look and feel.** The design rules are in `design/DESIGN.md`, and the logo
 rules in `design/BRAND.md`. The logo, app icons and splash image are the brand
 files in `mobile/assets/brand/`; the logo is drawn by
@@ -280,7 +321,7 @@ badges and the bottom tab bar from the design come in later milestones.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/api/config` | app name, interest keys, languages |
+| GET | `/api/config` | app name, languages, and the event category groups (also used for interests) |
 | POST | `/api/auth/signup` | email + password (+ `language`) → token and language |
 | POST | `/api/auth/login` | email + password → token and the account's language |
 | POST | `/api/auth/logout` | deletes the token |
@@ -288,7 +329,18 @@ badges and the bottom tab bar from the design come in later milestones.
 | PUT | `/api/profile` | first name, last name, alias, interest keys (+ `language`) |
 | POST | `/api/profile/photo` | photo upload (multipart, field `photo`) |
 | GET | `/api/profile/me` | your profile, or 404 `profile_not_found` |
-| PATCH | `/api/profile/me` | `{"language": "en" \| "es"}`; works before the profile exists |
+| PATCH | `/api/profile/me` | `{"language": ...}` and/or `{"interests": [category keys]}` (up to 8, no `other`) |
+| GET | `/api/events?group=&for_you=true` | upcoming events in your neighborhood, soonest first |
+| POST | `/api/events` | post an event in your neighborhood (10 a day) |
+| GET / PATCH | `/api/events/{id}` | event detail / edit (organizer only) |
+| POST | `/api/events/{id}/cancel` | cancel (organizer only); events are never deleted |
+| PUT / DELETE | `/api/events/{id}/going` | "I'm going" on / off; only the count is ever shown |
+| POST | `/api/events/{id}/report` | report an event (appears in admin) |
+| POST | `/api/events/partiful-preview` | `{url}` → `{title, suggested_category}` |
+| POST | `/api/events/{id}/translate` | `{target}` → title and description in that language |
+
+Events in another neighborhood answer 404, as if they didn't exist. Times go
+in and come out in Denver time and are stored in UTC.
 
 Every error is a code, never a sentence: `{"code": "outside_denver"}`, plus
 `"fields": {"email": ["email_taken"]}` for form errors. The app shows each code
@@ -340,3 +392,7 @@ its tests (`backend/accounts/tests/test_delete_account.py`). For Milestone 2:
 - Real privacy policy and terms pages (Settings shows "Coming soon" until
   `privacy_url` and `terms_url` are set in `shared/app_config.json`)
 - An email sending service for problem reports (for example Postmark or Amazon SES)
+- A translation provider for "Ver en español" / "See in English" (Google Cloud
+  Translation or DeepL). The code is ready: write a class like
+  `events.testing.FakeTranslator` that calls the provider, and set
+  `TRANSLATOR_CLASS` to its path. Until then the button hides itself.
