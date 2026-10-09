@@ -54,6 +54,10 @@ class SignupSerializer(serializers.Serializer):
         return user
 
 
+class DeleteAccountSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=254)
     password = serializers.CharField(write_only=True, trim_whitespace=False)

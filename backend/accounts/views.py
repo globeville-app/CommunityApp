@@ -6,6 +6,7 @@ here later without touching neighborhoods or profiles.
 """
 
 from django.contrib.auth import authenticate
+from django.db import transaction
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
@@ -15,7 +16,7 @@ from rest_framework.views import APIView
 from config.errors import ApiError
 
 from .models import language_of
-from .serializers import LoginSerializer, SignupSerializer, normalize_email
+from .serializers import DeleteAccountSerializer, LoginSerializer, SignupSerializer, normalize_email
 
 
 class SignupView(APIView):
@@ -56,4 +57,50 @@ class LogoutView(APIView):
         # Deleting the token means it can never be used again, even if it
         # was copied off the phone.
         request.auth.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DeleteAccountView(APIView):
+    """
+    POST /api/account/delete {"password": "..."}
+
+    Deletes the member's login, profile, photo file, tokens and everything
+    else tied to them. Their problem reports are kept so the team can still
+    fix the bug, but with the user removed and any contact email cleared.
+
+    RULE FOR EVERY FUTURE FEATURE (see README): content tied to a deleted
+    member is either removed or shown as "Former neighbor", never with their
+    name. When a feature adds data that points at a user, update this view.
+    """
+
+    throttle_scope = "auth"
+
+    def post(self, request):
+        serializer = DeleteAccountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        if not user.check_password(serializer.validated_data["password"]):
+            raise ApiError("wrong_password")
+
+        # Imported here to keep the accounts app free of a hard dependency
+        # on the apps that store member data.
+        from profiles.models import Profile
+        from support.models import ProblemReport
+
+        photo = None
+        profile = Profile.objects.filter(user=user).first()
+        if profile and profile.photo:
+            photo = (profile.photo.storage, profile.photo.name)
+
+        with transaction.atomic():
+            ProblemReport.objects.filter(user=user).update(user=None, contact_email="")
+            # Deleting the user also deletes, through the database: the
+            # profile (and its interests), the account settings, the
+            # neighborhood match and every login token.
+            user.delete()
+
+        # Remove the photo file only once the database change has stuck.
+        if photo:
+            storage, name = photo
+            storage.delete(name)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -11,6 +11,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/config", views.app_config, name="app-config"),
     path("api/auth/", include("accounts.urls")),
+    path("api/account/", include("accounts.account_urls")),
     path("api/join/", include("neighborhoods.urls")),
     path("api/profile", profile_views.ProfileView.as_view(), name="profile"),
     path("api/profile/me", profile_views.MyProfileView.as_view(), name="profile-me"),
