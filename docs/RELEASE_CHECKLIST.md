@@ -12,6 +12,15 @@ with the date and who did it.
 - [ ] **Tone check.** Neighbors confirm that informal "tú" is right.
       (docs/LANGUAGE.md, open items)
 
+- [ ] **Privacy policy and terms.** Required by the App Store and Play Store.
+      They should say home addresses are never stored. Put the links in
+      `privacy_url` and `terms_url` in `shared/app_config.json`.
+- [ ] **Problem report emails.** Set `PROBLEM_REPORT_EMAILS` on the server.
+- [ ] **Email service.** Choose one (for example Postmark or Amazon SES) and
+      set the `EMAIL_*` settings on the server (see the README).
+- [ ] **Reply promise.** Decide whether people who report a problem get a
+      reply, and how fast.
+
 ## Before Milestone 2 (events)
 
 - [ ] Choose the translation provider for event text (Google Cloud

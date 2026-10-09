@@ -10,13 +10,14 @@
 // Only the one icon set; the package root would pull in every icon font.
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import { ComponentProps, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -149,17 +150,20 @@ export function Caption({ children, onGlass }: { children: ReactNode; onGlass?: 
 // ---- Inputs and buttons -------------------------------------------------------
 
 export function Field({ label, icon, ...props }: TextInputProps & { label: string; icon?: IconName }) {
+  // Multi-line boxes (the problem report) are taller, with gentler corners.
+  const box = props.multiline ? styles.inputMultiline : null;
   return (
     <View style={styles.field}>
       <Text style={[type.label, { color: colors.textSoft }]}>{label}</Text>
-      <View style={styles.input}>
-        <Frost intensity={20} style={{ borderRadius: (BUTTON_HEIGHT - 2) / 2 }} />
+      <View style={[styles.input, box]}>
+        <Frost intensity={20} style={{ borderRadius: props.multiline ? radius.card : (BUTTON_HEIGHT - 2) / 2 }} />
         {icon ? <Ionicons name={icon} size={20} color={colors.textSoft} style={styles.inputIcon} /> : null}
         <TextInput
           accessibilityLabel={label}
           placeholderTextColor="rgba(237,231,255,0.7)"
           selectionColor={colors.glowYellow}
-          style={styles.inputText}
+          style={[styles.inputText, props.multiline && styles.inputTextMultiline]}
+          textAlignVertical={props.multiline ? "top" : undefined}
           {...props}
         />
       </View>
@@ -172,11 +176,13 @@ type ButtonProps = {
   onPress: () => void;
   disabled?: boolean;
   busy?: boolean;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "danger";
 };
 
 export function Button({ title, onPress, disabled, busy, variant = "primary" }: ButtonProps) {
   const isPrimary = variant === "primary";
+  const isDanger = variant === "danger";
+  const textColor = isPrimary ? colors.base : isDanger ? colors.danger : colors.textPrimary;
   const inactive = disabled || busy;
   return (
     <Pressable
@@ -187,15 +193,15 @@ export function Button({ title, onPress, disabled, busy, variant = "primary" }: 
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        isPrimary ? styles.primary : styles.secondary,
+        isPrimary ? styles.primary : isDanger ? styles.danger : styles.secondary,
         inactive && styles.inactive,
         pressed && styles.pressed,
       ]}
     >
       {busy ? (
-        <ActivityIndicator color={isPrimary ? colors.base : colors.textPrimary} />
+        <ActivityIndicator color={textColor} />
       ) : (
-        <Text style={[type.button, styles.buttonText, { color: isPrimary ? colors.base : colors.textPrimary }]}>
+        <Text style={[type.button, styles.buttonText, { color: textColor }]}>
           {title}
         </Text>
       )}
@@ -281,6 +287,113 @@ export function Avatar({ uri, initial, size = 112 }: { uri?: string | null; init
   );
 }
 
+/**
+ * One row of a settings list: at least 52pt tall, the label on the left, and
+ * either a chevron (opens another screen) or a control on the right. Long
+ * Spanish labels wrap instead of being cut off.
+ */
+export function ListRow({
+  label,
+  onPress,
+  chevron,
+  danger,
+  children,
+}: {
+  label: string;
+  onPress?: () => void;
+  chevron?: boolean;
+  danger?: boolean;
+  children?: ReactNode;
+}) {
+  const content = (
+    <>
+      <Text style={[type.body, styles.rowLabel, { color: danger ? colors.danger : colors.textPrimary }]}>{label}</Text>
+      {children}
+      {chevron ? (
+        <Ionicons name="chevron-forward" size={20} color={danger ? colors.danger : colors.textSecondary} />
+      ) : null}
+    </>
+  );
+  if (!onPress) return <View style={styles.listRow}>{content}</View>;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [styles.listRow, pressed && styles.pressed]}
+    >
+      {content}
+    </Pressable>
+  );
+}
+
+/** A thin line between rows of a list. */
+export function Divider() {
+  return <View style={styles.divider} />;
+}
+
+/** A small text link, e.g. "Having trouble?". */
+export function TextLink({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={onPress} style={styles.textLink}>
+      <Text style={[type.caption, styles.textLinkText]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+/**
+ * "Having trouble?" at the bottom of the join screens, for people who can't
+ * reach Settings yet. `from` is the screen's route name, sent with the report.
+ */
+export function TroubleLink({ from }: { from: string }) {
+  const { t } = useTranslation();
+  const href: Href = { pathname: "/report", params: { from } };
+  return <TextLink label={t("join.having_trouble")} onPress={() => router.push(href)} />;
+}
+
+/** A calm message in dark glass, e.g. "Your account was deleted." */
+export function Notice({ message }: { message: string }) {
+  return (
+    <View style={styles.notice} accessibilityRole="alert">
+      <Frost dark intensity={30} style={{ borderRadius: radius.card }} />
+      <Ionicons name="checkmark-circle" size={20} color={colors.glowTurquoise} />
+      <Text style={[type.body, styles.errorText]}>{message}</Text>
+    </View>
+  );
+}
+
+/** A yes/no question over the screen, e.g. "Log out?" with Cancel / Log out. */
+export function ConfirmDialog({
+  visible,
+  title,
+  confirmLabel,
+  cancelLabel,
+  onConfirm,
+  onCancel,
+}: {
+  visible: boolean;
+  title: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <View style={styles.dialogBackdrop}>
+        <View style={styles.dialog} accessibilityViewIsModal>
+          <Frost dark intensity={40} style={{ borderRadius: radius.card }} />
+          <Text style={[type.section, styles.white]} accessibilityRole="header">
+            {title}
+          </Text>
+          <Button title={confirmLabel} onPress={onConfirm} />
+          <Button title={cancelLabel} variant="secondary" onPress={onCancel} />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export function Loading() {
   return (
     <View style={styles.loading}>
@@ -341,6 +454,33 @@ export const styles = StyleSheet.create({
     elevation: 6,
   },
   secondary: { backgroundColor: "transparent", borderWidth: 1, borderColor: colors.secondaryBorder },
+  danger: { backgroundColor: "transparent", borderWidth: 1.5, borderColor: colors.danger },
+  inputMultiline: { height: undefined, minHeight: 140, borderRadius: radius.card, alignItems: "flex-start", paddingVertical: 14 },
+  inputTextMultiline: { height: undefined, minHeight: 112 },
+  listRow: { minHeight: 52, flexDirection: "row", alignItems: "center", gap: space.s, paddingVertical: 10 },
+  rowLabel: { flex: 1, flexShrink: 1 },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.glassDarkBorder },
+  textLink: { alignSelf: "center", minHeight: MIN_TOUCH, justifyContent: "center", paddingHorizontal: space.s },
+  textLinkText: { color: colors.textSoft, textDecorationLine: "underline" },
+  notice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: space.m,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.glowTurquoise,
+    overflow: "hidden",
+  },
+  dialogBackdrop: { flex: 1, justifyContent: "center", padding: SCREEN_PADDING, backgroundColor: "rgba(10,5,30,0.6)" },
+  dialog: {
+    gap: space.m,
+    padding: space.l,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.glassDarkBorder,
+    overflow: "hidden",
+  },
   inactive: { opacity: 0.45 },
   pressed: { opacity: 0.75 },
   pill: {

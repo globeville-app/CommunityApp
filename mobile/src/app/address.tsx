@@ -19,7 +19,21 @@ import { ApiError, MatchResult, matchAddress } from "../api";
 import { useAuth } from "../auth";
 import { DemoAddressHints } from "../components/DemoAddressHints";
 import { errorMessage } from "../i18n/errors";
-import { Button, Caption, Choice, ErrorMessage, Field, Hero, Intro, JoinHeader, Screen, Sheet, Title, styles } from "../ui";
+import {
+  Button,
+  Caption,
+  Choice,
+  ErrorMessage,
+  Field,
+  Hero,
+  Intro,
+  JoinHeader,
+  Screen,
+  Sheet,
+  Title,
+  TroubleLink,
+  styles,
+} from "../ui";
 
 // Errors where trying the same address again might work.
 const RETRYABLE = new Set(["network", "timeout", "geocoder_unavailable", "server_error", "throttled"]);
@@ -111,6 +125,8 @@ export default function Address() {
           ) : (
             <Button title={t("join.find_button")} onPress={onSubmit} busy={busy} disabled={!address.trim()} />
           )}
+          {/* Passes only this screen's name, never the address typed above. */}
+          <TroubleLink from="join/address" />
         </>
       )}
     </Screen>

@@ -11,7 +11,8 @@
   "welcome": {
     "tagline": "Meet your neighbors in Denver.",
     "sign_up": "Sign up",
-    "log_in": "Log in"
+    "log_in": "Log in",
+    "account_deleted": "Your account was deleted."
   },
   "auth": {
     "email_label": "Email",
@@ -36,7 +37,8 @@
     "which_name": "Which name do you use?",
     "join_button": "Join {{name}}",
     "edit_address": "Edit address",
-    "address_forgotten": "Your address was used once to find your neighborhood and wasn't saved."
+    "address_forgotten": "Your address was used once to find your neighborhood and wasn't saved.",
+    "having_trouble": "Having trouble?"
   },
   "setup": {
     "title": "Set up your profile",
@@ -51,13 +53,16 @@
     "finish_button": "Finish",
     "retry_photo_button": "Try the photo again",
     "skip_photo_button": "Continue without photo",
-    "photo_failed": "Your profile is saved, but the photo didn't upload. {{reason}}"
+    "photo_failed": "Your profile is saved, but the photo didn't upload. {{reason}}",
+    "edit_title": "Edit profile",
+    "save_button": "Save changes",
+    "your_neighborhood": "Your neighborhood: {{name}}"
   },
   "profile": {
     "photo_label": "Profile photo",
     "joined": "Joined {{date}}",
     "interests_title": "Interests",
-    "log_out_button": "Log out"
+    "settings_label": "Settings"
   },
   "interests": {
     "block_parties": "Block parties",
@@ -96,7 +101,12 @@
     "profile_not_found": "You haven't finished joining yet.",
     "photo_too_large": "Photos must be 5 MB or smaller.",
     "photo_wrong_type": "Photos must be JPEG or PNG.",
-    "photo_missing": "Choose a photo to upload."
+    "photo_missing": "Choose a photo to upload.",
+    "message_required": "Tell us what happened.",
+    "message_too_long": "Please keep it under 1,000 characters.",
+    "bad_image": "Screenshots must be a JPEG or PNG of 5 MB or less.",
+    "daily_limit": "You've sent a lot of reports today. Please try again tomorrow.",
+    "wrong_password": "That password isn't right."
   },
   "demo": {
     "banner_label": "Demo",
@@ -108,5 +118,42 @@
     "use_sample": "Use sample: {{name}}",
     "sample_misspelled": "A misspelled address",
     "sample_outage": "Lookup service down"
+  },
+  "settings": {
+    "title": "Settings",
+    "edit_profile": "Edit profile",
+    "report_problem": "Report a problem",
+    "privacy_policy": "Privacy policy",
+    "terms_of_use": "Terms of use",
+    "log_out": "Log out",
+    "delete_account": "Delete account",
+    "version": "Version {{version}} ({{build}})",
+    "log_out_confirm_title": "Log out?",
+    "cancel": "Cancel",
+    "opens_in_browser": "Opens in the in-app browser"
+  },
+  "coming_soon": {
+    "title": "Coming soon",
+    "body": "We're still writing this page. Check back before the app launches."
+  },
+  "report": {
+    "title": "Report a problem",
+    "message_label": "What happened?",
+    "message_placeholder": "Tell us what you were doing and what went wrong.",
+    "characters_left": "{{count}} characters left",
+    "add_screenshot": "Add a screenshot",
+    "change_screenshot": "Change screenshot",
+    "remove_screenshot": "Remove screenshot",
+    "screenshot_added": "Screenshot added",
+    "email_label": "Email for a reply (optional)",
+    "send_button": "Send",
+    "sent": "Thanks! We got it.",
+    "what_we_send": "We also send your app version, phone model, language and this screen's name, so we can find the problem. Never your address or location."
+  },
+  "delete": {
+    "title": "Delete account",
+    "warning": "This permanently deletes your profile, photo and login. It can't be undone.",
+    "password_label": "Your password",
+    "delete_button": "Delete my account"
   }
 }

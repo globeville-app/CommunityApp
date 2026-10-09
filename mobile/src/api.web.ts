@@ -10,11 +10,13 @@ import { INTERESTS } from "./demo/fakeBackend";
 
 export * from "./apiTypes";
 export {
+  deleteAccount,
   getMyProfile,
   login,
   logout,
   matchAddress,
   saveProfile,
+  sendProblemReport,
   signup,
   updateLanguage,
   uploadPhoto,

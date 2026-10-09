@@ -12,6 +12,7 @@ export default function Signup() {
       title={t("auth.signup_title")}
       buttonTitle={t("auth.signup_button")}
       hint={t("auth.password_hint")}
+      screen="join/signup"
       // The language picked before signing up is saved on the new account.
       submit={(email, password) => signup(email, password, language)}
     />

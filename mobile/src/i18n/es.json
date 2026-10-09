@@ -11,7 +11,8 @@
   "welcome": {
     "tagline": "Conoce a tus vecinos en Denver.",
     "sign_up": "Crear cuenta",
-    "log_in": "Iniciar sesión"
+    "log_in": "Iniciar sesión",
+    "account_deleted": "Tu cuenta se eliminó."
   },
   "auth": {
     "email_label": "Correo electrónico",
@@ -36,7 +37,8 @@
     "which_name": "¿Qué nombre usas?",
     "join_button": "Unirme a {{name}}",
     "edit_address": "Cambiar dirección",
-    "address_forgotten": "Usamos tu dirección una sola vez para encontrar tu vecindario y no la guardamos."
+    "address_forgotten": "Usamos tu dirección una sola vez para encontrar tu vecindario y no la guardamos.",
+    "having_trouble": "¿Problemas?"
   },
   "setup": {
     "title": "Crea tu perfil",
@@ -51,13 +53,16 @@
     "finish_button": "Terminar",
     "retry_photo_button": "Intentar la foto otra vez",
     "skip_photo_button": "Seguir sin foto",
-    "photo_failed": "Tu perfil se guardó, pero la foto no se subió. {{reason}}"
+    "photo_failed": "Tu perfil se guardó, pero la foto no se subió. {{reason}}",
+    "edit_title": "Editar perfil",
+    "save_button": "Guardar cambios",
+    "your_neighborhood": "Tu vecindario: {{name}}"
   },
   "profile": {
     "photo_label": "Foto de perfil",
     "joined": "Te uniste el {{date}}",
     "interests_title": "Intereses",
-    "log_out_button": "Cerrar sesión"
+    "settings_label": "Configuración"
   },
   "interests": {
     "block_parties": "Fiestas de cuadra",
@@ -96,7 +101,12 @@
     "profile_not_found": "Todavía no terminas de unirte.",
     "photo_too_large": "Las fotos deben pesar 5 MB o menos.",
     "photo_wrong_type": "Las fotos deben ser JPEG o PNG.",
-    "photo_missing": "Elige una foto para subir."
+    "photo_missing": "Elige una foto para subir.",
+    "message_required": "Cuéntanos qué pasó.",
+    "message_too_long": "Por favor, usa menos de 1,000 caracteres.",
+    "bad_image": "Las capturas deben ser JPEG o PNG de 5 MB o menos.",
+    "daily_limit": "Hoy enviaste muchos reportes. Inténtalo otra vez mañana.",
+    "wrong_password": "Esa contraseña no es correcta."
   },
   "demo": {
     "banner_label": "Demo",
@@ -108,5 +118,42 @@
     "use_sample": "Usar ejemplo: {{name}}",
     "sample_misspelled": "Una dirección mal escrita",
     "sample_outage": "Servicio de búsqueda caído"
+  },
+  "settings": {
+    "title": "Configuración",
+    "edit_profile": "Editar perfil",
+    "report_problem": "Reportar un problema",
+    "privacy_policy": "Política de privacidad",
+    "terms_of_use": "Términos de uso",
+    "log_out": "Cerrar sesión",
+    "delete_account": "Eliminar cuenta",
+    "version": "Versión {{version}} ({{build}})",
+    "log_out_confirm_title": "¿Cerrar sesión?",
+    "cancel": "Cancelar",
+    "opens_in_browser": "Se abre en el navegador de la app"
+  },
+  "coming_soon": {
+    "title": "Muy pronto",
+    "body": "Todavía estamos escribiendo esta página. Vuelve antes del lanzamiento de la app."
+  },
+  "report": {
+    "title": "Reportar un problema",
+    "message_label": "¿Qué pasó?",
+    "message_placeholder": "Cuéntanos qué estabas haciendo y qué salió mal.",
+    "characters_left": "Quedan {{count}} caracteres",
+    "add_screenshot": "Agregar una captura de pantalla",
+    "change_screenshot": "Cambiar la captura",
+    "remove_screenshot": "Quitar la captura",
+    "screenshot_added": "Captura agregada",
+    "email_label": "Correo para responderte (opcional)",
+    "send_button": "Enviar",
+    "sent": "¡Gracias! Lo recibimos.",
+    "what_we_send": "También enviamos la versión de la app, el modelo de tu teléfono, tu idioma y el nombre de esta pantalla, para encontrar el problema. Nunca tu dirección ni tu ubicación."
+  },
+  "delete": {
+    "title": "Eliminar cuenta",
+    "warning": "Esto elimina para siempre tu perfil, tu foto y tu acceso. No se puede deshacer.",
+    "password_label": "Tu contraseña",
+    "delete_button": "Eliminar mi cuenta"
   }
 }

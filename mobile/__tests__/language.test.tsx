@@ -155,8 +155,11 @@ describe("the choice is kept", () => {
     mocked.getMyProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, language: "es" });
     renderApp();
     await screen.findByText("Ana R.");
+    fireEvent.press(screen.getByRole("button", { name: "Settings" }));
+    await screen.findByText("Settings");
     await toSpanish();
-    await pressAndSettle(screen.getByRole("button", { name: "Cerrar sesión" }));
+    fireEvent.press(screen.getByRole("button", { name: "Cerrar sesión" }));
+    await pressAndSettle((await screen.findAllByRole("button", { name: "Cerrar sesión" })).at(-1)!);
     // Logged out, still Spanish.
     expect(await screen.findByRole("button", { name: "Crear cuenta" })).toBeTruthy();
 
@@ -165,7 +168,7 @@ describe("the choice is kept", () => {
     fireEvent.changeText(await screen.findByLabelText("Correo electrónico"), "ana@example.com");
     fireEvent.changeText(screen.getByLabelText("Contraseña"), "a long pass phrase");
     await pressAndSettle(screen.getAllByRole("button", { name: "Iniciar sesión" }).at(-1)!);
-    expect(await screen.findByText("Cerrar sesión")).toBeTruthy();
+    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
   });
 
   it("wins over the account's language at login, and is written to the account", async () => {
@@ -177,7 +180,7 @@ describe("the choice is kept", () => {
     fireEvent.changeText(screen.getByLabelText("Correo electrónico"), "ana@example.com");
     fireEvent.changeText(screen.getByLabelText("Contraseña"), "a long pass phrase");
     await pressAndSettle(screen.getByRole("button", { name: "Iniciar sesión" }));
-    expect(await screen.findByText("Cerrar sesión")).toBeTruthy();
+    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
     expect(mocked.updateLanguage).toHaveBeenCalledWith("tok-2", "es");
   });
 
@@ -188,7 +191,7 @@ describe("the choice is kept", () => {
     fireEvent.changeText(await screen.findByLabelText("Email"), "ana@example.com");
     fireEvent.changeText(screen.getByLabelText("Password"), "a long pass phrase");
     await pressAndSettle(screen.getByRole("button", { name: "Log in" }));
-    expect(await screen.findByText("Cerrar sesión")).toBeTruthy();
+    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
     expect(mocked.updateLanguage).not.toHaveBeenCalled();
     expect(await languageStore()).toMatchObject({ "app.language": "es", "app.language_source": "account" });
   });
@@ -216,13 +219,13 @@ describe("first launch", () => {
 });
 
 describe("saving to the server", () => {
-  it("sends a change made on the profile screen", async () => {
+  it("sends a change made in Settings", async () => {
     loggedIn();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
-    renderApp();
+    renderApp("/settings");
     expect(await screen.findByText("Language / Idioma")).toBeTruthy();
     await toSpanish();
-    expect(screen.getByText("Fiestas de cuadra")).toBeTruthy();
+    expect(screen.getByText("Configuración")).toBeTruthy();
     expect(mocked.updateLanguage).toHaveBeenCalledWith("tok-123", "es");
   });
 
@@ -230,15 +233,15 @@ describe("saving to the server", () => {
     loggedIn();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
     mocked.updateLanguage.mockRejectedValueOnce(new ApiError("network"));
-    const first = renderApp();
-    await screen.findByText("Ana R.");
+    const first = renderApp("/settings");
+    await screen.findByText("Settings");
     await toSpanish();
-    expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeTruthy(); // not undone
+    expect(screen.getByText("Configuración")).toBeTruthy(); // not undone
     await waitFor(async () => expect(await languageStore()).toMatchObject({ "app.language_unsynced": "1" }));
 
     first.unmount();
     renderApp();
-    expect(await screen.findByRole("button", { name: "Cerrar sesión" })).toBeTruthy();
+    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
     await waitFor(() => expect(mocked.updateLanguage).toHaveBeenCalledTimes(2));
     expect(mocked.updateLanguage).toHaveBeenLastCalledWith("tok-123", "es");
     await waitFor(async () => expect((await languageStore())["app.language_unsynced"]).toBeUndefined());

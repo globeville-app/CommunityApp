@@ -320,13 +320,21 @@ describe("address → match → profile setup → profile", () => {
   });
 });
 
-describe("profile screen", () => {
+describe("logging out (Settings)", () => {
+  async function logOutFromSettings() {
+    renderApp();
+    fireEvent.press(await screen.findByRole("button", { name: "Settings" }));
+    fireEvent.press(await screen.findByRole("button", { name: "Log out" }));
+    // "Log out?" with Cancel / Log out
+    expect(await screen.findByRole("header", { name: "Log out?" })).toBeTruthy();
+    await pressAndSettle(screen.getAllByRole("button", { name: "Log out" }).at(-1)!);
+  }
+
   it("logs out: tells the server, forgets the token, shows Welcome", async () => {
     loggedIn();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
     mocked.logout.mockResolvedValue(undefined);
-    renderApp();
-    await pressAndSettle(await screen.findByRole("button", { name: "Log out" }));
+    await logOutFromSettings();
     expect(await screen.findByRole("button", { name: "Sign up" })).toBeTruthy();
     expect(mocked.logout).toHaveBeenCalledWith("tok-123");
     expect(fakeStore.has("auth_token")).toBe(false);
@@ -336,8 +344,7 @@ describe("profile screen", () => {
     loggedIn();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
     mocked.logout.mockRejectedValue(new ApiError("network"));
-    renderApp();
-    await pressAndSettle(await screen.findByRole("button", { name: "Log out" }));
+    await logOutFromSettings();
     expect(await screen.findByRole("button", { name: "Sign up" })).toBeTruthy();
     expect(fakeStore.has("auth_token")).toBe(false);
   });

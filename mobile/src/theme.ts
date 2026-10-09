@@ -19,6 +19,9 @@ export const colors = {
   glassDarkSolid: "rgba(22,12,52,0.85)", // fallback where blur isn't available
   glassDarkBorder: "rgba(255,255,255,0.15)",
   secondaryBorder: "rgba(255,255,255,0.5)",
+  // Only for destructive actions (Delete account). Checked for contrast on
+  // the dark glass and the base purple.
+  danger: "#FF6B7A",
 };
 
 /** The dark purple gradient under the glow (design/BRAND.md), about 110°. */

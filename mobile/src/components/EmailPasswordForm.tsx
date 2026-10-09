@@ -7,16 +7,18 @@ import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
 import { useLanguage } from "../language";
 import { resetTo } from "../navigation";
-import { Button, Caption, ErrorMessage, Field, JoinHeader, Screen, Title } from "../ui";
+import { Button, Caption, ErrorMessage, Field, JoinHeader, Screen, Title, TroubleLink } from "../ui";
 
 type Props = {
   title: string;
   buttonTitle: string;
   hint?: string;
+  /** This screen's route name, sent with a problem report, e.g. "join/login". */
+  screen: string;
   submit: (email: string, password: string) => Promise<AuthResult>;
 };
 
-export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
+export function EmailPasswordForm({ title, buttonTitle, hint, screen, submit }: Props) {
   const { t } = useTranslation();
   const { signIn } = useAuth();
   const { syncAfterLogin } = useLanguage();
@@ -69,6 +71,7 @@ export function EmailPasswordForm({ title, buttonTitle, hint, submit }: Props) {
       {hint ? <Caption>{hint}</Caption> : null}
       <ErrorMessage message={errorMessage(t, error)} />
       <Button title={buttonTitle} onPress={onSubmit} busy={busy} disabled={!email || !password} />
+      <TroubleLink from={screen} />
     </Screen>
   );
 }

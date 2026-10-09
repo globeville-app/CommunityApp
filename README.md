@@ -82,8 +82,25 @@ terminal open while you use the app. If your computer asks whether to allow
 incoming connections for Python, say **Allow**.
 
 Optional: `python manage.py createsuperuser` creates an admin login for
-<http://localhost:8000/admin/>, where you can see users, profiles and
-neighborhoods.
+<http://localhost:8000/admin/>, where you can see users, profiles,
+neighborhoods and **problem reports** (with their screenshots).
+
+**Problem report emails.** Each report sends a short email to the addresses
+in the `PROBLEM_REPORT_EMAILS` environment variable (comma-separated). While
+developing, emails are printed in this terminal instead of being sent. To
+try it, start the server like this:
+
+```bash
+PROBLEM_REPORT_EMAILS="you@example.com" python manage.py runserver 0.0.0.0:8000      # Mac / Linux
+```
+
+```powershell
+$env:PROBLEM_REPORT_EMAILS="you@example.com"; python manage.py runserver 0.0.0.0:8000 # Windows
+```
+
+For real sending, set `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend`
+plus `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` and
+`DEFAULT_FROM_EMAIL` from your email service. Never put an address in the code.
 
 ---
 
@@ -160,6 +177,20 @@ Do this once with the backend running and the Denver file loaded:
    logged in and land on your profile.
 7. Bonus: try an Aurora or Lakewood address. You should see the
    "only in the City and County of Denver" message.
+
+Settings & Support (start the server with `PROBLEM_REPORT_EMAILS` set, as in
+step 2, and create an admin login with `createsuperuser`):
+
+1. Profile → gear → **Report a problem**. Type a message, add a screenshot,
+   **Send**. The email appears in the server terminal.
+2. Open <http://localhost:8000/admin/support/problemreport/>, open the report,
+   view the screenshot, set the status to **Resolved** and save.
+3. Log out, then tap **Having trouble?** on the welcome screen and send a
+   report while logged out.
+4. Log out and back in.
+5. Sign up a test account, then Settings → **Delete account** with its
+   password. You land on the welcome screen with "Your account was deleted."
+   Logging in with it now fails.
 
 ---
 
@@ -280,6 +311,24 @@ in the person's language (`mobile/src/i18n/*.json`, under `errors`).
 
 ---
 
+## Deleting members: the rule every feature follows
+
+When a member deletes their account (`POST /api/account/delete`, in
+`backend/accounts/views.py`), everything tied to them goes: login, profile,
+photo file, tokens, interests and their neighborhood match. Their problem
+reports stay, with the person removed, so the team can still fix bugs.
+
+**Rule for every future feature: content tied to a deleted member is either
+removed or shown as "Former neighbor / Exvecino," never with their name.**
+When a feature adds data that points at a member, update the delete view and
+its tests (`backend/accounts/tests/test_delete_account.py`). For Milestone 2:
+
+- upcoming events they organized are cancelled
+- past events they organized show "Former neighbor"
+- their "I'm going" records are removed
+
+---
+
 ## Not in this milestone (and still needed before real users)
 
 - Email verification and password reset
@@ -288,3 +337,6 @@ in the person's language (`mobile/src/i18n/*.json`, under `errors`).
   and a production database
 - App Store / Play Store builds and accounts
 - Address autocomplete (not allowed by the free geocoders)
+- Real privacy policy and terms pages (Settings shows "Coming soon" until
+  `privacy_url` and `terms_url` are set in `shared/app_config.json`)
+- An email sending service for problem reports (for example Postmark or Amazon SES)

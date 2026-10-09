@@ -7,7 +7,7 @@
  * PRIVACY: nothing here logs requests or stores responses. The address is
  * sent to /api/join/match and then forgotten.
  */
-import { ApiError, AppConfig, AuthResult, MatchResult, Profile, ProfileInput } from "./apiTypes";
+import { ApiError, AppConfig, AuthResult, MatchResult, ProblemReportInput, Profile, ProfileInput } from "./apiTypes";
 import { API_BASE_URL, REQUEST_TIMEOUT_MS, UPLOAD_TIMEOUT_MS } from "./config";
 import type { Language } from "./i18n";
 
@@ -98,6 +98,25 @@ export function matchAddress(token: string, address: string) {
 
 export function saveProfile(token: string, profile: ProfileInput) {
   return request<Profile>("/api/profile", { method: "PUT", token, json: profile });
+}
+
+/** Works signed in or not (token may be null). Returns a reference number. */
+export function sendProblemReport(token: string | null, report: ProblemReportInput) {
+  const form = new FormData();
+  const { screenshot, ...fields } = report;
+  for (const [key, value] of Object.entries(fields)) {
+    if (value) form.append(key, String(value));
+  }
+  if (screenshot) {
+    const extension = screenshot.mimeType === "image/png" ? "png" : "jpg";
+    form.append("screenshot", { uri: screenshot.uri, name: `screenshot.${extension}`, type: screenshot.mimeType } as any);
+  }
+  return request<{ id: number }>("/api/support/report", { method: "POST", token, form, timeoutMs: UPLOAD_TIMEOUT_MS });
+}
+
+/** Permanently deletes the account. The password confirms it's really them. */
+export function deleteAccount(token: string, password: string) {
+  return request<void>("/api/account/delete", { method: "POST", token, json: { password } });
 }
 
 export function uploadPhoto(token: string, photo: { uri: string; mimeType: string }) {

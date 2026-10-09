@@ -67,3 +67,9 @@ jest.mock("expo-localization", () => {
     getLocales: () => [{ languageTag: tag, languageCode: tag.split("-")[0] }],
   };
 });
+
+// The in-app browser for the privacy policy and terms.
+jest.mock("expo-web-browser", () => ({ openBrowserAsync: jest.fn(async () => ({ type: "dismiss" })) }));
+
+// The phone model and system, attached to problem reports.
+jest.mock("expo-device", () => ({ modelName: "iPhone 16", osName: "iOS", osVersion: "19.1" }));

@@ -164,6 +164,22 @@ If the firewall asks about **Node.js**, again choose **Private networks** only.
    The whole app switches at once, and anything you've typed stays. Close
    and reopen Expo Go, log out and back in: it stays in Spanish. If your
    iPhone itself is set to Spanish, a brand-new install starts in Spanish.
+9. **Settings:** on your profile, tap the **gear** (top right). Try
+   **Edit profile**, the language switch, **Privacy policy** (shows "Coming
+   soon" for now) and **Log out** (it asks first).
+10. **Report a problem:** in Settings, write a message, add a screenshot and
+    tap **Send**. To see the team email, stop the server (Ctrl+C) and start
+    it with your address, one line:
+    `$env:PROBLEM_REPORT_EMAILS="you@example.com"; python manage.py runserver 0.0.0.0:8000`
+    The email is printed in the server window (it isn't really sent while
+    testing). Then, in the server window's folder, run
+    `python manage.py createsuperuser` once (in a second PowerShell window,
+    after `.venv\Scripts\Activate.ps1`), open
+    `http://localhost:8000/admin/` on the computer, and find the report
+    under **Problem reports**, with its screenshot.
+11. **Delete account:** sign up a second, test account, then Settings →
+    **Delete account**, enter its password. You'll see "Your account was
+    deleted." and can't log in with it any more.
 
 Watching the **server window** while you test is useful: each action
 appears as a line such as `"PUT /api/profile HTTP/1.1" 201`. Photo uploads

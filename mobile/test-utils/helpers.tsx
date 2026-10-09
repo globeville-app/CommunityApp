@@ -5,11 +5,15 @@ import * as SecureStore from "expo-secure-store";
 import { renderRouter } from "expo-router/testing-library";
 
 import Address from "../src/app/address";
+import ComingSoon from "../src/app/coming-soon";
+import DeleteAccount from "../src/app/delete-account";
 import Start from "../src/app/index";
 import RootLayout from "../src/app/_layout";
 import Login from "../src/app/login";
 import Profile from "../src/app/profile";
 import ProfileSetup from "../src/app/profile-setup";
+import Report from "../src/app/report";
+import Settings from "../src/app/settings";
 import Signup from "../src/app/signup";
 import Welcome from "../src/app/welcome";
 import { ApiError, Profile as ProfileData } from "../src/api";
@@ -29,6 +33,10 @@ export function renderApp(initialUrl = "/") {
       address: Address,
       "profile-setup": ProfileSetup,
       profile: Profile,
+      settings: Settings,
+      report: Report,
+      "coming-soon": ComingSoon,
+      "delete-account": DeleteAccount,
     },
     { initialUrl },
   );

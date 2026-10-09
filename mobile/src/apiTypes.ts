@@ -45,6 +45,21 @@ export type Profile = {
   joined_at: string;
 };
 
+/**
+ * A "Report a problem" form. Only what the person typed, plus technical
+ * details the app adds (see src/report.ts). Never an address or location.
+ */
+export type ProblemReportInput = {
+  message: string;
+  contact_email?: string;
+  screenshot?: { uri: string; mimeType: string } | null;
+  app_version: string;
+  os: string;
+  device_model: string;
+  language: Language;
+  screen: string;
+};
+
 export type ProfileInput = {
   first_name: string;
   last_name: string;

@@ -5,5 +5,12 @@ import { EmailPasswordForm } from "../components/EmailPasswordForm";
 
 export default function Login() {
   const { t } = useTranslation();
-  return <EmailPasswordForm title={t("auth.login_title")} buttonTitle={t("auth.login_button")} submit={login} />;
+  return (
+    <EmailPasswordForm
+      title={t("auth.login_title")}
+      buttonTitle={t("auth.login_button")}
+      screen="join/login"
+      submit={login}
+    />
+  );
 }

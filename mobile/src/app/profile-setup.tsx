@@ -6,13 +6,29 @@ import { useTranslation } from "react-i18next";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { ApiError, getConfig, saveProfile, uploadPhoto } from "../api";
+import { ApiError, getConfig, getMyProfile, saveProfile, uploadPhoto } from "../api";
+import { neighborhoodLabel } from "../format";
 import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
 import { useLanguage } from "../language";
 import { resetTo } from "../navigation";
 import { colors, type } from "../theme";
-import { Avatar, Button, Choice, ErrorMessage, Field, GlassCard, JoinHeader, Screen, Section, Title, styles } from "../ui";
+import {
+  Avatar,
+  BackButton,
+  Button,
+  Choice,
+  ErrorMessage,
+  Field,
+  GlassCard,
+  JoinHeader,
+  Loading,
+  Screen,
+  Section,
+  Title,
+  TroubleLink,
+  styles,
+} from "../ui";
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
@@ -22,7 +38,14 @@ export default function ProfileSetup() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { token } = useAuth();
-  const { alias = "", neighborhood = "" } = useLocalSearchParams<{ alias?: string; neighborhood?: string }>();
+  const params = useLocalSearchParams<{ alias?: string; neighborhood?: string; edit?: string }>();
+  // Edit mode (from Settings): the same form, filled in from the saved
+  // profile. The neighborhood is shown but can't be changed here.
+  const editing = params.edit === "1";
+  const [alias, setAlias] = useState(params.alias ?? "");
+  const [neighborhood, setNeighborhood] = useState(params.neighborhood ?? "");
+  const [savedPhotoUrl, setSavedPhotoUrl] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(!editing);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
@@ -33,6 +56,22 @@ export default function ProfileSetup() {
   const [error, setError] = useState<ApiError | null>(null);
   // True once the profile is saved but the photo upload failed.
   const [photoFailed, setPhotoFailed] = useState(false);
+
+  useEffect(() => {
+    if (!editing || !token) return;
+    getMyProfile(token)
+      .then((profile) => {
+        setFirstName(profile.first_name);
+        // Only the initial of the last name is ever stored.
+        setLastName(profile.last_initial);
+        setInterests(profile.interests);
+        setAlias(profile.alias ?? "");
+        setNeighborhood(neighborhoodLabel(profile));
+        setSavedPhotoUrl(profile.photo_url);
+      })
+      .catch((e) => setError(e as ApiError))
+      .finally(() => setLoaded(true));
+  }, [editing, token]);
 
   useEffect(() => {
     // Interests are optional, so if this fails we just show none.
@@ -111,17 +150,19 @@ export default function ProfileSetup() {
 
   const joining = alias || neighborhood;
 
+  if (!loaded) return <Loading />;
+
   return (
     <Screen>
-      <JoinHeader back />
-      <Title>{t("setup.title")}</Title>
+      {editing ? <BackButton /> : <JoinHeader back />}
+      <Title>{editing ? t("setup.edit_title") : t("setup.title")}</Title>
 
       <View style={local.avatarWrap}>
-        <Avatar uri={photo?.uri} initial={firstName.trim().slice(0, 1).toUpperCase() || undefined} />
+        <Avatar uri={photo?.uri ?? savedPhotoUrl} initial={firstName.trim().slice(0, 1).toUpperCase() || undefined} />
         {photo ? <Text style={local.hidden} accessibilityLabel={t("setup.selected_photo")} /> : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={photo ? t("setup.change_photo") : t("setup.add_photo")}
+          accessibilityLabel={photo || savedPhotoUrl ? t("setup.change_photo") : t("setup.add_photo")}
           onPress={pickPhoto}
           style={({ pressed }) => [local.addPhoto, pressed && styles.pressed]}
         >
@@ -148,7 +189,7 @@ export default function ProfileSetup() {
         <GlassCard style={local.joiningCard}>
           <Ionicons name="home" size={18} color={colors.glowTurquoise} />
           <Text style={[type.label, { color: colors.glowTurquoise, flex: 1 }]}>
-            {t("setup.joining", { name: joining })}
+            {editing ? t("setup.your_neighborhood", { name: neighborhood }) : t("setup.joining", { name: joining })}
           </Text>
         </GlassCard>
       ) : null}
@@ -174,7 +215,9 @@ export default function ProfileSetup() {
         message={photoFailed ? t("setup.photo_failed", { reason: errorMessage(t, error) }) : errorMessage(t, error)}
       />
       <Button
-        title={photoFailed ? t("setup.retry_photo_button") : t("setup.finish_button")}
+        title={
+          photoFailed ? t("setup.retry_photo_button") : editing ? t("setup.save_button") : t("setup.finish_button")
+        }
         onPress={onSave}
         busy={busy}
         disabled={!firstName.trim() || !lastName.trim()}
@@ -182,6 +225,7 @@ export default function ProfileSetup() {
       {photoFailed ? (
         <Button title={t("setup.skip_photo_button")} variant="secondary" onPress={() => resetTo("/profile")} />
       ) : null}
+      {editing ? null : <TroubleLink from="join/profile-setup" />}
     </Screen>
   );
 }

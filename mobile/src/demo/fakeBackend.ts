@@ -12,7 +12,7 @@
  * Like the real backend, it never keeps the address. Accounts and profiles
  * are saved in this browser's localStorage so a reload keeps you logged in.
  */
-import { ApiError, AuthResult, MatchResult, Profile, ProfileInput } from "../apiTypes";
+import { ApiError, AuthResult, MatchResult, ProblemReportInput, Profile, ProfileInput } from "../apiTypes";
 import { isLanguage, Language } from "../i18n";
 
 // ---- Sample data -----------------------------------------------------------
@@ -77,6 +77,8 @@ type Db = {
   tokens: Record<string, string>; // token → email
   matches: Record<string, number>; // email → neighborhood id (never the address)
   profiles: Record<string, Omit<Profile, "neighborhood" | "language"> & { neighborhoodId: number }>;
+  // Only how many reports were sent; the demo has no team to read them.
+  reportsSent?: number;
 };
 
 const DB_KEY = "demo_db_v2"; // v2: interests are keys, accounts have a language
@@ -295,6 +297,31 @@ export async function uploadPhoto(token: string, photo: { uri: string; mimeType:
   db.profiles[email].photo_url = await shrinkPhoto(photo.uri);
   save(db);
   return toProfile(db, email);
+}
+
+export async function sendProblemReport(token: string | null, report: ProblemReportInput) {
+  await pause(600);
+  if (token) userFor(token);
+  const message = report.message.trim();
+  if (!message) throw new ApiError("message_required", 400);
+  if (message.length > 1000) throw new ApiError("message_too_long", 400);
+  const db = load();
+  if ((db.reportsSent ?? 0) >= 5) throw new ApiError("daily_limit", 429);
+  db.reportsSent = (db.reportsSent ?? 0) + 1;
+  save(db);
+  return { id: db.reportsSent };
+}
+
+export async function deleteAccount(token: string, password: string) {
+  await pause();
+  const email = userFor(token);
+  const db = load();
+  if (db.users[email]?.password !== password) throw new ApiError("wrong_password", 400);
+  delete db.users[email];
+  delete db.profiles[email];
+  delete db.matches[email];
+  for (const [key, owner] of Object.entries(db.tokens)) if (owner === email) delete db.tokens[key];
+  save(db);
 }
 
 export async function getMyProfile(token: string): Promise<Profile> {
