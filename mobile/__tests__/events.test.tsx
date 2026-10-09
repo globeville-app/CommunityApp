@@ -188,7 +188,7 @@ describe("posting an event", () => {
     fireEvent.changeText(screen.getByLabelText("Start time"), "09:30");
     fireEvent.press(screen.getByRole("link", { name: "Add an end time" }));
     fireEvent.changeText(screen.getByLabelText("End time"), "12:00");
-    fireEvent.changeText(screen.getByLabelText("Meeting spot"), "Globeville Landing Park");
+    fireEvent.changeText(screen.getByLabelText("Meeting spot"), "Riverside park by the bridge");
     expect(screen.getByText("Neighbors will see this. For a block party, a block or cross street is enough.")).toBeTruthy();
     fireEvent.press(screen.getByRole("link", { name: "Add Spanish version" }));
     fireEvent.changeText(screen.getByLabelText("Title in Spanish (optional)"), "Limpieza del río");
@@ -204,7 +204,7 @@ describe("posting an event", () => {
       description_alt: "",
       starts_at: "2030-10-24T09:30",
       ends_at: "2030-10-24T12:00",
-      location_text: "Globeville Landing Park",
+      location_text: "Riverside park by the bridge",
       partiful_url: "",
     });
     expect(await screen.findByRole("header", { name: "River cleanup" })).toBeTruthy();
