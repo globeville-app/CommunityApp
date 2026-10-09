@@ -10,7 +10,7 @@
 // Only the one icon set; the package root would pull in every icon font.
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
-import { Href, router } from "expo-router";
+import { Href, router, useIsFocused } from "expo-router";
 import { ComponentProps, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -84,6 +84,16 @@ export function JoinHeader({ back }: { back?: boolean }) {
       <LanguageToggle />
     </View>
   );
+}
+
+/**
+ * Wraps a tab's screen. Screens are see-through (the glow shows behind
+ * them), so a tab that isn't showing must be hidden, or it would show
+ * through the current one. Hidden, not removed, so it keeps its state.
+ */
+export function TabScene({ children }: { children: ReactNode }) {
+  const focused = useIsFocused();
+  return <View style={[styles.flex, !focused && styles.hidden]}>{children}</View>;
 }
 
 /** A round glass back button for the top of a screen. */
@@ -405,6 +415,7 @@ export function Loading() {
 export const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "transparent" },
   flex: { flex: 1 },
+  hidden: { display: "none" },
   white: { color: colors.textPrimary },
   content: { padding: SCREEN_PADDING, gap: space.m, flexGrow: 1 },
   row: { flexDirection: "row", flexWrap: "wrap", gap: space.xs },

@@ -14,9 +14,17 @@ import { errorMessage } from "../../i18n/errors";
 import { useLanguage } from "../../language";
 import { resetTo } from "../../navigation";
 import { colors } from "../../theme";
-import { Avatar, Button, Caption, ErrorMessage, GlassCard, Loading, Screen, Section, Tag, TextLink, Title, styles } from "../../ui";
+import { Avatar, Button, Caption, ErrorMessage, GlassCard, Loading, Screen, Section, Tag, TabScene, TextLink, Title, styles } from "../../ui";
 
-export default function Profile() {
+export default function ProfileTab() {
+  return (
+    <TabScene>
+      <Profile />
+    </TabScene>
+  );
+}
+
+function Profile() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { token } = useAuth();

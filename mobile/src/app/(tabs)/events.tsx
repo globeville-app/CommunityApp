@@ -14,12 +14,20 @@ import { EventCard } from "../../components/EventCard";
 import { errorMessage } from "../../i18n/errors";
 import { resetTo } from "../../navigation";
 import { colors, MIN_TOUCH, space, type } from "../../theme";
-import { Button, Caption, ErrorMessage, GlassCard, Hero, Intro, Loading, Screen } from "../../ui";
+import { Button, Caption, ErrorMessage, GlassCard, Hero, Intro, Loading, Screen, TabScene } from "../../ui";
 
 /** "for_you", "all", or a group key. */
 type Filter = string;
 
-export default function Events() {
+export default function EventsTab() {
+  return (
+    <TabScene>
+      <Events />
+    </TabScene>
+  );
+}
+
+function Events() {
   const { t } = useTranslation();
   const { token } = useAuth();
   const { groups } = useCategories();
@@ -99,6 +107,7 @@ export default function Events() {
 
       <ScrollView
         horizontal
+        style={styles.filterRow}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.filters}
         accessibilityLabel={t("events.filter_label")}
@@ -136,7 +145,10 @@ export default function Events() {
 
 const styles = StyleSheet.create({
   header: { gap: space.xs },
-  filters: { gap: space.xs, paddingVertical: 4 },
+  // flexGrow 0 and centered: the chips keep their size even when the
+  // event list below is short.
+  filterRow: { flexGrow: 0 },
+  filters: { gap: space.xs, paddingVertical: 4, alignItems: "center" },
   filter: {
     minHeight: MIN_TOUCH,
     paddingHorizontal: 16,
