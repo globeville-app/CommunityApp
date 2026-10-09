@@ -171,6 +171,13 @@ GEOCODER_URL = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddre
 GEOCODER_TIMEOUT_SECONDS = 8
 
 
+# --- Events -----------------------------------------------------------------
+# Machine translation provider for events (events/translation.py). Empty until
+# the owner picks one (docs/LANGUAGE.md); then the dotted path of a class that
+# implements events.translation.Translator.
+TRANSLATOR_CLASS = os.environ.get("TRANSLATOR_CLASS", "")
+
+
 # --- Photos -----------------------------------------------------------------
 PHOTO_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
 

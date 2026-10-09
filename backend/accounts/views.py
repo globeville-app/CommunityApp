@@ -84,6 +84,9 @@ class DeleteAccountView(APIView):
 
         # Imported here to keep the accounts app free of a hard dependency
         # on the apps that store member data.
+        from django.utils import timezone
+
+        from events.models import Event
         from profiles.models import Profile
         from support.models import ProblemReport
 
@@ -94,9 +97,13 @@ class DeleteAccountView(APIView):
 
         with transaction.atomic():
             ProblemReport.objects.filter(user=user).update(user=None, contact_email="")
+            # Their upcoming events are cancelled. Past ones stay, and once
+            # the user is gone they show "Former neighbor" as the organizer.
+            Event.objects.filter(organizer=user, starts_at__gt=timezone.now()).update(status=Event.Status.CANCELLED)
             # Deleting the user also deletes, through the database: the
             # profile (and its interests), the account settings, the
-            # neighborhood match and every login token.
+            # neighborhood match, every login token and their "I'm going"
+            # records. Events they organized keep existing with no organizer.
             user.delete()
 
         # Remove the photo file only once the database change has stuck.

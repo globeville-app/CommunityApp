@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from events import views as event_views
 from profiles import views as profile_views
 
 from . import views
@@ -17,6 +18,8 @@ urlpatterns = [
     path("api/profile/me", profile_views.MyProfileView.as_view(), name="profile-me"),
     path("api/profile/photo", profile_views.ProfilePhotoView.as_view(), name="profile-photo"),
     path("api/support/", include("support.urls")),
+    path("api/events", event_views.EventListView.as_view(), name="events"),
+    path("api/events/", include("events.urls")),
 ]
 
 if settings.DEBUG:
