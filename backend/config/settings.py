@@ -22,15 +22,13 @@ REPO_ROOT = BASE_DIR.parent
 with open(REPO_ROOT / "shared" / "app_config.json", encoding="utf-8") as f:
     APP_NAME = json.load(f)["app_name"]
 
-# The fixed list of interests a person can pick on their profile. These are
-# keys, not display text: the app shows each one in the person's language
-# (mobile/src/i18n/*.json, under "interests").
-INTEREST_CHOICES = [
-    "block_parties",
-    "food_drives",
-    "cleanups",
-    "live_music",
-    "gardening",
+# Interests are event category keys now (events/categories.py).
+
+# The app's language files. The server reads the category search hints from
+# them, so the hints are written in one place.
+LANGUAGE_FILES = [
+    REPO_ROOT / "mobile" / "src" / "i18n" / "en.json",
+    REPO_ROOT / "mobile" / "src" / "i18n" / "es.json",
 ]
 
 # Languages the app is available in (docs/LANGUAGE.md). New members default
@@ -65,6 +63,7 @@ INSTALLED_APPS = [
     "geocoding",
     "profiles",
     "support",
+    "events",
 ]
 
 MIDDLEWARE = [

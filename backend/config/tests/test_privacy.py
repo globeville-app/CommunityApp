@@ -59,7 +59,7 @@ class AddressIsNeverStoredTests(FixtureNeighborhoodsMixin, APITestCase):
         self.assertEqual(r[-1].status_code, 200)
         self.assertEqual(r[-1].data["name"], "Highland")
 
-        r.append(c.put("/api/profile", {"first_name": "Zed", "last_name": "Q", "alias": "LoHi", "interests": ["cleanups"]}, format="json"))
+        r.append(c.put("/api/profile", {"first_name": "Zed", "last_name": "Q", "alias": "LoHi", "interests": ["cleanup"]}, format="json"))
         self.assertEqual(r[-1].status_code, 201)
         r.append(c.post("/api/profile/photo", {"photo": upload(image_bytes(exif=exif_with_gps()))}, format="multipart"))
         self.assertEqual(r[-1].status_code, 200)

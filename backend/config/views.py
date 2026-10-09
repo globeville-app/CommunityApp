@@ -1,4 +1,6 @@
 from django.conf import settings
+
+from events.categories import config_json
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -11,7 +13,8 @@ def app_config(request):
     return Response(
         {
             "app_name": settings.APP_NAME,
-            "interests": settings.INTEREST_CHOICES,
             "languages": settings.LANGUAGES_AVAILABLE,
+            # Event categories, also used for interests.
+            **config_json(),
         }
     )

@@ -28,13 +28,20 @@ class Profile(models.Model):
     # Only the initial of the last name is kept: "Ana R."
     last_initial = models.CharField(max_length=1)
     photo = models.ImageField(upload_to=random_photo_path, blank=True)
-    # A list of keys from settings.INTEREST_CHOICES, e.g. ["gardening"].
-    # The app shows them in the person's language.
+    # Event category keys (events/categories.py), e.g. ["gardening"]: 0-8,
+    # no duplicates, never "other". The app shows them in the person's language.
     interests = models.JSONField(default=list, blank=True)
     neighborhood = models.ForeignKey(Neighborhood, on_delete=models.PROTECT)
     # The local name the person picked, e.g. "LoHi" for Highland. Blank = official name.
     alias = models.CharField(max_length=100, blank=True)
     joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Role(models.TextChoices):
+        MEMBER = "member", "Member"
+        ORGANIZER = "organizer", "Organizer"
+
+    # Becomes "organizer" when the member posts their first event.
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.MEMBER)
 
     @property
     def display_name(self):

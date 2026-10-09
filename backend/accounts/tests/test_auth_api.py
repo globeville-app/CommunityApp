@@ -84,8 +84,6 @@ class ConfigTests(APITestCase):
         response = self.client.get("/api/config")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["app_name"], settings.APP_NAME)
-        self.assertEqual(
-            response.data["interests"],
-            ["block_parties", "food_drives", "cleanups", "live_music", "gardening"],
-        )
+        # Interests now come from the event categories (events/tests).
+        self.assertNotIn("interests", response.data)
         self.assertEqual(response.data["languages"], ["en", "es"])

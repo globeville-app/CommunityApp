@@ -47,13 +47,14 @@ class ProfileApiTests(ProfileTestCase):
 
     def test_create_profile_uses_the_matched_neighborhood(self):
         self.match(self.HIGHLAND)
-        response = self.save_profile(alias="LoHi", interests=["gardening", "block_parties", "gardening"])
+        response = self.save_profile(alias="LoHi", interests=["block_party", "gardening"])
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["display_name"], "Ana R.")
         self.assertEqual(response.data["neighborhood"], {"id": 3, "name": "Highland"})
         self.assertEqual(response.data["alias"], "LoHi")
-        # Official order, no duplicates.
-        self.assertEqual(response.data["interests"], ["block_parties", "gardening"])
+        # Saved as sent (keys only; the app shows the words).
+        self.assertEqual(response.data["interests"], ["block_party", "gardening"])
+        self.assertEqual(response.data["role"], "member")
         self.assertIsNone(response.data["photo_url"])
 
     def test_only_the_last_initial_is_stored(self):

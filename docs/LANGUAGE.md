@@ -68,7 +68,7 @@ When the choice syncs:
 
 - Add `language` to `Profile`, and accept it in signup and in `PATCH /api/profile/me`. Reject any value other than `en` or `es`.
 - **Errors are codes, not sentences.** For example `{ "code": "outside_denver" }`, `no_match`, `geocoder_unavailable`, `invalid_credentials` and `email_taken`. The app maps each code to `errors.<code>`. Any code the app doesn't recognize shows `errors.generic`.
-- **The interests list in `/api/config` returns keys**, such as `block_parties`, `food_drives`, `cleanups`, `live_music` and `gardening`. The app translates them, and the profile stores the keys.
+- **The interests list in `/api/config` returns keys**, such as `block_parties`, `food_drives`, `cleanups`, `live_music` and `gardening`. The app translates them, and the profile stores the keys. (Milestone 2 replaces this list with the event category keys; see `MILESTONE_2.md`.)
 - Django admin can stay in English.
 
 ### Tests

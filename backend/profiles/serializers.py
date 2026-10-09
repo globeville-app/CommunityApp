@@ -2,12 +2,31 @@ from django.conf import settings
 from rest_framework import serializers
 
 from accounts.models import language_of
+from events.categories import INTEREST_KEYS, MAX_INTERESTS
 
 
-class LanguageSerializer(serializers.Serializer):
-    """PATCH /api/profile/me: {"language": "en" | "es"}."""
+def clean_interests(value):
+    """
+    Interests are event category keys: at most 8, no duplicates, and never
+    "other". Error codes: invalid_interest, too_many_interests.
+    """
+    if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+        raise serializers.ValidationError("invalid_interest", code="invalid_interest")
+    if any(item not in INTEREST_KEYS for item in value) or len(set(value)) != len(value):
+        raise serializers.ValidationError("invalid_interest", code="invalid_interest")
+    if len(value) > MAX_INTERESTS:
+        raise serializers.ValidationError("too_many_interests", code="too_many_interests")
+    return value
 
-    language = serializers.ChoiceField(choices=settings.LANGUAGES_AVAILABLE)
+
+class ProfileUpdateSerializer(serializers.Serializer):
+    """PATCH /api/profile/me: change the language and/or the interests."""
+
+    language = serializers.ChoiceField(choices=settings.LANGUAGES_AVAILABLE, required=False)
+    interests = serializers.JSONField(required=False)
+
+    def validate_interests(self, value):
+        return clean_interests(value)
 
 
 class ProfileInputSerializer(serializers.Serializer):
@@ -16,18 +35,12 @@ class ProfileInputSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=50)
     last_name = serializers.CharField(max_length=100)
     alias = serializers.CharField(max_length=100, required=False, allow_blank=True, default="")
-    interests = serializers.ListField(
-        child=serializers.CharField(), required=False, default=list
-    )
+    interests = serializers.JSONField(required=False, default=list)
     # Optional: the app sends it so the profile matches the phone's choice.
     language = serializers.ChoiceField(choices=settings.LANGUAGES_AVAILABLE, required=False)
 
     def validate_interests(self, value):
-        unknown = [item for item in value if item not in settings.INTEREST_CHOICES]
-        if unknown:
-            raise serializers.ValidationError("unknown_interest", code="unknown_interest")
-        # Keep the official order and drop duplicates.
-        return [choice for choice in settings.INTEREST_CHOICES if choice in value]
+        return clean_interests(value)
 
 
 def profile_json(profile, request):
@@ -40,6 +53,7 @@ def profile_json(profile, request):
         "interests": profile.interests,
         "neighborhood": {"id": profile.neighborhood_id, "name": profile.neighborhood.name},
         "alias": profile.alias or None,
+        "role": profile.role,
         "language": language_of(profile.user),
         "joined_at": profile.joined_at.isoformat(),
     }

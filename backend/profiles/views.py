@@ -13,7 +13,7 @@ from neighborhoods.models import NeighborhoodMatch
 
 from .models import Profile
 from .photos import PhotoError, clean_photo
-from .serializers import LanguageSerializer, ProfileInputSerializer, profile_json
+from .serializers import ProfileInputSerializer, ProfileUpdateSerializer, profile_json
 
 logger = logging.getLogger(__name__)
 
@@ -68,14 +68,25 @@ class MyProfileView(APIView):
 
     def patch(self, request):
         """
-        Change the member's language: {"language": "es"}. This also works
-        part-way through joining, before the profile exists, because the
-        language is kept on the account from signup on.
+        Change the language and/or interests: {"language": "es"},
+        {"interests": ["gardening"]}. A language change also works part-way
+        through joining, before the profile exists, because the language is
+        kept on the account from signup on. Interests need a profile.
         """
-        data = LanguageSerializer(data=request.data)
+        data = ProfileUpdateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        set_language(request.user, data.validated_data["language"])
-        return Response({"language": language_of(request.user)})
+        values = data.validated_data
+        if "interests" in values:
+            profile = get_profile_or_404(request.user)
+            profile.interests = values["interests"]
+            profile.save(update_fields=["interests"])
+        if "language" in values:
+            set_language(request.user, values["language"])
+
+        profile = Profile.objects.filter(user=request.user).select_related("neighborhood").first()
+        if profile is None:
+            return Response({"language": language_of(request.user)})
+        return Response(profile_json(profile, request))
 
 
 class ProfilePhotoView(APIView):
