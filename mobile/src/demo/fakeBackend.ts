@@ -12,23 +12,38 @@
  * Like the real backend, it never keeps the address. Accounts and profiles
  * are saved in this browser's localStorage so a reload keeps you logged in.
  */
-import { ApiError, AuthResult, MatchResult, ProblemReportInput, Profile, ProfileInput } from "../apiTypes";
+import {
+  ApiError,
+  AuthResult,
+  CategoryGroup,
+  EventData,
+  MatchResult,
+  ProblemReportInput,
+  Profile,
+  ProfileInput,
+} from "../apiTypes";
 import { isLanguage, Language } from "../i18n";
 
 // ---- Sample data -----------------------------------------------------------
 
-// Keys, like the real backend; the app shows them translated.
-export const INTERESTS = ["block_parties", "food_drives", "cleanups", "live_music", "gardening"];
-
 type Ring = [number, number][]; // [longitude, latitude] points
 type DemoNeighborhood = { id: number; name: string; rings: Ring[] };
-type DemoData = { neighborhoods: DemoNeighborhood[]; aliases: Record<string, string[]> };
+type DemoData = {
+  neighborhoods: DemoNeighborhood[];
+  aliases: Record<string, string[]>;
+  // The event categories, read from backend/events/categories.py at build time.
+  categoryGroups: CategoryGroup[];
+};
 
 // Put into the page by scripts/build-web-demo.mjs.
 const DATA: DemoData = (globalThis as { __DEMO_DATA__?: DemoData }).__DEMO_DATA__ ?? {
   neighborhoods: [],
   aliases: {},
+  categoryGroups: [],
 };
+
+export const CATEGORY_GROUPS = DATA.categoryGroups;
+export const CATEGORY_KEYS = CATEGORY_GROUPS.flatMap((group) => group.categories);
 const NEIGHBORHOODS = [...DATA.neighborhoods].sort((a, b) => a.id - b.id);
 const ALIASES = DATA.aliases;
 
@@ -72,22 +87,34 @@ export const SIMULATE_OUTAGE = "#down";
 
 // ---- Pretend database, saved in this browser -------------------------------
 
-type Db = {
+export type DemoEvent = Omit<EventData, "group" | "is_past" | "organizer_name" | "is_organizer" | "going_count" | "is_going" | "matches_interests"> & {
+  neighborhoodId: number;
+  organizerEmail: string | null; // null once deleted
+  organizerName: string; // made-up neighbors in the samples
+  goingEmails: string[];
+  extraGoing: number; // pretend neighbors going, in the samples
+  createdAt: string;
+};
+
+export type Db = {
   users: Record<string, { password: string; language?: Language }>;
   tokens: Record<string, string>; // token → email
   matches: Record<string, number>; // email → neighborhood id (never the address)
   profiles: Record<string, Omit<Profile, "neighborhood" | "language"> & { neighborhoodId: number }>;
   // Only how many reports were sent; the demo has no team to read them.
   reportsSent?: number;
+  events: Record<string, DemoEvent>;
+  nextEventId: number;
+  seededNeighborhoods: number[];
 };
 
-const DB_KEY = "demo_db_v2"; // v2: interests are keys, accounts have a language
+const DB_KEY = "demo_db_v3"; // v3: events, interests are event categories
 
 function emptyDb(): Db {
-  return { users: {}, tokens: {}, matches: {}, profiles: {} };
+  return { users: {}, tokens: {}, matches: {}, profiles: {}, events: {}, nextEventId: 1, seededNeighborhoods: [] };
 }
 
-function load(): Db {
+export function load(): Db {
   try {
     const saved = localStorage.getItem(DB_KEY);
     return saved ? { ...emptyDb(), ...JSON.parse(saved) } : emptyDb();
@@ -98,7 +125,7 @@ function load(): Db {
 
 let memoryDb: Db | null = null;
 
-function save(db: Db) {
+export function save(db: Db) {
   memoryDb = db;
   try {
     localStorage.setItem(DB_KEY, JSON.stringify(db));
@@ -119,22 +146,22 @@ export function resetDemo() {
 // ---- Helpers ---------------------------------------------------------------
 
 /** Make the demo feel like a network call. */
-function pause(ms = 450) {
+export function pause(ms = 450) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** A form error, shaped like the backend's: a top code plus per-field codes. */
-function invalid(field: string, code: string): never {
+export function invalid(field: string, code: string): never {
   throw new ApiError(code, 400, { [field]: [code] });
 }
 
-function userFor(token: string | null): string {
+export function userFor(token: string | null): string {
   const email = token ? load().tokens[token] : undefined;
   if (!email) throw new ApiError("authentication_failed", 401);
   return email;
 }
 
-function languageOf(db: Db, email: string): Language {
+export function languageOf(db: Db, email: string): Language {
   return db.users[email]?.language ?? "en";
 }
 
@@ -256,6 +283,25 @@ export async function matchAddress(token: string, address: string): Promise<Matc
   return { neighborhood_id: neighborhood.id, name: neighborhood.name, aliases: aliasesFor(neighborhood.name) };
 }
 
+/** Like the backend: category keys, at most 8, no duplicates, never "other". */
+function checkInterests(interests: string[]) {
+  if (interests.some((key) => !CATEGORY_KEYS.includes(key)) || new Set(interests).size !== interests.length) {
+    throw new ApiError("invalid_interest", 400);
+  }
+  if (interests.length > 8) throw new ApiError("too_many_interests", 400);
+  return interests;
+}
+
+export async function updateInterests(token: string, interests: string[]): Promise<Profile> {
+  await pause(300);
+  const email = userFor(token);
+  const db = load();
+  if (!db.profiles[email]) throw new ApiError("profile_not_found", 404);
+  db.profiles[email].interests = checkInterests(interests);
+  save(db);
+  return toProfile(db, email);
+}
+
 export async function saveProfile(token: string, input: ProfileInput): Promise<Profile> {
   await pause();
   const email = userFor(token);
@@ -280,7 +326,7 @@ export async function saveProfile(token: string, input: ProfileInput): Promise<P
     first_name: firstName,
     last_initial: lastInitial,
     photo_url: existing?.photo_url ?? null,
-    interests: INTERESTS.filter((i) => input.interests.includes(i)),
+    interests: checkInterests(input.interests),
     neighborhoodId,
     alias: alias || null,
     joined_at: existing?.joined_at ?? new Date().toISOString(),
@@ -321,6 +367,15 @@ export async function deleteAccount(token: string, password: string) {
   delete db.profiles[email];
   delete db.matches[email];
   for (const [key, owner] of Object.entries(db.tokens)) if (owner === email) delete db.tokens[key];
+  // Like the backend: upcoming events they organized are cancelled, the
+  // rest show "Former neighbor", and their "I'm going" marks are removed.
+  for (const event of Object.values(db.events)) {
+    if (event.organizerEmail === email) {
+      if (new Date(event.starts_at) > new Date()) event.status = "cancelled";
+      event.organizerEmail = null;
+    }
+    event.goingEmails = event.goingEmails.filter((e) => e !== email);
+  }
   save(db);
 }
 

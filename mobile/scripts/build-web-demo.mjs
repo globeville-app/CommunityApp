@@ -62,7 +62,23 @@ const demoData = {
     };
   }),
   aliases: JSON.parse(fs.readFileSync(path.join(dataDir, "neighborhood_aliases.json"), "utf8")),
+  categoryGroups: readCategoryGroups(),
 };
+
+/**
+ * The event categories, read from the one place they're defined:
+ * backend/events/categories.py (the GROUPS list of ("group", [keys]) pairs).
+ */
+function readCategoryGroups() {
+  const source = fs.readFileSync(path.join(mobileDir, "..", "backend", "events", "categories.py"), "utf8");
+  const block = source.match(/^GROUPS = \[([\s\S]*?)^\]/m)[1];
+  const groups = [...block.matchAll(/\("(\w+)",\s*\[([^\]]*)\]\)/g)].map(([, key, list]) => ({
+    key,
+    categories: [...list.matchAll(/"(\w+)"/g)].map((m) => m[1]),
+  }));
+  if (groups.length === 0) throw new Error("Couldn't read the categories from backend/events/categories.py");
+  return groups;
+}
 const demoDataScript = `globalThis.__DEMO_DATA__ = ${JSON.stringify(demoData).replace(/</g, "\\u003c")};`;
 
 // 5. Brand files (design/BRAND.md): the wordmark as vector art and the favicon.

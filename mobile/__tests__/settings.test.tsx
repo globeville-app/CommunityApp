@@ -18,24 +18,9 @@ import {
   renderApp,
   resetLanguage,
 } from "../test-utils/helpers";
+import { useDefaultReplies } from "../test-utils/apiMock";
 
-jest.mock("../src/api", () => {
-  const actual = jest.requireActual("../src/api");
-  return {
-    ...actual,
-    getConfig: jest.fn(),
-    signup: jest.fn(),
-    login: jest.fn(),
-    logout: jest.fn(),
-    matchAddress: jest.fn(),
-    saveProfile: jest.fn(),
-    uploadPhoto: jest.fn(),
-    getMyProfile: jest.fn(),
-    updateLanguage: jest.fn(),
-    sendProblemReport: jest.fn(),
-    deleteAccount: jest.fn(),
-  };
-});
+jest.mock("../src/api", () => require("../test-utils/apiMock").fakeApi());
 
 const mocked = api as jest.Mocked<typeof api>;
 const ADDRESS = "3300 Example Blvd Apt 2, Denver, CO 80211";
@@ -44,11 +29,7 @@ beforeEach(async () => {
   jest.clearAllMocks();
   fakeStore.clear();
   await resetLanguage();
-  mocked.getConfig.mockResolvedValue({
-    app_name: APP_NAME,
-    interests: ["block_parties", "gardening"],
-    languages: ["en", "es"],
-  });
+  useDefaultReplies(mocked);
   mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
   mocked.updateLanguage.mockImplementation(async (_token, language) => ({ language }));
   mocked.logout.mockResolvedValue(undefined);
@@ -98,7 +79,7 @@ const ROWS_ES = [
 describe("the settings screen", () => {
   it("opens from the gear on the profile", async () => {
     loggedIn();
-    renderApp();
+    renderApp("/profile");
     fireEvent.press(await screen.findByRole("button", { name: "Settings" }));
     expect(await screen.findByText("Edit profile")).toBeTruthy();
   });
@@ -135,7 +116,7 @@ describe("the settings screen", () => {
     expect(await screen.findByRole("header", { name: "Edit profile" })).toBeTruthy();
     expect(screen.getByLabelText("First name").props.value).toBe("Ana");
     expect(screen.getByLabelText("Last name").props.value).toBe("R");
-    expect(screen.getByRole("checkbox", { name: "Gardening" }).props.accessibilityState.checked).toBe(true);
+    expect(screen.getByRole("button", { name: "Edit interests" })).toBeTruthy();
     expect(screen.getByText("Your neighborhood: LoHi (Highland)")).toBeTruthy();
 
     mocked.saveProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, first_name: "Anita", display_name: "Anita R." });
@@ -146,7 +127,7 @@ describe("the settings screen", () => {
       first_name: "Anita",
       last_name: "R",
       alias: "LoHi",
-      interests: ["block_parties", "gardening"],
+      interests: ["block_party", "gardening"],
       language: "en",
     });
     expect(await screen.findByText("Anita R.")).toBeTruthy();
@@ -234,7 +215,7 @@ describe("report a problem", () => {
     fireEvent.press(await screen.findByRole("button", { name: "Report a problem" }));
     fireEvent.changeText(await screen.findByLabelText("What happened?"), "Again");
     await pressAndSettle(screen.getByRole("button", { name: "Send" }));
-    expect(await screen.findByText("You've sent a lot of reports today. Please try again tomorrow.")).toBeTruthy();
+    expect(await screen.findByText("You've reached today's limit. Please try again tomorrow.")).toBeTruthy();
   });
 });
 

@@ -16,22 +16,9 @@ import {
   resetLanguage,
   setDeviceLocale,
 } from "../test-utils/helpers";
+import { useDefaultReplies } from "../test-utils/apiMock";
 
-jest.mock("../src/api", () => {
-  const actual = jest.requireActual("../src/api");
-  return {
-    ...actual,
-    getConfig: jest.fn(),
-    signup: jest.fn(),
-    login: jest.fn(),
-    logout: jest.fn(),
-    matchAddress: jest.fn(),
-    saveProfile: jest.fn(),
-    uploadPhoto: jest.fn(),
-    getMyProfile: jest.fn(),
-    updateLanguage: jest.fn(),
-  };
-});
+jest.mock("../src/api", () => require("../test-utils/apiMock").fakeApi());
 
 const mocked = api as jest.Mocked<typeof api>;
 
@@ -39,11 +26,7 @@ beforeEach(async () => {
   jest.clearAllMocks();
   fakeStore.clear();
   await resetLanguage();
-  mocked.getConfig.mockResolvedValue({
-    app_name: APP_NAME,
-    interests: ["block_parties", "gardening"],
-    languages: ["en", "es"],
-  });
+  useDefaultReplies(mocked);
   mocked.updateLanguage.mockImplementation(async (_token, language) => ({ language }));
   mocked.logout.mockResolvedValue(undefined);
 });
@@ -104,10 +87,10 @@ describe("the toggle", () => {
 
     // Profile setup: still Spanish, with its own toggle; typed names survive a switch.
     fireEvent.changeText(await screen.findByLabelText("Nombre"), "Ana");
-    expect(screen.getByRole("checkbox", { name: "Jardinería" })).toBeTruthy();
+    expect(screen.getByRole("header", { name: "Crea tu perfil" })).toBeTruthy();
     await toEnglish();
     expect(screen.getByLabelText("First name").props.value).toBe("Ana");
-    expect(screen.getByRole("checkbox", { name: "Gardening" })).toBeTruthy();
+    expect(screen.getByRole("header", { name: "Set up your profile" })).toBeTruthy();
   });
 
   it("re-translates an error that's already showing", async () => {
@@ -153,7 +136,7 @@ describe("the choice is kept", () => {
   it("after logging out, and the next login keeps it", async () => {
     loggedIn();
     mocked.getMyProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, language: "es" });
-    renderApp();
+    renderApp("/profile");
     await screen.findByText("Ana R.");
     fireEvent.press(screen.getByRole("button", { name: "Settings" }));
     await screen.findByText("Settings");
@@ -168,7 +151,7 @@ describe("the choice is kept", () => {
     fireEvent.changeText(await screen.findByLabelText("Correo electrónico"), "ana@example.com");
     fireEvent.changeText(screen.getByLabelText("Contraseña"), "a long pass phrase");
     await pressAndSettle(screen.getAllByRole("button", { name: "Iniciar sesión" }).at(-1)!);
-    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
+    expect(await screen.findByText("Próximos eventos")).toBeTruthy();
   });
 
   it("wins over the account's language at login, and is written to the account", async () => {
@@ -180,7 +163,7 @@ describe("the choice is kept", () => {
     fireEvent.changeText(screen.getByLabelText("Correo electrónico"), "ana@example.com");
     fireEvent.changeText(screen.getByLabelText("Contraseña"), "a long pass phrase");
     await pressAndSettle(screen.getByRole("button", { name: "Iniciar sesión" }));
-    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
+    expect(await screen.findByText("Próximos eventos")).toBeTruthy();
     expect(mocked.updateLanguage).toHaveBeenCalledWith("tok-2", "es");
   });
 
@@ -191,7 +174,7 @@ describe("the choice is kept", () => {
     fireEvent.changeText(await screen.findByLabelText("Email"), "ana@example.com");
     fireEvent.changeText(screen.getByLabelText("Password"), "a long pass phrase");
     await pressAndSettle(screen.getByRole("button", { name: "Log in" }));
-    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
+    expect(await screen.findByText("Próximos eventos")).toBeTruthy();
     expect(mocked.updateLanguage).not.toHaveBeenCalled();
     expect(await languageStore()).toMatchObject({ "app.language": "es", "app.language_source": "account" });
   });
@@ -241,7 +224,7 @@ describe("saving to the server", () => {
 
     first.unmount();
     renderApp();
-    expect(await screen.findByText("Te uniste el 7 oct")).toBeTruthy();
+    expect(await screen.findByText("Próximos eventos")).toBeTruthy();
     await waitFor(() => expect(mocked.updateLanguage).toHaveBeenCalledTimes(2));
     expect(mocked.updateLanguage).toHaveBeenLastCalledWith("tok-123", "es");
     await waitFor(async () => expect((await languageStore())["app.language_unsynced"]).toBeUndefined());

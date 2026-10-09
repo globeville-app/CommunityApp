@@ -77,3 +77,33 @@ jest.mock("expo-web-browser", () => ({ openBrowserAsync: jest.fn(async () => ({ 
 
 // The phone model and system, attached to problem reports.
 jest.mock("expo-device", () => ({ modelName: "iPhone 16", osName: "iOS", osVersion: "19.1" }));
+
+// The phone's date/time picker, as a text box tests can type into:
+// "2026-10-24" for dates, "18:00" for times.
+jest.mock("@react-native-community/datetimepicker", () => {
+  const React = require("react");
+  const { TextInput } = require("react-native");
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return {
+    __esModule: true,
+    default: ({ value, mode, onChange, accessibilityLabel }: any) =>
+      React.createElement(TextInput, {
+        accessibilityLabel,
+        value:
+          mode === "date"
+            ? `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`
+            : `${pad(value.getHours())}:${pad(value.getMinutes())}`,
+        onChangeText: (text: string) => {
+          const date = new Date(value);
+          if (mode === "date") {
+            const [y, m, d] = text.split("-").map(Number);
+            date.setFullYear(y, m - 1, d);
+          } else {
+            const [h, min] = text.split(":").map(Number);
+            date.setHours(h, min);
+          }
+          onChange({ type: "set" }, date);
+        },
+      }),
+  };
+});

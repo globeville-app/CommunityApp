@@ -25,8 +25,59 @@ export class ApiError extends Error {
 
 // ---- Types the backend sends back ----
 
-/** `interests` are keys like "gardening"; the app shows them translated. */
-export type AppConfig = { app_name: string; interests: string[]; languages: string[] };
+/** Event categories, grouped. Also the list members pick interests from. */
+export type CategoryGroup = { key: string; categories: string[] };
+
+export type AppConfig = {
+  app_name: string;
+  languages: string[];
+  category_groups: CategoryGroup[];
+  other_category: string;
+  other_max_length: number;
+  max_interests: number;
+};
+
+/** An event as the server sends it. Times are Denver time, e.g. "2026-10-24T18:00:00-06:00". */
+export type EventData = {
+  id: number;
+  group: string | null;
+  category: string;
+  category_other: string | null;
+  title: string;
+  description: string;
+  language: Language;
+  title_alt: string | null;
+  description_alt: string | null;
+  starts_at: string;
+  ends_at: string | null;
+  location_text: string;
+  partiful_url: string | null;
+  status: "active" | "cancelled";
+  is_past: boolean;
+  /** null once the organizer deleted their account ("Former neighbor"). */
+  organizer_name: string | null;
+  is_organizer: boolean;
+  going_count: number;
+  is_going: boolean;
+  matches_interests: boolean;
+};
+
+/** What the post/edit form sends. Times are Denver time without a zone, "2026-10-24T18:00". */
+export type EventInput = {
+  category: string;
+  category_other?: string;
+  title: string;
+  description?: string;
+  language?: Language;
+  title_alt?: string;
+  description_alt?: string;
+  starts_at: string;
+  ends_at?: string | null;
+  location_text: string;
+  partiful_url?: string;
+};
+
+export type Translation = { title: string; description: string; target: Language; machine: boolean };
 
 /** Signup and login both return the token and the account's language. */
 export type AuthResult = { token: string; language: Language };
@@ -41,6 +92,7 @@ export type Profile = {
   interests: string[];
   neighborhood: { id: number; name: string };
   alias: string | null;
+  role?: "member" | "organizer";
   language: Language;
   joined_at: string;
 };

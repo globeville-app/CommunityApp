@@ -11,6 +11,7 @@ import { Outfit_500Medium } from "@expo-google-fonts/outfit/500Medium";
 import { Outfit_600SemiBold } from "@expo-google-fonts/outfit/600SemiBold";
 
 import { AuthProvider } from "../auth";
+import { CategoriesProvider } from "../categories";
 import { DemoBanner } from "../components/DemoBanner";
 import { GlowBackground } from "../components/GlowBackground";
 import { LanguageProvider, useLanguage } from "../language";
@@ -46,7 +47,9 @@ export default function RootLayout() {
         <View style={{ flex: 1, backgroundColor: colors.base }}>
           {/* One shared glow behind every screen; screens are see-through. */}
           <GlowBackground />
-          <LanguageProvider>{fontsLoaded ? <AppShell /> : null}</LanguageProvider>
+          <LanguageProvider>
+            <CategoriesProvider>{fontsLoaded ? <AppShell /> : null}</CategoriesProvider>
+          </LanguageProvider>
         </View>
       </AuthProvider>
     </ThemeProvider>

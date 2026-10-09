@@ -10,13 +10,18 @@ import DeleteAccount from "../src/app/delete-account";
 import Start from "../src/app/index";
 import RootLayout from "../src/app/_layout";
 import Login from "../src/app/login";
-import Profile from "../src/app/profile";
+import TabLayout from "../src/app/(tabs)/_layout";
+import Events from "../src/app/(tabs)/events";
+import Profile from "../src/app/(tabs)/profile";
+import EventDetail from "../src/app/event/[id]";
+import EventForm from "../src/app/event-form";
+import Interests from "../src/app/interests";
 import ProfileSetup from "../src/app/profile-setup";
 import Report from "../src/app/report";
 import Settings from "../src/app/settings";
 import Signup from "../src/app/signup";
 import Welcome from "../src/app/welcome";
-import { ApiError, Profile as ProfileData } from "../src/api";
+import { ApiError } from "../src/api";
 
 export const APP_NAME: string = require("../../shared/app_config.json").app_name;
 
@@ -32,7 +37,12 @@ export function renderApp(initialUrl = "/") {
       login: Login,
       address: Address,
       "profile-setup": ProfileSetup,
-      profile: Profile,
+      "(tabs)/_layout": TabLayout,
+      "(tabs)/events": Events,
+      "(tabs)/profile": Profile,
+      "event/[id]": EventDetail,
+      "event-form": EventForm,
+      interests: Interests,
       settings: Settings,
       report: Report,
       "coming-soon": ComingSoon,
@@ -61,14 +71,4 @@ export async function languageStore() {
   return Object.fromEntries(await AsyncStorage.multiGet(keys));
 }
 
-export const HIGHLAND_PROFILE: ProfileData = {
-  display_name: "Ana R.",
-  first_name: "Ana",
-  last_initial: "R",
-  photo_url: null,
-  interests: ["block_parties", "gardening"],
-  neighborhood: { id: 3, name: "Highland" },
-  alias: "LoHi",
-  language: "en",
-  joined_at: "2026-10-07T12:00:00Z",
-};
+export { CONFIG, HIGHLAND_PROFILE, sampleEvent } from "./data";

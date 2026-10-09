@@ -2,11 +2,12 @@
  * BROWSER DEMO ONLY. The real app runs on phones and uses api.ts, which
  * talks to the Django backend. In a web browser, the screens use this file
  * instead, which answers from a pretend backend inside the page
- * (src/demo/fakeBackend.ts). Same functions, same errors, same shapes.
+ * (src/demo/fakeBackend.ts and fakeEvents.ts). Same functions, same errors,
+ * same shapes.
  */
 import { AppConfig } from "./apiTypes";
 import { APP_NAME } from "./config";
-import { INTERESTS } from "./demo/fakeBackend";
+import { CATEGORY_GROUPS } from "./demo/fakeBackend";
 
 export * from "./apiTypes";
 export {
@@ -18,10 +19,29 @@ export {
   saveProfile,
   sendProblemReport,
   signup,
+  updateInterests,
   updateLanguage,
   uploadPhoto,
 } from "./demo/fakeBackend";
+export {
+  cancelEvent,
+  createEvent,
+  getEvent,
+  listEvents,
+  partifulPreview,
+  reportEvent,
+  setGoing,
+  translateEvent,
+  updateEvent,
+} from "./demo/fakeEvents";
 
 export async function getConfig(): Promise<AppConfig> {
-  return { app_name: APP_NAME, interests: INTERESTS, languages: ["en", "es"] };
+  return {
+    app_name: APP_NAME,
+    languages: ["en", "es"],
+    category_groups: CATEGORY_GROUPS,
+    other_category: "other",
+    other_max_length: 40,
+    max_interests: 8,
+  };
 }

@@ -24,6 +24,27 @@ export const colors = {
   danger: "#FF6B7A",
 };
 
+/**
+ * One accent per event category group (group tiles; chips at low opacity).
+ * DESIGN.md has four accent colors; lavender and peach are lighter tints in
+ * the same family for the fifth and sixth groups.
+ */
+export const groupAccent: Record<string, string> = {
+  celebrate: "#FF3EA5", // glowPink
+  buy_swap: "#FFF3A3", // glowYellow
+  entertainment: "#8B5CF6", // glowPurple
+  get_active: "#2EE6D6", // glowTurquoise
+  community: "#FFB38A", // peach
+  learn_connect: "#C4B5FD", // lavender
+};
+export const OTHER_ACCENT = "#D9D0F5";
+
+/** A color at low opacity, e.g. for category chips: alpha("#FF3EA5", 0.22). */
+export function alpha(hex: string, opacity: number) {
+  const value = parseInt(hex.slice(1), 16);
+  return `rgba(${(value >> 16) & 255},${(value >> 8) & 255},${value & 255},${opacity})`;
+}
+
 /** The dark purple gradient under the glow (design/BRAND.md), about 110°. */
 export const baseGradient = {
   colors: ["#1A0F3D", "#1C1240", "#2E1747"] as const,

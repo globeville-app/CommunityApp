@@ -1,23 +1,26 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
-import { ApiError, getMyProfile, Profile as ProfileData } from "../api";
-import { useAuth } from "../auth";
-import { neighborhoodLabel } from "../format";
-import { shortDate } from "../i18n/dates";
-import { errorMessage } from "../i18n/errors";
-import { useLanguage } from "../language";
-import { resetTo } from "../navigation";
-import { colors } from "../theme";
-import { Avatar, Button, Caption, ErrorMessage, GlassCard, Loading, Screen, Section, Tag, Title, styles } from "../ui";
+import { ApiError, getMyProfile, Profile as ProfileData } from "../../api";
+import { useAuth } from "../../auth";
+import { groupOf, useCategories } from "../../categories";
+import { CategoryChip } from "../../components/CategoryChip";
+import { neighborhoodLabel } from "../../format";
+import { shortDate } from "../../i18n/dates";
+import { errorMessage } from "../../i18n/errors";
+import { useLanguage } from "../../language";
+import { resetTo } from "../../navigation";
+import { colors } from "../../theme";
+import { Avatar, Button, Caption, ErrorMessage, GlassCard, Loading, Screen, Section, Tag, TextLink, Title, styles } from "../../ui";
 
 export default function Profile() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { token } = useAuth();
+  const { groups } = useCategories();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
 
@@ -33,9 +36,12 @@ export default function Profile() {
     }
   }, [token]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  // Reload when the tab comes into view, e.g. after editing interests.
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
 
   if (error) {
     return (
@@ -70,16 +76,21 @@ export default function Profile() {
         <Caption>{t("profile.joined", { date: shortDate(new Date(profile.joined_at), language) })}</Caption>
       </View>
 
-      {profile.interests.length > 0 ? (
-        <GlassCard>
-          <Section>{t("profile.interests_title")}</Section>
+      <GlassCard>
+        <Section>{t("profile.interests_title")}</Section>
+        {profile.interests.length > 0 ? (
           <View style={styles.row}>
             {profile.interests.map((item) => (
-              <Tag key={item} label={t(`interests.${item}`, { defaultValue: item })} />
+              <CategoryChip key={item} category={item} group={groupOf(groups, item)} />
             ))}
           </View>
-        </GlassCard>
-      ) : null}
+        ) : (
+          <Caption onGlass>{t("profile.interests_empty")}</Caption>
+        )}
+        <TextLink label={t("profile.edit_interests")} onPress={() => router.push("/interests")} />
+      </GlassCard>
+      {/* Room for the floating tab bar. */}
+      <View style={{ height: 96 }} />
     </Screen>
   );
 }

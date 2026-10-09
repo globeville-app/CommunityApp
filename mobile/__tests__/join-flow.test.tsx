@@ -9,22 +9,9 @@ import { act, fireEvent, screen, waitFor } from "expo-router/testing-library";
 import * as api from "../src/api";
 import { ApiError } from "../src/api";
 import { APP_NAME, HIGHLAND_PROFILE, fakeStore, notFound, renderApp, resetLanguage } from "../test-utils/helpers";
+import { useDefaultReplies } from "../test-utils/apiMock";
 
-jest.mock("../src/api", () => {
-  const actual = jest.requireActual("../src/api");
-  return {
-    ...actual,
-    getConfig: jest.fn(),
-    signup: jest.fn(),
-    login: jest.fn(),
-    logout: jest.fn(),
-    matchAddress: jest.fn(),
-    saveProfile: jest.fn(),
-    uploadPhoto: jest.fn(),
-    getMyProfile: jest.fn(),
-    updateLanguage: jest.fn(),
-  };
-});
+jest.mock("../src/api", () => require("../test-utils/apiMock").fakeApi());
 
 const mocked = api as jest.Mocked<typeof api>;
 const ADDRESS = "3300 Example Blvd Apt 2, Denver, CO 80211";
@@ -36,11 +23,7 @@ beforeEach(async () => {
   jest.clearAllMocks();
   fakeStore.clear();
   await resetLanguage();
-  mocked.getConfig.mockResolvedValue({
-    app_name: APP_NAME,
-    interests: ["block_parties", "food_drives", "cleanups", "live_music", "gardening"],
-    languages: ["en", "es"],
-  });
+  useDefaultReplies(mocked);
   mocked.updateLanguage.mockImplementation(async (_token, language) => ({ language }));
 });
 
@@ -69,13 +52,17 @@ describe("starting the app", () => {
     expect(screen.getByRole("button", { name: "Log in" })).toBeTruthy();
   });
 
-  it("goes straight to Profile when logged in with a profile (stays logged in)", async () => {
+  it("goes straight to Events when logged in with a profile (stays logged in)", async () => {
     loggedIn();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
     renderApp();
+    expect(await screen.findByText("Upcoming events")).toBeTruthy();
+    expect(screen.getByRole("header", { name: "LoHi" })).toBeTruthy();
+    expect(mocked.getMyProfile).toHaveBeenCalledWith("tok-123");
+    // The Profile tab is one tap away.
+    fireEvent.press(screen.getByLabelText("Profile"));
     expect(await screen.findByText("Ana R.")).toBeTruthy();
     expect(screen.getByText("LoHi (Highland)")).toBeTruthy();
-    expect(mocked.getMyProfile).toHaveBeenCalledWith("tok-123");
   });
 
   it("resumes at Address when logged in without a profile", async () => {
@@ -100,7 +87,7 @@ describe("starting the app", () => {
     expect(await screen.findByText(NETWORK_MESSAGE)).toBeTruthy();
     mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
     await pressAndSettle(screen.getByRole("button", { name: "Try again" }));
-    expect(await screen.findByText("Ana R.")).toBeTruthy();
+    expect(await screen.findByText("Upcoming events")).toBeTruthy();
   });
 });
 
@@ -159,23 +146,32 @@ describe("address → match → profile setup → profile", () => {
     // Profile setup
     fireEvent.changeText(await screen.findByLabelText("First name"), "Ana");
     fireEvent.changeText(screen.getByLabelText("Last name"), "Rivera");
-    fireEvent.press(await screen.findByRole("checkbox", { name: "Gardening" }));
-    fireEvent.press(screen.getByRole("checkbox", { name: "Block parties" }));
-    mocked.getMyProfile.mockResolvedValue(HIGHLAND_PROFILE);
+    mocked.getMyProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, interests: [] });
     await pressAndSettle(screen.getByRole("button", { name: "Finish" }));
-
-    // Profile
-    expect(await screen.findByText("Ana R.")).toBeTruthy();
-    expect(screen.getByText("LoHi (Highland)")).toBeTruthy();
-    expect(screen.getByText("Gardening")).toBeTruthy();
     expect(mocked.saveProfile).toHaveBeenCalledWith("tok-123", {
       first_name: "Ana",
       last_name: "Rivera",
       alias: "LoHi",
-      interests: ["gardening", "block_parties"],
+      interests: [],
       language: "en",
     });
     expect(mocked.uploadPhoto).not.toHaveBeenCalled();
+
+    // What are you into? (optional)
+    expect(await screen.findByRole("header", { name: "What are you into?" })).toBeTruthy();
+    fireEvent.press(screen.getByRole("checkbox", { name: "Gardening" }));
+    fireEvent.press(screen.getByRole("checkbox", { name: "Block Party" }));
+    mocked.getMyProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, interests: ["gardening", "block_party"] });
+    await pressAndSettle(screen.getByRole("button", { name: "Done" }));
+    expect(mocked.updateInterests).toHaveBeenCalledWith("tok-123", ["gardening", "block_party"]);
+
+    // Events, then the profile shows the interests.
+    expect(await screen.findByText("Upcoming events")).toBeTruthy();
+    fireEvent.press(screen.getByLabelText("Profile"));
+    expect(await screen.findByText("Ana R.")).toBeTruthy();
+    expect(screen.getByText("LoHi (Highland)")).toBeTruthy();
+    expect(screen.getByText("Gardening")).toBeTruthy();
+    expect(screen.getByText("Block Party")).toBeTruthy();
   });
 
   it("keeps the official name when there are no aliases", async () => {
@@ -272,7 +268,7 @@ describe("address → match → profile setup → profile", () => {
 
     mocked.getMyProfile.mockResolvedValue({ ...HIGHLAND_PROFILE, alias: null });
     await pressAndSettle(screen.getByRole("button", { name: "Continue without photo" }));
-    expect(await screen.findByText("Ana R.")).toBeTruthy();
+    expect(await screen.findByRole("header", { name: "What are you into?" })).toBeTruthy();
     expect(mocked.saveProfile).toHaveBeenCalledTimes(1);
   });
 
@@ -322,7 +318,7 @@ describe("address → match → profile setup → profile", () => {
 
 describe("logging out (Settings)", () => {
   async function logOutFromSettings() {
-    renderApp();
+    renderApp("/profile");
     fireEvent.press(await screen.findByRole("button", { name: "Settings" }));
     fireEvent.press(await screen.findByRole("button", { name: "Log out" }));
     // "Log out?" with Cancel / Log out

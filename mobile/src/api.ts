@@ -7,14 +7,25 @@
  * PRIVACY: nothing here logs requests or stores responses. The address is
  * sent to /api/join/match and then forgotten.
  */
-import { ApiError, AppConfig, AuthResult, MatchResult, ProblemReportInput, Profile, ProfileInput } from "./apiTypes";
+import {
+  ApiError,
+  AppConfig,
+  AuthResult,
+  EventData,
+  EventInput,
+  MatchResult,
+  ProblemReportInput,
+  Profile,
+  ProfileInput,
+  Translation,
+} from "./apiTypes";
 import { API_BASE_URL, REQUEST_TIMEOUT_MS, UPLOAD_TIMEOUT_MS } from "./config";
 import type { Language } from "./i18n";
 
 export * from "./apiTypes";
 
 type RequestOptions = {
-  method?: "GET" | "POST" | "PUT" | "PATCH";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   token?: string | null;
   json?: unknown;
   form?: FormData;
@@ -129,4 +140,60 @@ export function uploadPhoto(token: string, photo: { uri: string; mimeType: strin
 
 export function getMyProfile(token: string) {
   return request<Profile>("/api/profile/me", { token });
+}
+
+/** Interests are category keys (up to 8, never "other"). */
+export function updateInterests(token: string, interests: string[]) {
+  return request<Profile>("/api/profile/me", { method: "PATCH", token, json: { interests } });
+}
+
+// ---- Events ----
+
+export function listEvents(token: string, filter: { group?: string; forYou?: boolean } = {}) {
+  const query = new URLSearchParams();
+  if (filter.group) query.set("group", filter.group);
+  if (filter.forYou) query.set("for_you", "true");
+  const suffix = query.toString() ? `?${query}` : "";
+  return request<{ events: EventData[] }>(`/api/events${suffix}`, { token });
+}
+
+export function getEvent(token: string, id: number) {
+  return request<EventData>(`/api/events/${id}`, { token });
+}
+
+export function createEvent(token: string, event: EventInput) {
+  return request<EventData>("/api/events", { method: "POST", token, json: event });
+}
+
+export function updateEvent(token: string, id: number, changes: Partial<EventInput>) {
+  return request<EventData>(`/api/events/${id}`, { method: "PATCH", token, json: changes });
+}
+
+export function cancelEvent(token: string, id: number) {
+  return request<EventData>(`/api/events/${id}/cancel`, { method: "POST", token });
+}
+
+/** I'm going (true) or not anymore (false). */
+export function setGoing(token: string, id: number, going: boolean) {
+  return request<{ going_count: number; is_going: boolean }>(`/api/events/${id}/going`, {
+    method: going ? "PUT" : "DELETE",
+    token,
+  });
+}
+
+export function reportEvent(token: string, id: number, reason: string) {
+  return request<{ ok: boolean }>(`/api/events/${id}/report`, { method: "POST", token, json: { reason } });
+}
+
+/** Title and a suggested category from a Partiful link; both null if not found. */
+export function partifulPreview(token: string, url: string) {
+  return request<{ title: string | null; suggested_category: string | null }>("/api/events/partiful-preview", {
+    method: "POST",
+    token,
+    json: { url },
+  });
+}
+
+export function translateEvent(token: string, id: number, target: Language) {
+  return request<Translation>(`/api/events/${id}/translate`, { method: "POST", token, json: { target } });
 }

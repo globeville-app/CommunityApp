@@ -1,12 +1,12 @@
 import * as ImagePicker from "expo-image-picker";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 // Only the one icon set; the package root would pull in every icon font.
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { ApiError, getConfig, getMyProfile, saveProfile, uploadPhoto } from "../api";
+import { ApiError, getMyProfile, saveProfile, uploadPhoto } from "../api";
 import { neighborhoodLabel } from "../format";
 import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
@@ -17,14 +17,13 @@ import {
   Avatar,
   BackButton,
   Button,
-  Choice,
   ErrorMessage,
   Field,
   GlassCard,
   JoinHeader,
+  ListRow,
   Loading,
   Screen,
-  Section,
   Title,
   TroubleLink,
   styles,
@@ -49,7 +48,7 @@ export default function ProfileSetup() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
-  const [interestOptions, setInterestOptions] = useState<string[]>([]);
+  // Kept as they are when editing; chosen on their own screen (interests.tsx).
   const [interests, setInterests] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   // Errors are kept as codes so they re-translate if the language changes.
@@ -73,18 +72,6 @@ export default function ProfileSetup() {
       .finally(() => setLoaded(true));
   }, [editing, token]);
 
-  useEffect(() => {
-    // Interests are optional, so if this fails we just show none.
-    getConfig()
-      .then((config) => setInterestOptions(config.interests))
-      .catch(() => setInterestOptions([]));
-  }, []);
-
-  function toggleInterest(item: string) {
-    setInterests((current) =>
-      current.includes(item) ? current.filter((i) => i !== item) : [...current, item],
-    );
-  }
 
   async function pickPhoto() {
     setError(null);
@@ -145,7 +132,13 @@ export default function ProfileSetup() {
         return;
       }
     }
-    resetTo("/profile");
+    done();
+  }
+
+  /** Joining continues to "What are you into?"; editing returns to the profile. */
+  function done() {
+    if (editing) resetTo("/profile");
+    else resetTo({ pathname: "/interests", params: { onboarding: "1" } });
   }
 
   const joining = alias || neighborhood;
@@ -195,20 +188,10 @@ export default function ProfileSetup() {
       ) : null}
       <Text style={[type.caption, { color: colors.textSoft }]}>{t("setup.privacy_note")}</Text>
 
-      {interestOptions.length > 0 ? (
-        <>
-          <Section>{t("setup.interests_title")}</Section>
-          <View style={styles.row}>
-            {interestOptions.map((item) => (
-              <Choice
-                key={item}
-                label={t(`interests.${item}`, { defaultValue: item })}
-                selected={interests.includes(item)}
-                onPress={() => toggleInterest(item)}
-              />
-            ))}
-          </View>
-        </>
+      {editing ? (
+        <GlassCard style={{ gap: 0, paddingVertical: 6 }}>
+          <ListRow label={t("profile.edit_interests")} chevron onPress={() => router.push("/interests")} />
+        </GlassCard>
       ) : null}
 
       <ErrorMessage
@@ -223,7 +206,7 @@ export default function ProfileSetup() {
         disabled={!firstName.trim() || !lastName.trim()}
       />
       {photoFailed ? (
-        <Button title={t("setup.skip_photo_button")} variant="secondary" onPress={() => resetTo("/profile")} />
+        <Button title={t("setup.skip_photo_button")} variant="secondary" onPress={done} />
       ) : null}
       {editing ? null : <TroubleLink from="join/profile-setup" />}
     </Screen>

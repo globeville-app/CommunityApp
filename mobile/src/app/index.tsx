@@ -4,7 +4,7 @@
  *
  *   not logged in             → Welcome
  *   logged in, no profile yet → Address (they re-enter it; it's never saved)
- *   logged in, has profile    → Profile
+ *   logged in, has profile    → Events
  */
 import { Redirect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -15,7 +15,7 @@ import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
 import { Button, ErrorMessage, Intro, Loading, Screen, Title } from "../ui";
 
-type Destination = "/welcome" | "/address" | "/profile";
+type Destination = "/welcome" | "/address" | "/events";
 
 export default function Start() {
   const { t } = useTranslation();
@@ -31,7 +31,7 @@ export default function Start() {
     }
     try {
       await getMyProfile(token);
-      setDestination("/profile");
+      setDestination("/events");
     } catch (e) {
       const err = e as ApiError;
       if (err.code === "profile_not_found") {
