@@ -34,6 +34,22 @@ export {
   translateEvent,
   updateEvent,
 } from "./demo/fakeEvents";
+export {
+  checkIn,
+  collectEvent,
+  declineEvent,
+  getBadgeCatalog,
+  getCelebrations,
+  getCollectCards,
+  getGeofences,
+  getImpact,
+  getMember,
+  getMyBadges,
+  logShare,
+  markCelebrationsSeen,
+  markCheckinOfferSeen,
+  updateProfileSettings,
+} from "./demo/fakeBadges";
 
 export async function getConfig(): Promise<AppConfig> {
   return {

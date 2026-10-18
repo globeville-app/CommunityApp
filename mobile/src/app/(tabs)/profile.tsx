@@ -4,10 +4,11 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
-import { ApiError, getMyProfile, Profile as ProfileData } from "../../api";
+import { ApiError, BadgeData, getMyBadges, getMyProfile, Profile as ProfileData } from "../../api";
 import { useAuth } from "../../auth";
 import { groupOf, useCategories } from "../../categories";
 import { CategoryChip } from "../../components/CategoryChip";
+import { Badge, useBadgeLabel } from "../../components/badges/Badge";
 import { neighborhoodLabel } from "../../format";
 import { shortDate } from "../../i18n/dates";
 import { errorMessage } from "../../i18n/errors";
@@ -30,6 +31,8 @@ function Profile() {
   const { token } = useAuth();
   const { groups } = useCategories();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [badges, setBadges] = useState<BadgeData[]>([]);
+  const badgeLabel = useBadgeLabel();
   const [error, setError] = useState<ApiError | null>(null);
 
   const load = useCallback(async () => {
@@ -37,6 +40,10 @@ function Profile() {
     setError(null);
     try {
       setProfile(await getMyProfile(token));
+      // Badges are extra: the profile still shows if they fail to load.
+      getMyBadges(token)
+        .then((data) => setBadges(data.badges.filter((b) => b.stage > 0)))
+        .catch(() => undefined);
     } catch (e) {
       const err = e as ApiError;
       if (err.code === "profile_not_found") resetTo("/address");
@@ -61,9 +68,9 @@ function Profile() {
   }
   if (!profile) return <Loading />;
 
-  // Stats, badges, the neighborhoods card and the tab bar from the design
-  // arrive with the milestones that build those features. Language and
-  // Log out live in Settings (the gear).
+  // Stats and the neighborhoods card from the design arrive with the
+  // milestones that build those features. Language and Log out live in
+  // Settings (the gear).
   return (
     <Screen>
       <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
@@ -83,6 +90,29 @@ function Profile() {
         <Tag tone="yellow" label={neighborhoodLabel(profile)} />
         <Caption>{t("profile.joined", { date: shortDate(new Date(profile.joined_at), language) })}</Caption>
       </View>
+
+      <GlassCard>
+        <Section>{t("badges.row_title")}</Section>
+        {badges.length > 0 ? (
+          <View style={styles.row}>
+            {badges.map((badge) => (
+              <Pressable
+                key={badge.key}
+                accessibilityRole="button"
+                accessibilityLabel={badgeLabel(badge.key, badge.kind, badge.stage, badge.count)}
+                onPress={() => router.push({ pathname: "/badges/[key]", params: { key: badge.key } })}
+                style={({ pressed }) => pressed && styles.pressed}
+              >
+                <Badge badgeKey={badge.key} kind={badge.kind} stage={badge.stage} count={badge.count} size={72} label={false} />
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <Caption onGlass>{t("badges.none_yet")}</Caption>
+        )}
+        <TextLink label={t("badges.see_all")} onPress={() => router.push("/badges")} />
+      </GlassCard>
+      <Button title={t("impact.button")} variant="secondary" onPress={() => router.push("/impact")} />
 
       <GlassCard>
         <Section>{t("profile.interests_title")}</Section>

@@ -129,7 +129,19 @@
     "translation_unavailable": "Translation isn't available right now.",
     "translation_failed": "We couldn't translate this right now.",
     "invalid_interest": "One of those interests isn't on the list.",
-    "too_many_interests": "You can pick up to 8 interests."
+    "too_many_interests": "You can pick up to 8 interests.",
+    "pin_required": "Drop a pin on the map.",
+    "invalid_pin": "That pin doesn't look right. Try placing it again.",
+    "pin_outside_denver": "The pin has to be in Denver.",
+    "category_locked": "The category can't change after the event ends.",
+    "not_going": "You weren't marked as going to this event.",
+    "event_not_ended": "You can collect once the event ends.",
+    "collect_window_closed": "This event can't be collected anymore.",
+    "checkin_window_closed": "Check-in is only during the event.",
+    "already_recorded": "You already collected this one.",
+    "is_host": "Hosting counts on its own, so you don't collect your own event.",
+    "member_not_found": "We couldn't find that neighbor.",
+    "invalid_badge_visibility": "Choose My neighborhood or Only me."
   },
   "demo": {
     "banner_label": "Demo",
@@ -153,7 +165,13 @@
     "version": "Version {{version}} ({{build}})",
     "log_out_confirm_title": "Log out?",
     "cancel": "Cancel",
-    "opens_in_browser": "Opens in the in-app browser"
+    "opens_in_browser": "Opens in the in-app browser",
+    "auto_checkin": "Auto check-in",
+    "show_badges_to": "Show my badges to",
+    "badges_neighborhood": "My neighborhood",
+    "badges_only_me": "Only me",
+    "maps_app": "Maps app",
+    "credits": "Open-source credits"
   },
   "coming_soon": {
     "title": "Coming soon",
@@ -300,7 +318,10 @@
     "keep_event": "Keep it",
     "ended": "This event has ended.",
     "cancelled_notice": "This event was cancelled.",
-    "date_time": "{{date}} · {{time}}"
+    "date_time": "{{date}} · {{time}}",
+    "add_pin_title": "Add a map pin",
+    "add_pin_body": "Neighbors with auto check-in can only be checked in at events with a pin. Until then, they collect after the event.",
+    "add_pin_button": "Add a map pin"
   },
   "picker": {
     "event_title": "What kind of event?",
@@ -350,6 +371,190 @@
     "alt_description_en": "Description in English (optional)",
     "post_button": "Post",
     "save_button": "Save changes",
-    "times_note": "Times are Denver time."
+    "times_note": "Times are Denver time.",
+    "continue_to_pin": "Next: map pin",
+    "pin_title": "Where exactly?",
+    "pin_intro": "Tap the map to drop a pin on the meeting spot, then drag it to fine-tune. Your typed meeting spot stays as the label.",
+    "pin_locked": "This event has started, so its pin can't move.",
+    "pin_privacy": "The pin marks the event's place. Never put it on your home.",
+    "pin_map_label": "Map. Tap to place the event's pin.",
+    "pin_demo_map": "Demo map: phones show a real map",
+    "back_to_details": "Back to details"
+  },
+  "badges": {
+    "local": {
+      "name": "Local",
+      "description": "Show up to any neighborhood event.",
+      "unit_one": "event",
+      "unit_other": "events"
+    },
+    "best_guest": {
+      "name": "Best Guest",
+      "description": "Go to events hosted by different neighbors.",
+      "unit_one": "host",
+      "unit_other": "hosts"
+    },
+    "host": {
+      "name": "Host",
+      "description": "Host events that bring neighbors together.",
+      "unit_one": "neighbor brought together",
+      "unit_other": "neighbors brought together"
+    },
+    "day_one": {
+      "name": "Day One",
+      "description": "Be there for a neighbor's first event.",
+      "unit_one": "first event",
+      "unit_other": "first events"
+    },
+    "fiestero": {
+      "name": "Fiestero",
+      "description": "Join block parties, festivals, cookouts and parades.",
+      "unit_one": "celebration",
+      "unit_other": "celebrations"
+    },
+    "treasure_hunter": {
+      "name": "Treasure Hunter",
+      "description": "Shop, sell or swap at markets, pop-ups and yard sales.",
+      "unit_one": "market or swap",
+      "unit_other": "markets and swaps"
+    },
+    "aficionado": {
+      "name": "Aficionado",
+      "description": "Catch music, comedy, movies, game nights and more.",
+      "unit_one": "night out",
+      "unit_other": "nights out"
+    },
+    "recreationist": {
+      "name": "Recreationist",
+      "description": "Get active: pickup games, fitness, gardening and pet meetups.",
+      "unit_one": "active event",
+      "unit_other": "active events"
+    },
+    "helping_hand": {
+      "name": "Helping Hand",
+      "description": "Pitch in at cleanups, volunteer days, drives and fundraisers.",
+      "unit_one": "time pitching in",
+      "unit_other": "times pitching in"
+    },
+    "clean_sweeper": {
+      "name": "Clean Sweeper",
+      "description": "Help clean up the neighborhood.",
+      "unit_one": "cleanup",
+      "unit_other": "cleanups"
+    },
+    "civic_voice": {
+      "name": "Civic Voice",
+      "description": "Show up to community meetings.",
+      "unit_one": "meeting",
+      "unit_other": "meetings"
+    },
+    "ambassador": {
+      "name": "Ambassador",
+      "description": "Join an event posted in a language other than yours."
+    },
+    "open_door": {
+      "name": "Open Door",
+      "description": "Host an event in both English and Spanish."
+    },
+    "familiar_face": {
+      "name": "Familiar Face",
+      "description": "Come to an event three months in a row."
+    },
+    "year_rounder": {
+      "name": "Year-Rounder",
+      "description": "Show up in every season of the year."
+    },
+    "stage": {
+      "seed": "Seed",
+      "sprout": "Sprout",
+      "bloom": "Bloom",
+      "tree": "Tree",
+      "grove": "Grove"
+    },
+    "a11y": {
+      "growth": "{{badge}}, {{stage}} stage, {{count}} {{units}}.",
+      "keepsake": "{{badge}}, earned.",
+      "unearned": "{{badge}}, not earned yet. {{description}}"
+    },
+    "count": "{{count}} {{units}}",
+    "keepsake": "Keepsake",
+    "more_to": "{{count}} more to {{stage}}",
+    "not_earned_yet": "Not earned yet.",
+    "share": "Share",
+    "row_title": "Badges",
+    "none_yet": "Go to an event and collect it to earn your first badge.",
+    "see_all": "See all badges",
+    "all_title": "All badges",
+    "growth_title": "Growth badges",
+    "keepsakes_title": "Keepsakes"
+  },
+  "maps": {
+    "open_in": "Open in",
+    "app_apple": "Apple Maps",
+    "app_google": "Google Maps",
+    "app_waze": "Waze",
+    "remember": "Remember my choice",
+    "close": "Close",
+    "directions_to": "Directions to {{place}}",
+    "settings_title": "Maps app",
+    "ask_every_time": "Ask every time",
+    "settings_note": "Saved on this phone only. Only maps apps on this phone are listed."
+  },
+  "member": {
+    "since": "Member since {{date}}"
+  },
+  "impact": {
+    "button": "My Impact",
+    "title": "My Impact",
+    "private_note": "Only you can see this.",
+    "reoffer_title": "Missed a few? Auto check-in can collect for you.",
+    "no_thanks": "No thanks",
+    "ready_to_collect": "Ready to collect",
+    "starts": "Starts your {{badge}} badge",
+    "collect": "Collect",
+    "didnt_make_it": "I didn't make it",
+    "progress_title": "Badge progress",
+    "progress_line": "{{badge}} · {{stage}}",
+    "host_title": "Your impact as a host",
+    "brought_together_one": "Your events brought together {{count}} neighbor.",
+    "brought_together_other": "Your events brought together {{count}} neighbors.",
+    "first_timers_one": "{{count}} of them was at their first event in the neighborhood.",
+    "first_timers_other": "{{count}} of them were at their first event in the neighborhood.",
+    "came_back_one": "{{count}} came back to another neighborhood event.",
+    "came_back_other": "{{count}} came back to another neighborhood event.",
+    "most_popular_one": "Your most popular: {{title}}, {{date}}, with {{count}} neighbor.",
+    "most_popular_other": "Your most popular: {{title}}, {{date}}, with {{count}} neighbors."
+  },
+  "checkin": {
+    "title": "Check in automatically?",
+    "what_it_does": "Your phone notices when you arrive at events you're going to, and your badge grows on its own.",
+    "what_it_never_does": "We never see or store where you are.",
+    "permission_note": "Your phone will ask to use your location. Choose \"Always\" so it works when the app is closed. You can turn this off in Settings any time.",
+    "turn_on": "Turn on",
+    "not_now": "Not now",
+    "stays_off": "Auto check-in stays off. You can still collect after each event."
+  },
+  "share": {
+    "title": "Share your badge",
+    "earned": "{{name}} earned",
+    "count_in": "{{amount}} in {{neighborhood}}",
+    "cta": "Join your neighbors on {{url}}",
+    "show_neighborhood": "Show my neighborhood",
+    "not_now": "Not now",
+    "privacy_note": "Only your first name is shown. Never your last name, photo, address or event details.",
+    "message_neighborhood": "I earned the {{badge}} badge on {{app}} 🎉 Join our neighborhood: {{url}}",
+    "message_neighbors": "I earned the {{badge}} badge on {{app}} 🎉 Join your neighbors: {{url}}"
+  },
+  "celebrate": {
+    "earned": "You earned {{badge}}!",
+    "stage_up": "{{badge}} grew to {{stage}}!",
+    "milestone": "{{badge}}: {{amount}}!",
+    "several_one": "{{count}} badge grew 🌱",
+    "several_other": "{{count}} badges grew 🌱"
+  },
+  "credits": {
+    "title": "Open-source credits",
+    "intro": "This app is built with open-source software. Thank you to everyone who made it.",
+    "lucide_use": "Badge emblems and stage icons."
   }
 }

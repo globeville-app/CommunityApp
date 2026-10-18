@@ -1,0 +1,60 @@
+/**
+ * Things that happen when the app opens or comes back to the foreground:
+ *   - unlock moments: unseen celebrations show once, never mid-post
+ *   - auto check-in: refresh which event places the phone watches
+ */
+import { router, usePathname } from "expo-router";
+import { useEffect, useRef } from "react";
+import { AppState } from "react-native";
+
+import { getCelebrations } from "../api";
+import { useAuth } from "../auth";
+import { syncGeofences } from "../checkin/geofencing";
+
+/** Screens an unlock moment may appear over. Never the post/edit flow or joining. */
+export function canCelebrateOn(pathname: string) {
+  return (
+    pathname === "/events" ||
+    pathname === "/profile" ||
+    pathname === "/impact" ||
+    pathname === "/badges" ||
+    pathname.startsWith("/event/")
+  );
+}
+
+export function AppWatchers() {
+  const { token } = useAuth();
+  const pathname = usePathname();
+  // Set on open and on every return to the foreground; cleared once checked.
+  const due = useRef(true);
+  const checking = useRef(false);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") return;
+      due.current = true;
+      if (token) syncGeofences(token).catch(() => undefined);
+    });
+    return () => sub.remove();
+  }, [token]);
+
+  useEffect(() => {
+    if (token) syncGeofences(token).catch(() => undefined);
+  }, [token]);
+
+  useEffect(() => {
+    if (!token || !due.current || checking.current || !canCelebrateOn(pathname)) return;
+    checking.current = true;
+    getCelebrations(token)
+      .then(({ celebrations }) => {
+        due.current = false;
+        if (celebrations.length > 0) router.push("/celebrate");
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        checking.current = false;
+      });
+  });
+
+  return null;
+}

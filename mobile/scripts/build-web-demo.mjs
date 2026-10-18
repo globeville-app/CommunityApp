@@ -63,7 +63,30 @@ const demoData = {
   }),
   aliases: JSON.parse(fs.readFileSync(path.join(dataDir, "neighborhood_aliases.json"), "utf8")),
   categoryGroups: readCategoryGroups(),
+  badgeRules: readBadgeRules(),
 };
+
+/**
+ * The badge rules, read from the one place they're defined:
+ * backend/badges/config.py (thresholds, which badge grows from what).
+ */
+function readBadgeRules() {
+  const source = fs.readFileSync(path.join(mobileDir, "..", "backend", "badges", "config.py"), "utf8");
+  const thresholds = Object.fromEntries(
+    [...source.match(/^TRACK_THRESHOLDS = \{([\s\S]*?)^\}/m)[1].matchAll(/"(\w+)":\s*\[([\d,\s]+)\]/g)].map(
+      ([, track, list]) => [track, list.split(",").map(Number)],
+    ),
+  );
+  const growth = [...source.match(/^GROWTH_BADGES = \[([\s\S]*?)^\]/m)[1].matchAll(/\("(\w+)",\s*"(\w+)",\s*"([\w:]+)"\)/g)].map(
+    ([, key, track, rule]) => ({ key, track, rule }),
+  );
+  const list = (name) => [...source.match(new RegExp(`^${name} = [\\[{]([^\\]}]*)[\\]}]`, "m"))[1].matchAll(/"(\w+)"/g)].map((m) => m[1]);
+  const rules = { thresholds, growth, keepsakes: list("KEEPSAKES"), sensitive: list("SENSITIVE_CATEGORIES") };
+  if (growth.length !== 11 || rules.keepsakes.length !== 4 || !thresholds.everyday) {
+    throw new Error("Couldn't read the badge rules from backend/badges/config.py");
+  }
+  return rules;
+}
 
 /**
  * The event categories, read from the one place they're defined:

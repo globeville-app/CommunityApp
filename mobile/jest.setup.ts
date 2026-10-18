@@ -41,6 +41,7 @@ jest.mock("expo-constants", () => {
           apiBaseUrl: "http://test-server:8000",
           privacyUrl: shared.privacy_url,
           termsUrl: shared.terms_url,
+          inviteUrl: shared.invite_url,
           buildNumber: "12",
         },
       },
@@ -110,3 +111,57 @@ jest.mock("@react-native-community/datetimepicker", () => {
 
 // Tests run like Expo Go: the build number comes from the app's config.
 jest.mock("expo-application", () => ({ nativeBuildVersion: null, nativeApplicationVersion: null }));
+
+// ---- Milestone 3 ----
+
+// Location and background tasks. Tests set permissions with __setPermission
+// and read what's being watched with __watched(). Nothing here can see a
+// real location, and the app never asks for one.
+jest.mock("expo-location", () => {
+  let permission = { granted: false, canAskAgain: true };
+  let watched: { task: string; regions: unknown[] } | null = null;
+  return {
+    __setPermission: (next: { granted: boolean; canAskAgain: boolean }) => {
+      permission = next;
+    },
+    __watched: () => watched,
+    __reset: () => {
+      permission = { granted: false, canAskAgain: true };
+      watched = null;
+    },
+    GeofencingEventType: { Enter: 1, Exit: 2 },
+    requestForegroundPermissionsAsync: jest.fn(async () => permission),
+    requestBackgroundPermissionsAsync: jest.fn(async () => permission),
+    getBackgroundPermissionsAsync: jest.fn(async () => permission),
+    hasStartedGeofencingAsync: jest.fn(async () => watched !== null),
+    startGeofencingAsync: jest.fn(async (task: string, regions: unknown[]) => {
+      watched = { task, regions };
+    }),
+    stopGeofencingAsync: jest.fn(async () => {
+      watched = null;
+    }),
+  };
+});
+
+jest.mock("expo-task-manager", () => {
+  const tasks = new Map<string, (mockBody: unknown) => unknown>();
+  return {
+    __tasks: tasks,
+    defineTask: jest.fn((name: string, fn: (mockBody: unknown) => unknown) => tasks.set(name, fn)),
+    isTaskDefined: jest.fn((name: string) => tasks.has(name)),
+  };
+});
+
+// The map, as a plain view tests can "tap" with onPress.
+jest.mock("react-native-maps", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+  const MapView = ({ children, onPress, testID }: any) =>
+    React.createElement(View, { testID, onPress, accessibilityRole: "image" }, children);
+  const Marker = ({ coordinate }: any) =>
+    React.createElement(View, { testID: "pin", accessibilityHint: `${coordinate.latitude},${coordinate.longitude}` });
+  return { __esModule: true, default: MapView, Marker, PROVIDER_GOOGLE: "google" };
+});
+
+jest.mock("react-native-view-shot", () => ({ captureRef: jest.fn(async () => "file:///tmp/badge-card.png") }));
+jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(async () => undefined), isAvailableAsync: jest.fn(async () => true) }));

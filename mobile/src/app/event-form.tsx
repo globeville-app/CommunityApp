@@ -3,7 +3,9 @@
  *   1. What kind of event? (category picker)
  *   2. Got a Partiful link? (optional; prefills the title, may suggest a category)
  *   3. Details
+ *   4. Map pin (Milestone 3): tap the map, drag the pin to the meeting spot
  * Editing (?id=) opens straight on Details; the category can still change.
+ * "Add a map pin" on a pinless event opens editing on the pin (?step=pin).
  * Times are entered in Denver time.
  */
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,7 +13,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 
-import { ApiError, createEvent, EventInput, getEvent, partifulPreview, updateEvent } from "../api";
+import { ApiError, createEvent, EventInput, getEvent, getMyProfile, LatLng, partifulPreview, updateEvent } from "../api";
 import { useAuth } from "../auth";
 import { categoryLabel, groupOf, useCategories } from "../categories";
 import { CategoryChip } from "../components/CategoryChip";
@@ -21,6 +23,7 @@ import type { Language } from "../i18n";
 import { denverParts, EVENT_TIME_ZONE, toServerTime } from "../i18n/dates";
 import { errorMessage } from "../i18n/errors";
 import { useLanguage } from "../language";
+import { PinMap } from "../maps/PinMap";
 import { space } from "../theme";
 import {
   BackButton,
@@ -38,7 +41,10 @@ import {
   Title,
 } from "../ui";
 
-type Step = "category" | "partiful" | "details";
+type Step = "category" | "partiful" | "details" | "pin";
+
+// Downtown Denver, if the server can't say where the neighborhood is.
+const DENVER: LatLng = { latitude: 39.7392, longitude: -104.9903 };
 
 // An example link, the same in every language.
 const PARTIFUL_PLACEHOLDER = "https://partiful.com/e/…";
@@ -56,10 +62,10 @@ export default function EventForm() {
   const { token } = useAuth();
   const { language: appLanguage } = useLanguage();
   const { groups, other, ready } = useCategories();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, step: startStep } = useLocalSearchParams<{ id?: string; step?: string }>();
   const editingId = id ? Number(id) : null;
 
-  const [step, setStep] = useState<Step>(editingId ? "details" : "category");
+  const [step, setStep] = useState<Step>(editingId ? (startStep === "pin" ? "pin" : "details") : "category");
   const [loaded, setLoaded] = useState(!editingId);
   const [category, setCategory] = useState<string | null>(null);
   const [otherText, setOtherText] = useState("");
@@ -79,8 +85,22 @@ export default function EventForm() {
   const [showAlt, setShowAlt] = useState(false);
   const [titleAlt, setTitleAlt] = useState("");
   const [descriptionAlt, setDescriptionAlt] = useState("");
+  const [pin, setPin] = useState<LatLng | null>(null);
+  const [mapCenter, setMapCenter] = useState<LatLng>(DENVER);
+  // A started event's pin can't move (the server refuses it too).
+  const [pinLocked, setPinLocked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+
+  // The map opens on the member's neighborhood.
+  useEffect(() => {
+    if (!token) return;
+    getMyProfile(token)
+      .then((profile) => {
+        if (profile.neighborhood.center) setMapCenter(profile.neighborhood.center);
+      })
+      .catch(() => undefined);
+  }, [token]);
 
   // Editing: fill the form from the saved event.
   useEffect(() => {
@@ -104,6 +124,10 @@ export default function EventForm() {
         setTitleAlt(event.title_alt ?? "");
         setDescriptionAlt(event.description_alt ?? "");
         setShowAlt(!!event.title_alt || !!event.description_alt);
+        if (event.latitude !== null && event.longitude !== null) {
+          setPin({ latitude: event.latitude, longitude: event.longitude });
+          setPinLocked(new Date(event.starts_at).getTime() <= Date.now());
+        }
       })
       .catch((e) => setError(e as ApiError))
       .finally(() => setLoaded(true));
@@ -154,6 +178,8 @@ export default function EventForm() {
       starts_at: toServerTime(date, start),
       ends_at: hasEnd ? toServerTime(date, end) : null,
       location_text: location.trim(),
+      latitude: pin?.latitude ?? null,
+      longitude: pin?.longitude ?? null,
       partiful_url: partifulUrl.trim(),
     };
     setBusy(true);
@@ -176,6 +202,26 @@ export default function EventForm() {
   if (!ready || !loaded) return <Loading />;
 
   const otherLanguage: Language = writing === "es" ? "en" : "es";
+
+  if (step === "pin") {
+    return (
+      <Screen>
+        <BackButton />
+        <Title>{t("post.pin_title")}</Title>
+        <Intro>{pinLocked ? t("post.pin_locked") : t("post.pin_intro")}</Intro>
+        <PinMap center={mapCenter} pin={pin} onChange={setPin} locked={pinLocked} />
+        <Caption>{t("post.pin_privacy")}</Caption>
+        <ErrorMessage message={errorMessage(t, error)} />
+        <Button
+          title={editingId ? t("post.save_button") : t("post.post_button")}
+          onPress={onSubmit}
+          busy={busy}
+          disabled={!pin || !category || !title.trim() || !location.trim()}
+        />
+        <TextLink label={t("post.back_to_details")} onPress={() => setStep("details")} />
+      </Screen>
+    );
+  }
 
   if (step === "category") {
     return (
@@ -307,9 +353,8 @@ export default function EventForm() {
 
       <ErrorMessage message={errorMessage(t, error)} />
       <Button
-        title={editingId ? t("post.save_button") : t("post.post_button")}
-        onPress={onSubmit}
-        busy={busy}
+        title={t("post.continue_to_pin")}
+        onPress={() => setStep("pin")}
         disabled={!category || !title.trim() || !location.trim()}
       />
       <View style={{ height: space.l }} />

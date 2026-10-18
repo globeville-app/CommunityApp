@@ -51,11 +51,18 @@ export type EventData = {
   starts_at: string;
   ends_at: string | null;
   location_text: string;
+  /** The map pin. Events posted before Milestone 3 may have none. */
+  latitude: number | null;
+  longitude: number | null;
+  /** True for the organizer of an upcoming event that has no pin yet. */
+  needs_pin: boolean;
   partiful_url: string | null;
   status: "active" | "cancelled";
   is_past: boolean;
   /** null once the organizer deleted their account ("Former neighbor"). */
   organizer_name: string | null;
+  /** For the organizer's member page; null once they deleted their account. */
+  organizer_member_id: number | null;
   is_organizer: boolean;
   going_count: number;
   is_going: boolean;
@@ -74,6 +81,8 @@ export type EventInput = {
   starts_at: string;
   ends_at?: string | null;
   location_text: string;
+  latitude: number | null;
+  longitude: number | null;
   partiful_url?: string;
 };
 
@@ -84,15 +93,26 @@ export type AuthResult = { token: string; language: Language };
 
 export type MatchResult = { neighborhood_id: number; name: string; aliases: string[] };
 
+export type LatLng = { latitude: number; longitude: number };
+
+export type BadgeVisibility = "neighborhood" | "private";
+
 export type Profile = {
+  /** The member id neighbors use for the member page. */
+  id: number;
   display_name: string;
   first_name: string;
   last_initial: string;
   photo_url: string | null;
   interests: string[];
-  neighborhood: { id: number; name: string };
+  /** center: where the event pin map opens; null if the server lacks the map file. */
+  neighborhood: { id: number; name: string; center?: LatLng | null };
   alias: string | null;
   role?: "member" | "organizer";
+  auto_checkin: boolean;
+  badge_visibility: BadgeVisibility;
+  /** The first auto check-in offer was shown (it never shows again). */
+  checkin_offer_shown: boolean;
   language: Language;
   joined_at: string;
 };
@@ -119,3 +139,79 @@ export type ProfileInput = {
   interests: string[];
   language?: Language;
 };
+
+// ---- Badges (docs/MILESTONE_3.md, API) ----
+
+export type BadgeKind = "growth" | "keepsake";
+
+/** A member's badge. stage: 0 = not earned, 1–5 = Seed–Grove (keepsakes: 1 once earned). */
+export type BadgeData = {
+  key: string;
+  kind: BadgeKind;
+  stage: number;
+  count: number;
+  next_threshold: number | null;
+  earned_at: string | null;
+};
+
+/** The rules, from backend/badges/config.py. Words live in the app. */
+export type BadgeCatalog = {
+  badges: { key: string; kind: BadgeKind; track: string | null; emblem: string; thresholds: number[] }[];
+  stages: string[];
+  grove_milestone_multipliers: number[];
+  collect_window_days: number;
+};
+
+/** A badge this event would grow if collected. */
+export type BadgeGrowth = { badge: string; stage: number; count: number; next_threshold: number | null };
+
+export type CollectCard = {
+  event_id: number;
+  title: string;
+  title_alt: string | null;
+  language: Language;
+  category: string;
+  starts_at: string;
+  collect_until: string;
+  grows: BadgeGrowth[];
+};
+
+export type Celebration = {
+  id: number;
+  badge_key: string;
+  kind: "earned" | "stage_up" | "grove_milestone";
+  stage: number;
+  count: number;
+};
+
+/** Empty ({}) until the host's first event counts as hosted. */
+export type Impact =
+  | {
+      brought_together: number;
+      first_timers: number;
+      came_back: number;
+      most_popular: { title: string; starts_at: string; attendee_count: number };
+    }
+  | Record<string, never>;
+
+export type MemberPage = {
+  id: number;
+  display_name: string;
+  photo_url: string | null;
+  neighborhood: { id: number; name: string };
+  alias: string | null;
+  member_since: string;
+  badges: BadgeData[];
+};
+
+/** One event for the phone to watch (auto check-in). Only the event's pin. */
+export type Geofence = {
+  event_id: number;
+  latitude: number;
+  longitude: number;
+  radius_meters: number;
+  opens_at: string;
+  closes_at: string;
+};
+
+export type ProfileSettings = { auto_checkin?: boolean; badge_visibility?: BadgeVisibility };

@@ -6,7 +6,17 @@
  */
 import { ApiError, EventData, EventInput, Translation } from "../apiTypes";
 import type { Language } from "../i18n";
-import { CATEGORY_GROUPS, CATEGORY_KEYS, DemoEvent, Db, load, pause, save, userFor } from "./fakeBackend";
+import {
+  CATEGORY_GROUPS,
+  CATEGORY_KEYS,
+  DemoEvent,
+  Db,
+  load,
+  neighborhoodCenter,
+  pause,
+  save,
+  userFor,
+} from "./fakeBackend";
 
 const DENVER = "America/Denver";
 const HOUR = 60 * 60 * 1000;
@@ -61,9 +71,18 @@ function daysFromNow(days: number, hour: number) {
 
 // ---- Sample events ----------------------------------------------------------------
 
+/** The sample organizers' member pages (see fakeBadges.ts), by name. */
+export const SAMPLE_MEMBER_IDS: Record<string, number> = { "Rosa M.": 9001, "Kim T.": 9002, "Luis G.": 9003, "Ann P.": 9004 };
+
 function seed(db: Db, neighborhoodId: number) {
   if (db.seededNeighborhoods.includes(neighborhoodId)) return;
   db.seededNeighborhoods.push(neighborhoodId);
+  const center = neighborhoodCenter(neighborhoodId);
+  // Pins a short walk from the neighborhood's middle.
+  const near = (north: number, east: number) => ({
+    latitude: Number((center.latitude + north * 0.001).toFixed(6)),
+    longitude: Number((center.longitude + east * 0.001).toFixed(6)),
+  });
   const base = {
     neighborhoodId,
     organizerEmail: "sample@neighbors.demo",
@@ -86,6 +105,7 @@ function seed(db: Db, neighborhoodId: number) {
       location_text: "Rec center, back room",
       organizerName: "Rosa M.",
       extraGoing: 11,
+      ...near(1, -2),
     },
     {
       category: "cleanup",
@@ -99,6 +119,7 @@ function seed(db: Db, neighborhoodId: number) {
       location_text: "Alley behind the 4400 block",
       organizerName: "Kim T.",
       extraGoing: 4,
+      ...near(-2, 1),
     },
     {
       category: "potluck",
@@ -113,6 +134,7 @@ function seed(db: Db, neighborhoodId: number) {
       location_text: "Corner of the park by the playground",
       organizerName: "Luis G.",
       extraGoing: 23,
+      ...near(0, 0),
     },
     {
       category: "yard_sale",
@@ -127,6 +149,39 @@ function seed(db: Db, neighborhoodId: number) {
       organizerName: "Ann P.",
       extraGoing: 2,
       status: "cancelled",
+      latitude: null,
+      longitude: null,
+    },
+    // Already over, and "you" were going: they wait in My Impact to collect.
+    {
+      category: "cleanup",
+      language: "en",
+      title: "River trail cleanup",
+      description: "Bags, gloves and coffee provided.",
+      title_alt: "Limpieza del sendero del río",
+      description_alt: "Damos bolsas, guantes y café.",
+      starts_at: daysFromNow(-1, 9),
+      ends_at: daysFromNow(-1, 11),
+      location_text: "Trailhead by the bridge",
+      organizerName: "Kim T.",
+      extraGoing: 9,
+      viewerGoing: true,
+      ...near(2, 2),
+    },
+    {
+      category: "potluck",
+      language: "es",
+      title: "Comida compartida de la cuadra",
+      description: "Trae un platillo para compartir.",
+      title_alt: "Block potluck",
+      description_alt: "Bring a dish to share.",
+      starts_at: daysFromNow(-3, 17),
+      ends_at: daysFromNow(-3, 20),
+      location_text: "Luis's front yard",
+      organizerName: "Luis G.",
+      extraGoing: 14,
+      viewerGoing: true,
+      ...near(-1, -1),
     },
   ];
   for (const sample of samples) {
@@ -159,8 +214,20 @@ function groupOf(category: string) {
   return CATEGORY_GROUPS.find((g) => g.categories.includes(category))?.key ?? null;
 }
 
-function ended(event: DemoEvent) {
-  return new Date(event.ends_at ?? event.starts_at).getTime() < Date.now();
+/** When it ends: its end time, or midnight Denver time after the start. */
+export function eventEnd(event: DemoEvent) {
+  if (event.ends_at) return new Date(event.ends_at);
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: DENVER }).format(new Date(event.starts_at));
+  return new Date(fromDenver(`${day}T00:00`)!.getTime() + DAY);
+}
+
+export function ended(event: DemoEvent) {
+  return eventEnd(event).getTime() <= Date.now();
+}
+
+/** Going: tapped "I'm going", or a sample that pretends you did (until declined). */
+export function isGoing(db: Db, event: DemoEvent, email: string) {
+  return event.goingEmails.includes(email) || (!!event.viewerGoing && !db.badges[email]?.declined.includes(event.id));
 }
 
 function toJson(db: Db, event: DemoEvent, email: string): EventData {
@@ -179,13 +246,18 @@ function toJson(db: Db, event: DemoEvent, email: string): EventData {
     starts_at: event.starts_at,
     ends_at: event.ends_at,
     location_text: event.location_text,
+    latitude: event.latitude ?? null,
+    longitude: event.longitude ?? null,
+    needs_pin: event.organizerEmail === email && event.latitude == null && !ended(event) && event.status === "active",
     partiful_url: event.partiful_url,
     status: event.status,
     is_past: ended(event),
     organizer_name: event.organizerEmail === null ? null : (organizer?.display_name ?? event.organizerName),
+    organizer_member_id:
+      event.organizerEmail === null ? null : organizer ? (organizer.id ?? 1) : (SAMPLE_MEMBER_IDS[event.organizerName] ?? null),
     is_organizer: event.organizerEmail === email,
-    going_count: event.goingEmails.length + event.extraGoing,
-    is_going: event.goingEmails.includes(email),
+    going_count: event.goingEmails.length + event.extraGoing + (isGoing(db, event, email) && !event.goingEmails.includes(email) ? 1 : 0),
+    is_going: isGoing(db, event, email),
     matches_interests: (profile?.interests ?? []).includes(event.category),
   };
 }
@@ -219,6 +291,17 @@ function check(input: Partial<EventInput>, existing?: DemoEvent) {
     throw new ApiError("start_in_past", 400);
   }
   if (end && end <= start) throw new ApiError("end_before_start", 400);
+  // The map pin (Milestone 3): required, inside Denver, fixed once started.
+  const latitude = input.latitude !== undefined ? (input.latitude ?? null) : (existing?.latitude ?? null);
+  const longitude = input.longitude !== undefined ? (input.longitude ?? null) : (existing?.longitude ?? null);
+  if (latitude === null || longitude === null) throw new ApiError("pin_required", 400);
+  if (latitude < 39.55 || latitude > 40.05 || longitude < -105.25 || longitude > -104.55) {
+    throw new ApiError("pin_outside_denver", 400);
+  }
+  if (started && existing.latitude != null && (latitude !== existing.latitude || longitude !== existing.longitude)) {
+    throw new ApiError("event_started", 409);
+  }
+  if (existing && ended(existing) && category !== existing.category) throw new ApiError("category_locked", 409);
   const url = (merged.partiful_url ?? "").trim();
   if (url && !/^https:\/\/(www\.)?partiful\.com(\/|$)/i.test(url)) throw new ApiError("invalid_partiful_url", 400);
   return {
@@ -232,6 +315,8 @@ function check(input: Partial<EventInput>, existing?: DemoEvent) {
     starts_at: toDenver(start),
     ends_at: end ? toDenver(end) : null,
     location_text: location,
+    latitude,
+    longitude,
     partiful_url: url || null,
   };
 }
@@ -250,6 +335,8 @@ export async function listEvents(token: string, filter: { group?: string; forYou
     .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
   return { events: events.map((e) => toJson(db, e, email)) };
 }
+
+export { member as demoMember, findEvent, toDenver };
 
 export async function getEvent(token: string, id: number) {
   await pause(200);

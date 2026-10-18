@@ -5,6 +5,15 @@ import * as SecureStore from "expo-secure-store";
 import { renderRouter } from "expo-router/testing-library";
 
 import Address from "../src/app/address";
+import BadgeDetail from "../src/app/badges/[key]";
+import AllBadges from "../src/app/badges/index";
+import Celebrate from "../src/app/celebrate";
+import CheckinOffer from "../src/app/checkin-offer";
+import Credits from "../src/app/credits";
+import MyImpact from "../src/app/impact";
+import MapsApp from "../src/app/maps-app";
+import Member from "../src/app/member/[id]";
+import SharePreview from "../src/app/share/[key]";
 import ComingSoon from "../src/app/coming-soon";
 import DeleteAccount from "../src/app/delete-account";
 import Start from "../src/app/index";
@@ -47,6 +56,15 @@ export function renderApp(initialUrl = "/") {
       report: Report,
       "coming-soon": ComingSoon,
       "delete-account": DeleteAccount,
+      impact: MyImpact,
+      "badges/index": AllBadges,
+      "badges/[key]": BadgeDetail,
+      "member/[id]": Member,
+      "checkin-offer": CheckinOffer,
+      celebrate: Celebrate,
+      "share/[key]": SharePreview,
+      "maps-app": MapsApp,
+      credits: Credits,
     },
     { initialUrl },
   );
@@ -71,4 +89,4 @@ export async function languageStore() {
   return Object.fromEntries(await AsyncStorage.multiGet(keys));
 }
 
-export { CONFIG, HIGHLAND_PROFILE, sampleEvent } from "./data";
+export { CATALOG, CONFIG, HIGHLAND_PROFILE, myBadges, sampleEvent } from "./data";

@@ -11,6 +11,14 @@ import {
   ApiError,
   AppConfig,
   AuthResult,
+  BadgeCatalog,
+  BadgeData,
+  Celebration,
+  CollectCard,
+  Geofence,
+  Impact,
+  MemberPage,
+  ProfileSettings,
   EventData,
   EventInput,
   MatchResult,
@@ -196,4 +204,68 @@ export function partifulPreview(token: string, url: string) {
 
 export function translateEvent(token: string, id: number, target: Language) {
   return request<Translation>(`/api/events/${id}/translate`, { method: "POST", token, json: { target } });
+}
+
+// ---- Badges and attendance (Milestone 3) ----
+
+export function updateProfileSettings(token: string, settings: ProfileSettings) {
+  return request<Profile>("/api/profile/me", { method: "PATCH", token, json: settings });
+}
+
+export function getBadgeCatalog(token: string) {
+  return request<BadgeCatalog>("/api/badges/catalog", { token });
+}
+
+export function getMyBadges(token: string) {
+  return request<{ badges: BadgeData[] }>("/api/me/badges", { token });
+}
+
+export function getMember(token: string, id: number) {
+  return request<MemberPage>(`/api/members/${id}`, { token });
+}
+
+export function getCollectCards(token: string) {
+  return request<{ cards: CollectCard[]; show_checkin_reoffer: boolean }>("/api/me/collect", { token });
+}
+
+export function collectEvent(token: string, id: number) {
+  return request<{ celebrations: Celebration[] }>(`/api/events/${id}/collect`, { method: "POST", token });
+}
+
+/** "I didn't make it": off the going count, nothing counted. */
+export function declineEvent(token: string, id: number) {
+  return request<void>(`/api/events/${id}/decline`, { method: "POST", token });
+}
+
+/**
+ * Auto check-in: "I arrived at event X". PRIVACY: no body at all, so no
+ * location can ever be sent.
+ */
+export function checkIn(token: string, id: number) {
+  return request<{ celebrations: Celebration[] }>(`/api/events/${id}/checkin`, { method: "POST", token });
+}
+
+export function getGeofences(token: string) {
+  return request<{ geofences: Geofence[] }>("/api/me/geofences", { token });
+}
+
+export function getImpact(token: string) {
+  return request<Impact>("/api/me/impact", { token });
+}
+
+export function getCelebrations(token: string) {
+  return request<{ celebrations: Celebration[] }>("/api/me/celebrations", { token });
+}
+
+export function markCelebrationsSeen(token: string, ids: number[]) {
+  return request<void>("/api/me/celebrations/seen", { method: "POST", token, json: { ids } });
+}
+
+/** Counts a share: the badge and the date only. */
+export function logShare(token: string, badgeKey: string) {
+  return request<void>(`/api/badges/${badgeKey}/shared`, { method: "POST", token });
+}
+
+export function markCheckinOfferSeen(token: string, which: "first" | "reoffer") {
+  return request<void>("/api/me/checkin-offer/seen", { method: "POST", token, json: { which } });
 }

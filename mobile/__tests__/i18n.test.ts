@@ -40,7 +40,11 @@ describe("translation files", () => {
 
   it("uses Spanish characters that the Outfit font includes", () => {
     // Outfit covers Latin-1 (á é í ó ú ü ñ ¿ ¡). Anything outside it would show as a box.
-    const outside = Object.values(spanish).join("").replace(/[\u0000-ÿ·…]/g, "");
+    // Emoji (🎉 🌱) come from the phone's emoji font, not Outfit.
+    const outside = Object.values(spanish)
+      .join("")
+      .replace(/[\u0000-ÿ·…]/g, "")
+      .replace(/\p{Extended_Pictographic}/gu, "");
     expect(outside).toBe("");
     expect(Object.values(spanish).join("")).toMatch(/[áéíóúñ¿¡]/);
   });

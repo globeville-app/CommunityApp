@@ -36,6 +36,13 @@ async function useSpanish() {
   settings.unmount();
 }
 
+/** Tap the (mocked) map at a spot, which drops the pin there. */
+async function dropPin(latitude: number, longitude: number) {
+  await act(async () => {
+    fireEvent(await screen.findByTestId("pin-map"), "press", { nativeEvent: { coordinate: { latitude, longitude } } });
+  });
+}
+
 /** Every piece of visible text on screen. */
 function visibleText(): string[] {
   return screen.UNSAFE_getAllByType(Text).flatMap((node) => {
@@ -192,6 +199,8 @@ describe("posting an event", () => {
     expect(screen.getByText("Neighbors will see this. For a block party, a block or cross street is enough.")).toBeTruthy();
     fireEvent.press(screen.getByRole("link", { name: "Add Spanish version" }));
     fireEvent.changeText(screen.getByLabelText("Title in Spanish (optional)"), "Limpieza del río");
+    await pressAndSettle(screen.getByRole("button", { name: "Next: map pin" }));
+    await dropPin(39.7621, -105.0098);
     await pressAndSettle(screen.getByRole("button", { name: "Post" }));
 
     expect(mocked.createEvent).toHaveBeenCalledWith("tok-123", {
@@ -205,6 +214,8 @@ describe("posting an event", () => {
       starts_at: "2030-10-24T09:30",
       ends_at: "2030-10-24T12:00",
       location_text: "Riverside park by the bridge",
+      latitude: 39.7621,
+      longitude: -105.0098,
       partiful_url: "",
     });
     expect(await screen.findByRole("header", { name: "River cleanup" })).toBeTruthy();
@@ -216,6 +227,8 @@ describe("posting an event", () => {
     fireEvent.press(screen.getByRole("link", { name: "Skip" }));
     fireEvent.changeText(await screen.findByLabelText("Title"), "Cleanup");
     fireEvent.changeText(screen.getByLabelText("Meeting spot"), "The park");
+    await pressAndSettle(screen.getByRole("button", { name: "Next: map pin" }));
+    await dropPin(39.76, -105.01);
     await pressAndSettle(screen.getByRole("button", { name: "Post" }));
     expect(await screen.findByText("The start time has to be in the future.")).toBeTruthy();
   });
@@ -273,8 +286,14 @@ describe("the event detail", () => {
     expect(screen.getByLabelText("Date")).toHaveProp("value", "2030-01-10");
     expect(screen.getByLabelText("Start time")).toHaveProp("value", "18:00");
     fireEvent.changeText(screen.getByLabelText("Title"), "Winter potluck");
+    await pressAndSettle(screen.getByRole("button", { name: "Next: map pin" }));
     await pressAndSettle(screen.getByRole("button", { name: "Save changes" }));
-    expect(mocked.updateEvent).toHaveBeenCalledWith("tok-123", 7, expect.objectContaining({ title: "Winter potluck", starts_at: "2030-01-10T18:00" }));
+    // The existing pin is kept.
+    expect(mocked.updateEvent).toHaveBeenCalledWith(
+      "tok-123",
+      7,
+      expect.objectContaining({ title: "Winter potluck", starts_at: "2030-01-10T18:00", latitude: 39.7615, longitude: -105.0112 }),
+    );
   });
 
   it("report submits and confirms", async () => {

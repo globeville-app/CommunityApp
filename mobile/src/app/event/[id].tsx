@@ -2,30 +2,37 @@
  * Event detail: everything about one event, "I'm going", the Partiful link,
  * reading it in your language, reporting, and (for the organizer) Edit and
  * Cancel. The app never shows who is going, only how many.
+ *
+ * Milestone 3: the location opens the "Open in" sheet, the organizer's name
+ * opens their member page, organizers of pinless upcoming events get an
+ * "Add a map pin" prompt, and the first "I'm going" offers auto check-in.
  */
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
   ApiError,
   cancelEvent,
   EventData,
   getEvent,
+  getMyProfile,
   reportEvent,
   setGoing,
   translateEvent,
   Translation,
 } from "../../api";
 import { useAuth } from "../../auth";
+import { syncGeofences } from "../../checkin/geofencing";
 import { CategoryChip } from "../../components/CategoryChip";
 import { DateBlock } from "../../components/EventCard";
 import { timeRange, weekdayDate } from "../../i18n/dates";
 import { errorMessage } from "../../i18n/errors";
 import { useLanguage } from "../../language";
+import { useGetThere } from "../../maps/OpenInSheet";
 import { colors, space, type } from "../../theme";
 import {
   BackButton,
@@ -62,6 +69,7 @@ export default function EventDetail() {
   const [reason, setReason] = useState("");
   const [reported, setReported] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const getThere = useGetThere();
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -128,6 +136,15 @@ export default function EventDetail() {
     try {
       const result = await setGoing(token, event.id, !event.is_going);
       setEvent({ ...event, ...result });
+      // Watch (or stop watching) this event's place, if auto check-in is on.
+      syncGeofences(token).catch(() => undefined);
+      if (result.is_going) {
+        // The auto check-in offer: once, ever, on the first "I'm going".
+        const profile = await getMyProfile(token).catch(() => null);
+        if (profile && !profile.checkin_offer_shown && !profile.auto_checkin) {
+          router.push({ pathname: "/checkin-offer", params: { which: "first" } });
+        }
+      }
     } catch (e) {
       setError(e as ApiError);
     } finally {
@@ -193,16 +210,31 @@ export default function EventDetail() {
             })}
           </Body>
         </View>
-        <View style={styles.line}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("maps.directions_to", { place: event.location_text })}
+          onPress={() =>
+            getThere.open({ latitude: event.latitude, longitude: event.longitude, label: event.location_text })
+          }
+          style={({ pressed }) => [styles.line, styles.tappable, pressed && { opacity: 0.75 }]}
+        >
           <Ionicons name="location-outline" size={18} color={colors.glowTurquoise} />
-          <Body onGlass>{event.location_text}</Body>
-        </View>
-        <View style={styles.line}>
+          <Text style={[type.body, styles.link]}>{event.location_text}</Text>
+          <Ionicons name="navigate-outline" size={16} color={colors.textSecondary} />
+        </Pressable>
+        <Pressable
+          accessibilityRole={event.organizer_member_id ? "button" : undefined}
+          disabled={!event.organizer_member_id}
+          onPress={() =>
+            router.push({ pathname: "/member/[id]", params: { id: String(event.organizer_member_id) } })
+          }
+          style={({ pressed }) => [styles.line, styles.tappable, pressed && { opacity: 0.75 }]}
+        >
           <Ionicons name="person-outline" size={18} color={colors.glowTurquoise} />
-          <Body onGlass>
+          <Text style={[type.body, event.organizer_member_id ? styles.link : styles.plain]}>
             {t("events.posted_by", { name: event.organizer_name ?? t("events.former_neighbor") })}
-          </Body>
-        </View>
+          </Text>
+        </Pressable>
         {description ? <Body>{description}</Body> : null}
       </GlassCard>
 
@@ -222,6 +254,17 @@ export default function EventDetail() {
           variant="secondary"
           onPress={() => WebBrowser.openBrowserAsync(event.partiful_url!)}
         />
+      ) : null}
+
+      {event.needs_pin ? (
+        <GlassCard>
+          <Text style={[type.section, { color: colors.textPrimary }]}>{t("events.add_pin_title")}</Text>
+          <Body onGlass>{t("events.add_pin_body")}</Body>
+          <Button
+            title={t("events.add_pin_button")}
+            onPress={() => router.push({ pathname: "/event-form", params: { id: String(event.id), step: "pin" } })}
+          />
+        </GlassCard>
       ) : null}
 
       {event.is_organizer && !cancelled ? (
@@ -261,6 +304,7 @@ export default function EventDetail() {
         onConfirm={onCancel}
         onCancel={() => setConfirmingCancel(false)}
       />
+      {getThere.sheet}
     </Screen>
   );
 }
@@ -270,6 +314,9 @@ const styles = StyleSheet.create({
   cancelled: { color: colors.danger, fontFamily: "Outfit_600SemiBold" },
   translatedRow: { flexDirection: "row", alignItems: "center", gap: space.s, flexWrap: "wrap" },
   line: { flexDirection: "row", gap: space.xs, alignItems: "flex-start" },
+  tappable: { minHeight: 44, alignItems: "center" },
+  link: { flex: 1, color: colors.textPrimary, textDecorationLine: "underline" },
+  plain: { flex: 1, color: colors.textPrimary },
   going: { color: colors.glowTurquoise },
   organizer: { flexDirection: "row", gap: space.s },
 });

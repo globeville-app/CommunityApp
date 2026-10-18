@@ -13,6 +13,9 @@ export const API_BASE_URL: string = String(
 export const PRIVACY_URL: string = String(Constants.expoConfig?.extra?.privacyUrl ?? "");
 export const TERMS_URL: string = String(Constants.expoConfig?.extra?.termsUrl ?? "");
 
+/** The invite link on share cards, from shared/app_config.json. */
+export const INVITE_URL: string = String(Constants.expoConfig?.extra?.inviteUrl ?? "https://globeville.app");
+
 /** "1.0.0 (1)": the version (app.config.ts) and build number. */
 export const APP_VERSION: string = Constants.expoConfig?.version ?? "0.0.0";
 export const BUILD_NUMBER: string =

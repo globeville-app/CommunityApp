@@ -11,6 +11,7 @@ import { Outfit_500Medium } from "@expo-google-fonts/outfit/500Medium";
 import { Outfit_600SemiBold } from "@expo-google-fonts/outfit/600SemiBold";
 
 import { AuthProvider } from "../auth";
+import { AppWatchers } from "../components/AppWatchers";
 import { CategoriesProvider } from "../categories";
 import { DemoBanner } from "../components/DemoBanner";
 import { GlowBackground } from "../components/GlowBackground";
@@ -72,13 +73,16 @@ function AppShell() {
   return (
     <View style={{ flex: 1 }} accessibilityLanguage={language}>
       <DemoBanner />
+      <AppWatchers />
       <Stack
         screenOptions={{
           headerShown: false,
           animation: "fade",
           contentStyle: { backgroundColor: "transparent" },
         }}
-      />
+      >
+        <Stack.Screen name="celebrate" options={{ presentation: "fullScreenModal", animation: "fade" }} />
+      </Stack>
     </View>
   );
 }

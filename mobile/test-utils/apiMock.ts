@@ -7,7 +7,7 @@
  * then `useDefaultReplies(mocked)` in beforeEach.
  */
 import type * as Api from "../src/api";
-import { CONFIG, HIGHLAND_PROFILE } from "./data";
+import { CATALOG, CONFIG, HIGHLAND_PROFILE, myBadges } from "./data";
 
 const SERVER_CALLS = [
   "getConfig",
@@ -31,6 +31,20 @@ const SERVER_CALLS = [
   "reportEvent",
   "partifulPreview",
   "translateEvent",
+  "updateProfileSettings",
+  "getBadgeCatalog",
+  "getMyBadges",
+  "getMember",
+  "getCollectCards",
+  "collectEvent",
+  "declineEvent",
+  "checkIn",
+  "getGeofences",
+  "getImpact",
+  "getCelebrations",
+  "markCelebrationsSeen",
+  "logShare",
+  "markCheckinOfferSeen",
 ] as const;
 
 export function fakeApi() {
@@ -46,4 +60,15 @@ export function useDefaultReplies(mocked: jest.Mocked<typeof Api>) {
   mocked.updateInterests.mockImplementation(async (_token, interests) => ({ ...HIGHLAND_PROFILE, interests }));
   mocked.listEvents.mockResolvedValue({ events: [] });
   mocked.logout.mockResolvedValue(undefined);
+  mocked.getBadgeCatalog.mockResolvedValue(CATALOG);
+  mocked.getMyBadges.mockResolvedValue({ badges: myBadges() });
+  mocked.getCollectCards.mockResolvedValue({ cards: [], show_checkin_reoffer: false });
+  mocked.getImpact.mockResolvedValue({});
+  mocked.getCelebrations.mockResolvedValue({ celebrations: [] });
+  mocked.markCelebrationsSeen.mockResolvedValue(undefined);
+  mocked.getGeofences.mockResolvedValue({ geofences: [] });
+  mocked.markCheckinOfferSeen.mockResolvedValue(undefined);
+  mocked.logShare.mockResolvedValue(undefined);
+  mocked.declineEvent.mockResolvedValue(undefined);
+  mocked.updateProfileSettings.mockImplementation(async (_token, settings) => ({ ...HIGHLAND_PROFILE, ...settings }));
 }

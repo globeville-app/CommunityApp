@@ -61,6 +61,14 @@ class Boundaries:
                 return area
         return None
 
+    def center(self, neighborhood_id):
+        """(lat, lon) of a point inside the neighborhood, for centering maps; None if unknown."""
+        for area in self.areas:
+            if area.id == neighborhood_id:
+                point = area.geometry.representative_point()
+                return (round(point.y, 6), round(point.x, 6))
+        return None
+
     def by_name(self, name):
         for area in self.areas:
             if area.name == name:
@@ -135,3 +143,12 @@ def load_boundaries(path):
 def get_boundaries():
     """The Denver boundaries, loaded once per server process."""
     return load_boundaries(settings.NEIGHBORHOODS_GEOJSON)
+
+
+def neighborhood_center(neighborhood_id):
+    """{"latitude", "longitude"} inside a neighborhood, or None if the file isn't there."""
+    try:
+        point = get_boundaries().center(neighborhood_id)
+    except (NeighborhoodDataError, OSError):
+        return None
+    return {"latitude": point[0], "longitude": point[1]} if point else None

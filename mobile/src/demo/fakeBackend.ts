@@ -33,6 +33,15 @@ type DemoData = {
   aliases: Record<string, string[]>;
   // The event categories, read from backend/events/categories.py at build time.
   categoryGroups: CategoryGroup[];
+  // The badge rules, read from backend/badges/config.py at build time.
+  badgeRules: BadgeRules;
+};
+
+export type BadgeRules = {
+  thresholds: Record<string, number[]>;
+  growth: { key: string; track: string; rule: string }[];
+  keepsakes: string[];
+  sensitive: string[];
 };
 
 // Put into the page by scripts/build-web-demo.mjs.
@@ -40,8 +49,10 @@ const DATA: DemoData = (globalThis as { __DEMO_DATA__?: DemoData }).__DEMO_DATA_
   neighborhoods: [],
   aliases: {},
   categoryGroups: [],
+  badgeRules: { thresholds: {}, growth: [], keepsakes: [], sensitive: [] },
 };
 
+export const BADGE_RULES = DATA.badgeRules;
 export const CATEGORY_GROUPS = DATA.categoryGroups;
 export const CATEGORY_KEYS = CATEGORY_GROUPS.flatMap((group) => group.categories);
 const NEIGHBORHOODS = [...DATA.neighborhoods].sort((a, b) => a.id - b.id);
@@ -87,31 +98,60 @@ export const SIMULATE_OUTAGE = "#down";
 
 // ---- Pretend database, saved in this browser -------------------------------
 
-export type DemoEvent = Omit<EventData, "group" | "is_past" | "organizer_name" | "is_organizer" | "going_count" | "is_going" | "matches_interests"> & {
+export type DemoEvent = Omit<EventData, "group" | "is_past" | "organizer_name" | "is_organizer" | "going_count" | "is_going" | "matches_interests" | "needs_pin" | "organizer_member_id"> & {
   neighborhoodId: number;
   organizerEmail: string | null; // null once deleted
   organizerName: string; // made-up neighbors in the samples
   goingEmails: string[];
   extraGoing: number; // pretend neighbors going, in the samples
   createdAt: string;
+  // Samples from before you joined that pretend you tapped "I'm going",
+  // so My Impact has something to collect.
+  viewerGoing?: boolean;
+};
+
+/** The demo's attendance, badges and celebrations for one person. */
+export type DemoBadges = {
+  attended: { eventId: number; method: "auto" | "collect"; language: Language; at: string }[];
+  declined: number[];
+  stages: Record<string, number>; // highest stage reached, never lowered
+  keepsakes: string[];
+  celebrations: { id: number; badge_key: string; kind: "earned" | "stage_up" | "grove_milestone"; stage: number; count: number; seen: boolean }[];
 };
 
 export type Db = {
   users: Record<string, { password: string; language?: Language }>;
   tokens: Record<string, string>; // token → email
   matches: Record<string, number>; // email → neighborhood id (never the address)
-  profiles: Record<string, Omit<Profile, "neighborhood" | "language"> & { neighborhoodId: number }>;
+  profiles: Record<string, DemoProfile>;
   // Only how many reports were sent; the demo has no team to read them.
   reportsSent?: number;
   events: Record<string, DemoEvent>;
   nextEventId: number;
   seededNeighborhoods: number[];
+  badges: Record<string, DemoBadges>; // by email
+  nextCelebrationId: number;
 };
 
-const DB_KEY = "demo_db_v3"; // v3: events, interests are event categories
+type Milestone3Settings = "id" | "auto_checkin" | "badge_visibility" | "checkin_offer_shown";
+// Older saved demo profiles lack the Milestone 3 settings, so they're optional here.
+type DemoProfile = Omit<Profile, "neighborhood" | "language" | Milestone3Settings> &
+  Partial<Pick<Profile, Milestone3Settings>> & { neighborhoodId: number };
+
+const DB_KEY = "demo_db_v4"; // v4: badges, pins
 
 function emptyDb(): Db {
-  return { users: {}, tokens: {}, matches: {}, profiles: {}, events: {}, nextEventId: 1, seededNeighborhoods: [] };
+  return {
+    users: {},
+    tokens: {},
+    matches: {},
+    profiles: {},
+    events: {},
+    nextEventId: 1,
+    seededNeighborhoods: [],
+    badges: {},
+    nextCelebrationId: 1,
+  };
 }
 
 export function load(): Db {
@@ -185,12 +225,24 @@ function newToken() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function toProfile(db: Db, email: string): Profile {
+/** A point inside the neighborhood, where the pin map opens. */
+export function neighborhoodCenter(id: number) {
+  const ring = neighborhoodById(id).rings[0] ?? [];
+  const lon = ring.reduce((sum, p) => sum + p[0], 0) / Math.max(ring.length, 1);
+  const lat = ring.reduce((sum, p) => sum + p[1], 0) / Math.max(ring.length, 1);
+  return { latitude: Number(lat.toFixed(6)), longitude: Number(lon.toFixed(6)) };
+}
+
+export function toProfile(db: Db, email: string): Profile {
   const { neighborhoodId, ...rest } = db.profiles[email];
   const neighborhood = neighborhoodById(neighborhoodId);
   return {
     ...rest,
-    neighborhood: { id: neighborhood.id, name: neighborhood.name },
+    id: rest.id ?? 1,
+    auto_checkin: rest.auto_checkin ?? false,
+    badge_visibility: rest.badge_visibility ?? "neighborhood",
+    checkin_offer_shown: rest.checkin_offer_shown ?? false,
+    neighborhood: { id: neighborhood.id, name: neighborhood.name, center: neighborhoodCenter(neighborhood.id) },
     language: languageOf(db, email),
   };
 }
@@ -322,6 +374,10 @@ export async function saveProfile(token: string, input: ProfileInput): Promise<P
   const lastInitial = lastName.slice(0, 1).toUpperCase();
   const existing = db.profiles[email];
   db.profiles[email] = {
+    id: existing?.id ?? Object.keys(db.profiles).length + 1,
+    auto_checkin: existing?.auto_checkin ?? false,
+    badge_visibility: existing?.badge_visibility ?? "neighborhood",
+    checkin_offer_shown: existing?.checkin_offer_shown ?? false,
     display_name: `${firstName} ${lastInitial}.`,
     first_name: firstName,
     last_initial: lastInitial,
@@ -366,6 +422,7 @@ export async function deleteAccount(token: string, password: string) {
   delete db.users[email];
   delete db.profiles[email];
   delete db.matches[email];
+  delete db.badges[email];
   for (const [key, owner] of Object.entries(db.tokens)) if (owner === email) delete db.tokens[key];
   // Like the backend: upcoming events they organized are cancelled, the
   // rest show "Former neighbor", and their "I'm going" marks are removed.

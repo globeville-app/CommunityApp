@@ -10,6 +10,12 @@
  * The backend address comes from API_BASE_URL: mobile/.env on your computer,
  * or the build profile in eas.json for real builds (production is
  * https://api.globeville.app). Screens read it through src/config.ts.
+ *
+ * Milestone 3 (maps and auto check-in):
+ *   - GOOGLE_MAPS_ANDROID_KEY: the Google Maps key for Android's maps. The
+ *     owner provides it (MILESTONE_3.md, Open items); iPhone needs none.
+ *   - Background location ("Always") and geofencing need an EAS
+ *     development build; they don't work in Expo Go.
  */
 import type { ExpoConfig } from "expo/config";
 
@@ -17,6 +23,7 @@ const shared = require("../shared/app_config.json") as {
   app_name: string;
   privacy_url: string;
   terms_url: string;
+  invite_url: string;
 };
 
 const appName = shared.app_name;
@@ -45,6 +52,10 @@ const config: ExpoConfig = {
     supportsTablet: false,
     bundleIdentifier: APP_ID,
     buildNumber: String(BUILD_NUMBER),
+    infoPlist: {
+      // Lets the "Open in" sheet see whether these maps apps are installed.
+      LSApplicationQueriesSchemes: ["comgooglemaps", "waze"],
+    },
   },
   android: {
     adaptiveIcon: {
@@ -72,6 +83,18 @@ const config: ExpoConfig = {
     ],
     "expo-secure-store",
     [
+      "expo-location",
+      {
+        // Draft wording: the owner approves it before launch (MILESTONE_3.md, Open items).
+        locationWhenInUsePermission: `${appName} checks you in when you arrive at events you're going to. We never see or store where you are.`,
+        locationAlwaysAndWhenInUsePermission: `${appName} checks you in when you arrive at events you're going to, even when the app is closed. We never see or store where you are.`,
+        isIosBackgroundLocationEnabled: true,
+        isAndroidBackgroundLocationEnabled: true,
+      },
+    ],
+    ["react-native-maps", { androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_ANDROID_KEY ?? "" }],
+    "./plugins/withMapAppQueries",
+    [
       "expo-image-picker",
       {
         photosPermission: `${appName} uses your photo library so you can add a profile photo.`,
@@ -86,6 +109,8 @@ const config: ExpoConfig = {
     // Empty until the real pages exist; Settings then shows "Coming soon".
     privacyUrl: shared.privacy_url,
     termsUrl: shared.terms_url,
+    // Shown on share cards and in the share message.
+    inviteUrl: shared.invite_url,
     // The same number for every platform, so Settings can show it anywhere.
     buildNumber: String(BUILD_NUMBER),
   },

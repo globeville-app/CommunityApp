@@ -2,18 +2,22 @@
  * Settings (docs/SETTINGS.md): one glass list, in this order. Delete
  * account sits apart, in red. The app version is at the bottom.
  */
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Switch, View } from "react-native";
 
-import { logout } from "../api";
+import { BadgeVisibility, getMyProfile, logout, updateProfileSettings } from "../api";
 import { useAuth } from "../auth";
+import { turnOffAutoCheckin } from "../checkin/autoCheckin";
 import { LanguageToggle } from "../components/LanguageToggle";
 import { APP_VERSION, BUILD_NUMBER, PRIVACY_URL, TERMS_URL } from "../config";
+import { getRememberedMapApp } from "../maps/mapsPreference";
+import { MapApp } from "../maps/openIn";
 import { resetTo } from "../navigation";
-import { BackButton, Caption, ConfirmDialog, Divider, GlassCard, ListRow, Screen, Title } from "../ui";
+import { colors } from "../theme";
+import { BackButton, Caption, Choice, ConfirmDialog, Divider, GlassCard, ListRow, Screen, Title } from "../ui";
 
 type LegalPage = "privacy" | "terms";
 
@@ -21,6 +25,38 @@ export default function Settings() {
   const { t } = useTranslation();
   const { token, signOut } = useAuth();
   const [confirmingLogOut, setConfirmingLogOut] = useState(false);
+  const [autoCheckin, setAutoCheckin] = useState(false);
+  const [visibility, setVisibility] = useState<BadgeVisibility | null>(null);
+  const [mapApp, setMapApp] = useState<MapApp | null>(null);
+
+  // Reload on return, e.g. after turning auto check-in on or picking a maps app.
+  useFocusEffect(
+    useCallback(() => {
+      getRememberedMapApp().then(setMapApp);
+      if (!token) return;
+      getMyProfile(token)
+        .then((profile) => {
+          setAutoCheckin(profile.auto_checkin);
+          setVisibility(profile.badge_visibility);
+        })
+        .catch(() => undefined);
+    }, [token]),
+  );
+
+  async function onAutoCheckin(on: boolean) {
+    if (!token) return;
+    // On: the explanation screen first, then the phone's permission prompts.
+    if (on) return router.push({ pathname: "/checkin-offer", params: { which: "settings" } });
+    setAutoCheckin(false);
+    await turnOffAutoCheckin(token).catch(() => setAutoCheckin(true));
+  }
+
+  async function onVisibility(next: BadgeVisibility) {
+    if (!token) return;
+    const before = visibility;
+    setVisibility(next);
+    await updateProfileSettings(token, { badge_visibility: next }).catch(() => setVisibility(before));
+  }
 
   function openLegal(page: LegalPage) {
     const url = page === "privacy" ? PRIVACY_URL : TERMS_URL;
@@ -50,6 +86,32 @@ export default function Settings() {
           <LanguageToggle />
         </ListRow>
         <Divider />
+        <ListRow label={t("settings.auto_checkin")}>
+          <Switch
+            accessibilityLabel={t("settings.auto_checkin")}
+            value={autoCheckin}
+            onValueChange={onAutoCheckin}
+            trackColor={{ true: colors.glowTurquoise, false: "rgba(255,255,255,0.2)" }}
+            thumbColor="#FFFFFF"
+          />
+        </ListRow>
+        <Divider />
+        <ListRow label={t("settings.show_badges_to")} />
+        {visibility ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, paddingBottom: 12 }}>
+            <Choice
+              label={t("settings.badges_neighborhood")}
+              selected={visibility === "neighborhood"}
+              onPress={() => onVisibility("neighborhood")}
+            />
+            <Choice label={t("settings.badges_only_me")} selected={visibility === "private"} onPress={() => onVisibility("private")} />
+          </View>
+        ) : null}
+        <Divider />
+        <ListRow label={t("settings.maps_app")} chevron onPress={() => router.push("/maps-app")}>
+          <Caption onGlass>{mapApp ? t(`maps.app_${mapApp}`) : t("maps.ask_every_time")}</Caption>
+        </ListRow>
+        <Divider />
         <ListRow
           label={t("settings.report_problem")}
           chevron
@@ -59,6 +121,8 @@ export default function Settings() {
         <ListRow label={t("settings.privacy_policy")} chevron onPress={() => openLegal("privacy")} />
         <Divider />
         <ListRow label={t("settings.terms_of_use")} chevron onPress={() => openLegal("terms")} />
+        <Divider />
+        <ListRow label={t("settings.credits")} chevron onPress={() => router.push("/credits")} />
         <Divider />
         <ListRow label={t("settings.log_out")} onPress={() => setConfirmingLogOut(true)} />
       </GlassCard>

@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from accounts.models import language_of
 from events.categories import INTEREST_KEYS, MAX_INTERESTS
+from neighborhoods.geo import neighborhood_center
 
 
 def clean_interests(value):
@@ -53,7 +54,12 @@ def profile_json(profile, request):
         "last_initial": profile.last_initial,
         "photo_url": request.build_absolute_uri(profile.photo.url) if profile.photo else None,
         "interests": profile.interests,
-        "neighborhood": {"id": profile.neighborhood_id, "name": profile.neighborhood.name},
+        "neighborhood": {
+            "id": profile.neighborhood_id,
+            "name": profile.neighborhood.name,
+            # Where the event pin map opens (MILESTONE_3.md); a point inside, not a home.
+            "center": neighborhood_center(profile.neighborhood_id),
+        },
         "alias": profile.alias or None,
         "role": profile.role,
         "id": profile.pk,  # the member id neighbors use for the member page

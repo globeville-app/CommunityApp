@@ -129,7 +129,19 @@
     "translation_unavailable": "La traducción no está disponible ahora.",
     "translation_failed": "No pudimos traducir esto ahora.",
     "invalid_interest": "Uno de esos intereses no está en la lista.",
-    "too_many_interests": "Puedes elegir hasta 8 intereses."
+    "too_many_interests": "Puedes elegir hasta 8 intereses.",
+    "pin_required": "Pon un pin en el mapa.",
+    "invalid_pin": "Ese pin no se ve bien. Intenta ponerlo otra vez.",
+    "pin_outside_denver": "El pin tiene que estar en Denver.",
+    "category_locked": "La categoría no puede cambiar después de que termina el evento.",
+    "not_going": "No estabas marcado como que ibas a este evento.",
+    "event_not_ended": "Puedes recogerlo cuando termine el evento.",
+    "collect_window_closed": "Este evento ya no se puede recoger.",
+    "checkin_window_closed": "El registro es solo durante el evento.",
+    "already_recorded": "Ya recogiste este.",
+    "is_host": "Organizar cuenta por separado, así que no recoges tu propio evento.",
+    "member_not_found": "No encontramos a ese vecino.",
+    "invalid_badge_visibility": "Elige Mi barrio o Solo yo."
   },
   "demo": {
     "banner_label": "Demo",
@@ -153,7 +165,13 @@
     "version": "Versión {{version}} ({{build}})",
     "log_out_confirm_title": "¿Cerrar sesión?",
     "cancel": "Cancelar",
-    "opens_in_browser": "Se abre en el navegador de la app"
+    "opens_in_browser": "Se abre en el navegador de la app",
+    "auto_checkin": "Registro automático",
+    "show_badges_to": "Mostrar mis insignias a",
+    "badges_neighborhood": "Mi barrio",
+    "badges_only_me": "Solo yo",
+    "maps_app": "App de mapas",
+    "credits": "Créditos de código abierto"
   },
   "coming_soon": {
     "title": "Muy pronto",
@@ -300,7 +318,10 @@
     "keep_event": "No cancelar",
     "ended": "Este evento ya terminó.",
     "cancelled_notice": "Este evento se canceló.",
-    "date_time": "{{date}} · {{time}}"
+    "date_time": "{{date}} · {{time}}",
+    "add_pin_title": "Marca el lugar en el mapa",
+    "add_pin_body": "Solo se puede registrar automáticamente a los vecinos en eventos con pin. Mientras tanto, lo recogen después del evento.",
+    "add_pin_button": "Marcar en el mapa"
   },
   "picker": {
     "event_title": "¿Qué tipo de evento?",
@@ -350,6 +371,190 @@
     "alt_description_en": "Descripción en inglés (opcional)",
     "post_button": "Publicar",
     "save_button": "Guardar cambios",
-    "times_note": "Las horas son de Denver."
+    "times_note": "Las horas son de Denver.",
+    "continue_to_pin": "Siguiente: marcar en el mapa",
+    "pin_title": "¿Dónde exactamente?",
+    "pin_intro": "Toca el mapa para poner un pin en el punto de encuentro y arrástralo para ajustarlo. El punto de encuentro que escribiste se queda como nombre.",
+    "pin_locked": "Este evento ya empezó, así que su pin no se puede mover.",
+    "pin_privacy": "El pin marca el lugar del evento. Nunca lo pongas en tu casa.",
+    "pin_map_label": "Mapa. Toca para poner el pin del evento.",
+    "pin_demo_map": "Mapa de demostración: los teléfonos muestran un mapa real",
+    "back_to_details": "Volver a los detalles"
+  },
+  "badges": {
+    "local": {
+      "name": "Del Barrio",
+      "description": "Asiste a cualquier evento del barrio.",
+      "unit_one": "evento",
+      "unit_other": "eventos"
+    },
+    "best_guest": {
+      "name": "Invitado de Lujo",
+      "description": "Ve a eventos organizados por diferentes vecinos.",
+      "unit_one": "anfitrión",
+      "unit_other": "anfitriones"
+    },
+    "host": {
+      "name": "Anfitrión",
+      "description": "Organiza eventos que reúnan a tus vecinos.",
+      "unit_one": "vecino reunido",
+      "unit_other": "vecinos reunidos"
+    },
+    "day_one": {
+      "name": "Día Uno",
+      "description": "Acompaña a un vecino en su primer evento.",
+      "unit_one": "primer evento",
+      "unit_other": "primeros eventos"
+    },
+    "fiestero": {
+      "name": "Fiestero",
+      "description": "Únete a fiestas de cuadra, festivales, carnes asadas y desfiles.",
+      "unit_one": "celebración",
+      "unit_other": "celebraciones"
+    },
+    "treasure_hunter": {
+      "name": "Cazatesoros",
+      "description": "Compra, vende o intercambia en mercados, pop-ups y ventas de garaje.",
+      "unit_one": "mercado o intercambio",
+      "unit_other": "mercados e intercambios"
+    },
+    "aficionado": {
+      "name": "Aficionado",
+      "description": "Disfruta música, comedia, películas, noches de juegos y más.",
+      "unit_one": "salida",
+      "unit_other": "salidas"
+    },
+    "recreationist": {
+      "name": "Deportista",
+      "description": "Muévete: partidos, ejercicio, jardinería y paseos con mascotas.",
+      "unit_one": "evento activo",
+      "unit_other": "eventos activos"
+    },
+    "helping_hand": {
+      "name": "Mano Amiga",
+      "description": "Echa la mano en limpiezas, voluntariados, colectas y recaudaciones.",
+      "unit_one": "vez echando la mano",
+      "unit_other": "veces echando la mano"
+    },
+    "clean_sweeper": {
+      "name": "Escobita",
+      "description": "Ayuda a limpiar el barrio.",
+      "unit_one": "limpieza",
+      "unit_other": "limpiezas"
+    },
+    "civic_voice": {
+      "name": "Voz Vecinal",
+      "description": "Participa en las juntas vecinales.",
+      "unit_one": "junta",
+      "unit_other": "juntas"
+    },
+    "ambassador": {
+      "name": "Embajador",
+      "description": "Asiste a un evento publicado en un idioma distinto al tuyo."
+    },
+    "open_door": {
+      "name": "Puerta Abierta",
+      "description": "Organiza un evento en inglés y en español."
+    },
+    "familiar_face": {
+      "name": "Cara Conocida",
+      "description": "Asiste a un evento tres meses seguidos."
+    },
+    "year_rounder": {
+      "name": "Todo el Año",
+      "description": "Participa en todas las estaciones del año."
+    },
+    "stage": {
+      "seed": "Semilla",
+      "sprout": "Brote",
+      "bloom": "Flor",
+      "tree": "Árbol",
+      "grove": "Arboleda"
+    },
+    "a11y": {
+      "growth": "{{badge}}, etapa {{stage}}, {{count}} {{units}}.",
+      "keepsake": "{{badge}}, obtenida.",
+      "unearned": "{{badge}}, aún no obtenida. {{description}}"
+    },
+    "count": "{{count}} {{units}}",
+    "keepsake": "Recuerdo",
+    "more_to": "{{count}} más para {{stage}}",
+    "not_earned_yet": "Aún no obtenida.",
+    "share": "Compartir",
+    "row_title": "Insignias",
+    "none_yet": "Ve a un evento y recógelo para ganar tu primera insignia.",
+    "see_all": "Ver todas las insignias",
+    "all_title": "Todas las insignias",
+    "growth_title": "Insignias que crecen",
+    "keepsakes_title": "Recuerdos"
+  },
+  "maps": {
+    "open_in": "Abrir en",
+    "app_apple": "Apple Maps",
+    "app_google": "Google Maps",
+    "app_waze": "Waze",
+    "remember": "Recordar mi elección",
+    "close": "Cerrar",
+    "directions_to": "Cómo llegar a {{place}}",
+    "settings_title": "App de mapas",
+    "ask_every_time": "Preguntar siempre",
+    "settings_note": "Se guarda solo en este teléfono. Solo aparecen las apps de mapas de este teléfono."
+  },
+  "member": {
+    "since": "Miembro desde {{date}}"
+  },
+  "impact": {
+    "button": "Mi impacto",
+    "title": "Mi impacto",
+    "private_note": "Solo tú puedes ver esto.",
+    "reoffer_title": "¿Se te pasaron algunos? El registro automático puede recogerlos por ti.",
+    "no_thanks": "No, gracias",
+    "ready_to_collect": "Listo para recoger",
+    "starts": "Empieza tu insignia {{badge}}",
+    "collect": "Recoger",
+    "didnt_make_it": "No pude ir",
+    "progress_title": "Progreso de insignias",
+    "progress_line": "{{badge}} · {{stage}}",
+    "host_title": "Tu impacto como anfitrión",
+    "brought_together_one": "Tus eventos reunieron a {{count}} vecino.",
+    "brought_together_other": "Tus eventos reunieron a {{count}} vecinos.",
+    "first_timers_one": "{{count}} de ellos fue a su primer evento en el barrio.",
+    "first_timers_other": "{{count}} de ellos fueron a su primer evento en el barrio.",
+    "came_back_one": "{{count}} volvió a otro evento del barrio.",
+    "came_back_other": "{{count}} volvieron a otro evento del barrio.",
+    "most_popular_one": "Tu evento más popular: {{title}}, {{date}}, con {{count}} vecino.",
+    "most_popular_other": "Tu evento más popular: {{title}}, {{date}}, con {{count}} vecinos."
+  },
+  "checkin": {
+    "title": "¿Registrarte automáticamente?",
+    "what_it_does": "Tu teléfono nota cuando llegas a los eventos a los que vas, y tu insignia crece sola.",
+    "what_it_never_does": "Nunca vemos ni guardamos dónde estás.",
+    "permission_note": "Tu teléfono te pedirá usar tu ubicación. Elige \"Siempre\" para que funcione con la app cerrada. Puedes apagarlo en Ajustes cuando quieras.",
+    "turn_on": "Activar",
+    "not_now": "Ahora no",
+    "stays_off": "El registro automático sigue apagado. Puedes recoger después de cada evento."
+  },
+  "share": {
+    "title": "Comparte tu insignia",
+    "earned": "{{name}} ganó",
+    "count_in": "{{amount}} en {{neighborhood}}",
+    "cta": "Únete a tus vecinos en {{url}}",
+    "show_neighborhood": "Mostrar mi barrio",
+    "not_now": "Ahora no",
+    "privacy_note": "Solo se muestra tu nombre. Nunca tu apellido, foto, dirección ni detalles del evento.",
+    "message_neighborhood": "Gané la insignia {{badge}} en {{app}} 🎉 Únete a nuestro barrio: {{url}}",
+    "message_neighbors": "Gané la insignia {{badge}} en {{app}} 🎉 Únete a tus vecinos: {{url}}"
+  },
+  "celebrate": {
+    "earned": "¡Ganaste {{badge}}!",
+    "stage_up": "¡{{badge}} creció a {{stage}}!",
+    "milestone": "{{badge}}: ¡{{amount}}!",
+    "several_one": "¡{{count}} insignia creció 🌱!",
+    "several_other": "¡{{count}} insignias crecieron 🌱!"
+  },
+  "credits": {
+    "title": "Créditos de código abierto",
+    "intro": "Esta app usa software de código abierto. Gracias a todas las personas que lo hicieron.",
+    "lucide_use": "Emblemas de insignias e íconos de etapas."
   }
 }

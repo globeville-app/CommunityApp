@@ -50,7 +50,10 @@ class ProfileApiTests(ProfileTestCase):
         response = self.save_profile(alias="LoHi", interests=["block_party", "gardening"])
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["display_name"], "Ana R.")
-        self.assertEqual(response.data["neighborhood"], {"id": 3, "name": "Highland"})
+        self.assertEqual(
+            response.data["neighborhood"],
+            {"id": 3, "name": "Highland", "center": {"latitude": 39.85, "longitude": -104.95}},
+        )
         self.assertEqual(response.data["alias"], "LoHi")
         # Saved as sent (keys only; the app shows the words).
         self.assertEqual(response.data["interests"], ["block_party", "gardening"])
