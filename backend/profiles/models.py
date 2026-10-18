@@ -43,6 +43,21 @@ class Profile(models.Model):
     # Becomes "organizer" when the member posts their first event.
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.MEMBER)
 
+    # Milestone 3: auto check-in (the phone notices arriving; the server only
+    # hears "attended event X") and who can see this member's badges.
+    auto_checkin = models.BooleanField(default=False)
+
+    class BadgeVisibility(models.TextChoices):
+        NEIGHBORHOOD = "neighborhood", "My neighborhood"
+        PRIVATE = "private", "Only me"
+
+    badge_visibility = models.CharField(
+        max_length=12, choices=BadgeVisibility.choices, default=BadgeVisibility.NEIGHBORHOOD
+    )
+    # The auto check-in offer is shown once, and re-offered at most once, ever.
+    checkin_offer_shown_at = models.DateTimeField(null=True, blank=True)
+    checkin_reoffer_shown_at = models.DateTimeField(null=True, blank=True)
+
     @property
     def display_name(self):
         return f"{self.first_name} {self.last_initial}."

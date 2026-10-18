@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/profile/me", profile_views.MyProfileView.as_view(), name="profile-me"),
     path("api/profile/photo", profile_views.ProfilePhotoView.as_view(), name="profile-photo"),
     path("api/support/", include("support.urls")),
+    path("api/", include("badges.urls")),
     path("api/events", event_views.EventListView.as_view(), name="events"),
     path("api/events/", include("events.urls")),
 ]

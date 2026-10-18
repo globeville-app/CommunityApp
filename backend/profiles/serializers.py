@@ -24,6 +24,8 @@ class ProfileUpdateSerializer(serializers.Serializer):
 
     language = serializers.ChoiceField(choices=settings.LANGUAGES_AVAILABLE, required=False)
     interests = serializers.JSONField(required=False)
+    auto_checkin = serializers.BooleanField(required=False)
+    badge_visibility = serializers.ChoiceField(choices=["neighborhood", "private"], required=False)
 
     def validate_interests(self, value):
         return clean_interests(value)
@@ -54,6 +56,10 @@ def profile_json(profile, request):
         "neighborhood": {"id": profile.neighborhood_id, "name": profile.neighborhood.name},
         "alias": profile.alias or None,
         "role": profile.role,
+        "id": profile.pk,  # the member id neighbors use for the member page
+        "auto_checkin": profile.auto_checkin,
+        "badge_visibility": profile.badge_visibility,
+        "checkin_offer_shown": profile.checkin_offer_shown_at is not None,
         "language": language_of(profile.user),
         "joined_at": profile.joined_at.isoformat(),
     }

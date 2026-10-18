@@ -53,6 +53,9 @@ class EventTestCase(FixtureNeighborhoodsMixin, APITestCase):
             "description": "Bring a dish to share.",
             "starts_at": self.later(days=3),
             "location_text": "Corner of 32nd and Lowell",
+            # The map pin (a park in Highland).
+            "latitude": 39.7615,
+            "longitude": -105.0112,
             **overrides,
         }
 

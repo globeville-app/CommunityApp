@@ -65,6 +65,25 @@
   </section>
 
   <section>
+    <h2>Attendance and badges (last 30 days)</h2>
+    <div class="tiles">
+      <div class="tile"><b>{{ badges.attended_auto }}</b>attended, auto check-in</div>
+      <div class="tile"><b>{{ badges.attended_collect }}</b>attended, collected</div>
+      <div class="tile"><b>{{ badges.declines }}</b>"I didn't make it"</div>
+      <div class="tile"><b>{{ badges.badges_earned }}</b>badges earned</div>
+      <div class="tile"><b>{{ badges.stage_ups }}</b>stage-ups</div>
+      <div class="tile"><b>{{ badges.shares }}</b>badge shares</div>
+    </div>
+    <h3>Community badges (last 12 months, admin only)</h3>
+    <table>
+      <tbody>
+      {% for name, labels in badges.known_for %}<tr><td>{{ name }}</td><td>{{ labels|join:", " }}</td></tr>
+      {% empty %}<tr><td>No neighborhood is "known for" anything yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
     <h2>Support</h2>
     <p><a href="{% url 'admin:support_problemreport_changelist' %}"><b>{{ support.open_reports }}</b> open problem reports</a> (not yet resolved)</p>
   </section>

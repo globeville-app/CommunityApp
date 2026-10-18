@@ -76,10 +76,12 @@ class MyProfileView(APIView):
         data = ProfileUpdateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         values = data.validated_data
-        if "interests" in values:
+        profile_fields = [f for f in ("interests", "auto_checkin", "badge_visibility") if f in values]
+        if profile_fields:
             profile = get_profile_or_404(request.user)
-            profile.interests = values["interests"]
-            profile.save(update_fields=["interests"])
+            for field in profile_fields:
+                setattr(profile, field, values[field])
+            profile.save(update_fields=profile_fields)
         if "language" in values:
             set_language(request.user, values["language"])
 

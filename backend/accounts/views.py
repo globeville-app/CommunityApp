@@ -5,7 +5,7 @@ All login logic lives in this app, so phone-number login (v2) can be added
 here later without touching neighborhoods or profiles.
 """
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -90,6 +90,13 @@ class DeleteAccountView(APIView):
         from profiles.models import Profile
         from support.models import ProblemReport
 
+        from badges.engine import update_badges
+
+        # Hosts whose numbers include this member, to refresh afterwards.
+        hosts = list(
+            get_user_model().objects.filter(organized_events__attendances__user=user).exclude(pk=user.pk).distinct()
+        )
+
         photo = None
         profile = Profile.objects.filter(user=user).first()
         if profile and profile.photo:
@@ -103,8 +110,13 @@ class DeleteAccountView(APIView):
             # Deleting the user also deletes, through the database: the
             # profile (and its interests), the account settings, the
             # neighborhood match, every login token and their "I'm going"
-            # records. Events they organized keep existing with no organizer.
+            # records, attendance, badges and unlock moments. Events they
+            # organized keep existing with no organizer.
             user.delete()
+            # Their attendance drops out of these hosts' counts. Stages are
+            # never lowered (badges/engine.py), only the counts change.
+            for host in hosts:
+                update_badges(host)
 
         # Remove the photo file only once the database change has stuck.
         if photo:

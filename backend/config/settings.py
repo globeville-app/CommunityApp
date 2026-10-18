@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "support",
     "events",
     "stats",
+    "badges",
 ]
 
 MIDDLEWARE = [

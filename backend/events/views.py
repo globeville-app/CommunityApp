@@ -21,6 +21,7 @@ from profiles.models import Profile
 from .categories import GROUP_KEYS, GROUPS, group_of, suggest_category
 from .models import Event, EventReport, Going, TranslationCache
 from .partiful import fetch_og_title
+from .timing import has_ended
 from .translation import TranslationUnavailable, get_translator
 from .validation import clean_event, is_partiful_url
 
@@ -59,13 +60,13 @@ def get_event(request, profile, event_id):
         raise ApiError("event_not_found", status_code=status.HTTP_404_NOT_FOUND) from None
 
 
-def has_ended(event, now):
-    return (event.ends_at or event.starts_at) < now
+def organizer_profile(event):
+    return getattr(event.organizer, "profile", None) if event.organizer_id else None
 
 
 def organizer_name(event):
     """Display name only ("Ana R."). None once the organizer deleted their account."""
-    profile = getattr(event.organizer, "profile", None) if event.organizer_id else None
+    profile = organizer_profile(event)
     return profile.display_name if profile else None
 
 
@@ -85,10 +86,17 @@ def event_json(event, request, profile, now):
         "starts_at": timezone.localtime(event.starts_at).isoformat(),
         "ends_at": timezone.localtime(event.ends_at).isoformat() if event.ends_at else None,
         "location_text": event.location_text,
+        # The meeting place's pin (null for events posted before pins existed).
+        "latitude": float(event.latitude) if event.latitude is not None else None,
+        "longitude": float(event.longitude) if event.longitude is not None else None,
+        # Organizers of upcoming pinless events are asked to add one.
+        "needs_pin": event.latitude is None and event.organizer_id == request.user.id and not has_ended(event, now),
         "partiful_url": event.partiful_url or None,
         "status": event.status,
         "is_past": has_ended(event, now),
         "organizer_name": organizer_name(event),
+        # Opens the organizer's member page (null for a former neighbor).
+        "organizer_member_id": organizer_profile(event).pk if organizer_profile(event) else None,
         "is_organizer": event.organizer_id == request.user.id,
         "going_count": event.going_count,
         "is_going": event.is_going,
@@ -104,8 +112,10 @@ class EventListView(APIView):
         """Upcoming events (active and cancelled), soonest first."""
         profile = member_profile(request)
         now = timezone.now()
+        # Not ended yet. An event with no end time lasts until midnight, so
+        # look back a day, then apply the exact rule (events/timing.py).
         events = events_for(profile, request.user).filter(
-            Q(starts_at__gte=now) | Q(ends_at__gte=now)
+            Q(starts_at__gte=now - timedelta(days=1)) | Q(ends_at__gte=now)
         )
 
         group = request.query_params.get("group")
@@ -116,7 +126,7 @@ class EventListView(APIView):
         if request.query_params.get("for_you") == "true":
             events = events.filter(category__in=profile.interests or [])
 
-        events = events.order_by("starts_at", "pk")
+        events = [e for e in events.order_by("starts_at", "pk") if not has_ended(e, now)]
         return Response({"events": [event_json(e, request, profile, now) for e in events]})
 
     def post(self, request):

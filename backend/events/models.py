@@ -44,12 +44,21 @@ class Event(models.Model):
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField(null=True, blank=True)
     location_text = models.CharField(max_length=LOCATION_MAX)
+    # The map pin: where the event meets (never anyone's home). Required for
+    # new and edited events from Milestone 3; older events may have none.
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     partiful_url = models.URLField(blank=True)
     # A seam for sponsorships later. Not settable or readable through the API.
     sponsor_name = models.CharField(max_length=100, blank=True)
 
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    # When the event first had 2 counted attendees, so it counts as hosted
+    # (docs/BADGES.md). Kept even if attendees later delete their accounts.
+    counted_hosted_at = models.DateTimeField(null=True, blank=True)
+    # True if this was its organizer's first event to count as hosted (Day One).
+    is_hosts_first_counted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -18,6 +18,8 @@ from accounts.models import Account
 from events.categories import GROUPS
 from events.models import Event, Going
 from profiles.models import Profile
+from badges.community import known_for
+from badges.models import Attendance, Celebration, DeclineLog, ShareLog
 from support.models import ProblemReport
 
 
@@ -80,6 +82,22 @@ def event_numbers(now):
     }
 
 
+def badge_numbers(now):
+    """Milestone 3: attendance and badges, last 30 days. Counts only."""
+    since = _days_ago(now, 30)
+    recent = Attendance.objects.filter(created_at__gte=since)
+    celebrations = Celebration.objects.filter(created_at__gte=since)
+    return {
+        "attended_auto": recent.filter(method=Attendance.Method.AUTO).count(),
+        "attended_collect": recent.filter(method=Attendance.Method.COLLECT).count(),
+        "declines": DeclineLog.objects.filter(date__gte=since.date()).count(),
+        "badges_earned": celebrations.filter(kind=Celebration.Kind.EARNED).count(),
+        "stage_ups": celebrations.filter(kind=Celebration.Kind.STAGE_UP).count(),
+        "shares": ShareLog.objects.filter(date__gte=since.date()).count(),
+        "known_for": known_for(now),
+    }
+
+
 def support_numbers():
     return {"open_reports": ProblemReport.objects.exclude(status=ProblemReport.Status.RESOLVED).count()}
 
@@ -90,5 +108,6 @@ def all_numbers(now=None):
         "members": member_numbers(now),
         "events": event_numbers(now),
         "support": support_numbers(),
+        "badges": badge_numbers(now),
         "generated_at": timezone.localtime(now),
     }
