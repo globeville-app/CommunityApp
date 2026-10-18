@@ -5,11 +5,14 @@ from django.urls import include, path
 
 from events import views as event_views
 from profiles import views as profile_views
+from stats.views import owner_stats
 
 from . import views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    # The owner stats page sits inside admin, before admin's own pages.
+    path(f"{settings.ADMIN_URL}stats/", owner_stats, name="owner-stats"),
+    path(settings.ADMIN_URL, admin.site.urls),
     path("api/config", views.app_config, name="app-config"),
     path("api/auth/", include("accounts.urls")),
     path("api/account/", include("accounts.account_urls")),

@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "profiles",
     "support",
     "events",
+    "stats",
 ]
 
 MIDDLEWARE = [
@@ -81,7 +82,9 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        # Project-wide template overrides, e.g. the admin home page's link to
+        # the owner stats page.
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -137,11 +140,18 @@ MEDIA_ROOT = BASE_DIR / "media"
 PRIVATE_MEDIA_ROOT = BASE_DIR / "private_media"
 
 
+# --- Admin --------------------------------------------------------------------
+# Where Django admin lives. Production uses a non-default path (GO_LIVE.md),
+# set in the environment, e.g. ADMIN_URL="team-7f3k/".
+ADMIN_URL = os.environ.get("ADMIN_URL", "admin/")
+
+
 # --- API --------------------------------------------------------------------
 REST_FRAMEWORK = {
     # The phone sends "Authorization: Token <token>" on every request.
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        # Token login, plus a once-an-hour "last seen" stamp (owner stats).
+        "accounts.authentication.SeenTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",

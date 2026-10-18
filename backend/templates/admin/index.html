@@ -1,0 +1,6 @@
+{% extends "admin/index.html" %}
+{# Adds a link to the owner stats page at the top of the admin home page. #}
+{% block content %}
+<p style="font-size:16px"><a href="{% url 'owner-stats' %}"><b>Owner stats →</b></a> members, events and support, as counts.</p>
+{{ block.super }}
+{% endblock %}
