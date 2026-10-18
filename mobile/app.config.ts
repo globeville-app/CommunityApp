@@ -7,8 +7,9 @@
  * Icons and the splash screen use the brand files in assets/brand/
  * (see design/BRAND.md).
  *
- * The backend address comes from the API_BASE_URL setting in mobile/.env
- * (see the README). Screens read both values through src/config.ts.
+ * The backend address comes from API_BASE_URL: mobile/.env on your computer,
+ * or the build profile in eas.json for real builds (production is
+ * https://api.globeville.app). Screens read it through src/config.ts.
  */
 import type { ExpoConfig } from "expo/config";
 
@@ -20,10 +21,16 @@ const shared = require("../shared/app_config.json") as {
 
 const appName = shared.app_name;
 
-// Shown at the bottom of Settings as "Version 1.0.0 (1)". Raise the build
-// number for every build sent to the stores.
+// The version: raise it for every store release ("1.0.0" → "1.0.1").
+// The build number is counted up by EAS automatically for real builds
+// (eas.json: appVersionSource "remote"); BUILD_NUMBER is only what Expo Go
+// and the browser demo show at the bottom of Settings.
 const VERSION = "1.0.0";
 const BUILD_NUMBER = 1;
+
+// The app's permanent ID in the App Store and Google Play. Set once and
+// NEVER change it: a new ID is a new app to the stores.
+const APP_ID = "app.globeville";
 const slug = appName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
 
 const config: ExpoConfig = {
@@ -36,6 +43,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: "dark",
   ios: {
     supportsTablet: false,
+    bundleIdentifier: APP_ID,
     buildNumber: String(BUILD_NUMBER),
   },
   android: {
@@ -45,6 +53,7 @@ const config: ExpoConfig = {
       backgroundImage: "./assets/brand/adaptive-icon-background.png",
     },
     predictiveBackGestureEnabled: false,
+    package: APP_ID,
     versionCode: BUILD_NUMBER,
   },
   web: {

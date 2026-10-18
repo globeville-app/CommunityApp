@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.admin.views.decorators import staff_member_required
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
@@ -45,7 +44,7 @@ class ProblemReportAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         # Screenshots are only ever served here, to signed-in staff.
-        view = staff_member_required(self.screenshot_view)
+        view = self.admin_site.admin_view(self.screenshot_view)
         custom = [path("<int:pk>/screenshot/", view, name="support_problemreport_screenshot")]
         return custom + super().get_urls()
 

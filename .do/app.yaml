@@ -1,0 +1,97 @@
+# DigitalOcean App Platform spec (docs/GO_LIVE.md §2). Create the app from
+# this file (Apps → Create App → "Import from app spec"), then fill in every
+# value marked CHANGE_ME in the dashboard. Secrets stay in the dashboard,
+# never in this repository.
+name: globeville
+region: sfo
+
+services:
+  - name: api
+    dockerfile_path: Dockerfile
+    github:
+      repo: indubitably-dubin/CommunityApp-Milestone-1
+      branch: main
+      deploy_on_push: true
+    http_port: 8080
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    instance_count: 1
+    health_check:
+      http_path: /api/config
+    envs:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        type: SECRET
+        value: CHANGE_ME
+      - key: ALLOWED_HOSTS
+        value: api.globeville.app
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://api.globeville.app
+      - key: ADMIN_URL
+        type: SECRET
+        value: CHANGE_ME/
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: ${db.DATABASE_URL}
+      - key: SPACES_BUCKET
+        value: CHANGE_ME
+      - key: SPACES_ENDPOINT
+        value: https://sfo3.digitaloceanspaces.com
+      - key: SPACES_REGION
+        value: sfo3
+      - key: SPACES_KEY
+        type: SECRET
+        value: CHANGE_ME
+      - key: SPACES_SECRET
+        type: SECRET
+        value: CHANGE_ME
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        value: smtp.postmarkapp.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        type: SECRET
+        value: CHANGE_ME
+      - key: EMAIL_HOST_PASSWORD
+        type: SECRET
+        value: CHANGE_ME
+      - key: DEFAULT_FROM_EMAIL
+        value: globeville <hello@globeville.app>
+      - key: PROBLEM_REPORT_EMAILS
+        type: SECRET
+        value: CHANGE_ME
+    domains:
+      - domain: api.globeville.app
+        type: PRIMARY
+
+jobs:
+  # Runs before every deploy: database changes, then the neighborhood map
+  # (safe to repeat; it updates the 78 neighborhoods in place).
+  - name: migrate
+    kind: PRE_DEPLOY
+    dockerfile_path: Dockerfile
+    github:
+      repo: indubitably-dubin/CommunityApp-Milestone-1
+      branch: main
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    run_command: sh -c "python manage.py migrate --noinput && python manage.py load_neighborhoods"
+    envs:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        type: SECRET
+        value: CHANGE_ME
+      - key: ALLOWED_HOSTS
+        value: api.globeville.app
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: ${db.DATABASE_URL}
+
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: true
+    cluster_name: CHANGE_ME

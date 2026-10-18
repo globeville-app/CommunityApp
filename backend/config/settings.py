@@ -1,14 +1,23 @@
 """
 Django settings for the backend.
 
-This file is for local development only (the milestone has no production
-hosting). Settings that would change for production are marked "DEV ONLY".
+One file for both places it runs:
+  - development (your computer, or Claude Code in the cloud): the defaults
+    below just work, with SQLite and files on disk;
+  - production (DigitalOcean App Platform, docs/GO_LIVE.md): every secret and
+    every production choice comes from environment variables, listed in
+    the README under "Going live". Nothing secret is ever in this file.
+
+Production is switched on by DJANGO_DEBUG=0.
 """
 
 import json
 import os
 import sys
 from pathlib import Path
+
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 # backend/ (where manage.py lives)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,15 +46,30 @@ LANGUAGES_AVAILABLE = ["en", "es"]
 DEFAULT_LANGUAGE_CODE = "en"
 
 
-# --- Security (DEV ONLY) ----------------------------------------------------
-# A real secret key must come from the environment before any real hosting.
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY", "dev-only-insecure-key-change-me-before-hosting"
-)
+# --- Security -----------------------------------------------------------------
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-# "*" lets the phone reach your computer by its Wi-Fi IP address during
-# development. Production must list the real host name instead.
-ALLOWED_HOSTS = ["*"]
+DEV_SECRET_KEY = "dev-only-insecure-key-change-me-before-hosting"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", DEV_SECRET_KEY)
+
+if DEBUG:
+    # "*" lets the phone reach your computer by its Wi-Fi IP address.
+    ALLOWED_HOSTS = ["*"]
+else:
+    if SECRET_KEY == DEV_SECRET_KEY:
+        raise ImproperlyConfigured("Set DJANGO_SECRET_KEY in the environment before running in production.")
+    # e.g. "api.globeville.app"
+    ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()]
+    # e.g. "https://api.globeville.app" (the admin's login form needs it)
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
+    # App Platform handles HTTPS in front of Django and says so in this header.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365  # .app domains are HTTPS-only anyway
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 
 INSTALLED_APPS = [
@@ -55,6 +79,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
     "rest_framework",
     "rest_framework.authtoken",
     # Our apps
@@ -69,10 +95,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Serves the admin's CSS/JS in production (no separate file server needed).
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Two-step admin login (see ADMIN_REQUIRE_2FA below).
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -98,11 +128,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# Development: a SQLite file. Production: managed Postgres, from DATABASE_URL
+# (e.g. "postgresql://user:password@host:25060/globeville?sslmode=require").
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -118,6 +151,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # filled by collectstatic when deploying
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Rate limits are counted in the cache. While tests run we use a cache that
@@ -132,18 +166,56 @@ CACHES = {
     }
 }
 
-# Uploaded profile photos. Served by Django only while DEBUG is on.
+# Uploaded files.
+#  - Development: profile photos in backend/media (served by Django while
+#    DEBUG is on); problem-report screenshots in backend/private_media, never
+#    served at a URL.
+#  - Production: a PRIVATE DigitalOcean Spaces bucket. Photos are shown
+#    through short-lived signed links; screenshots sit in a separate
+#    private/ folder that only the admin reads (support/admin.py).
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-# Problem report screenshots. Never served at a URL; only staff can see them,
-# through the Django admin (support/admin.py).
 PRIVATE_MEDIA_ROOT = BASE_DIR / "private_media"
+
+USE_SPACES = bool(os.environ.get("SPACES_BUCKET"))
+if USE_SPACES:
+    _spaces = {
+        "bucket_name": os.environ["SPACES_BUCKET"],
+        "endpoint_url": os.environ["SPACES_ENDPOINT"],  # e.g. https://sfo3.digitaloceanspaces.com
+        "region_name": os.environ.get("SPACES_REGION", "sfo3"),
+        "access_key": os.environ["SPACES_KEY"],
+        "secret_key": os.environ["SPACES_SECRET"],
+        "default_acl": "private",
+        "querystring_auth": True,  # signed links...
+        "querystring_expire": 3600,  # ...that stop working after an hour
+        "file_overwrite": False,
+    }
+    STORAGES = {
+        "default": {"BACKEND": "storages.backends.s3.S3Storage", "OPTIONS": {**_spaces, "location": "media"}},
+        "private": {"BACKEND": "storages.backends.s3.S3Storage", "OPTIONS": {**_spaces, "location": "private"}},
+    }
+else:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "private": {"BACKEND": "support.models.PrivateStorage"},
+    }
+# The admin's CSS/JS: compressed, with versioned names, in production. Chosen
+# by DEBUG (not by Spaces) so the build step and the server always agree.
+STORAGES["staticfiles"] = {
+    "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+    if DEBUG
+    else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+}
 
 
 # --- Admin --------------------------------------------------------------------
 # Where Django admin lives. Production uses a non-default path (GO_LIVE.md),
 # set in the environment, e.g. ADMIN_URL="team-7f3k/".
 ADMIN_URL = os.environ.get("ADMIN_URL", "admin/")
+# Two-step login for the admin (a code from an authenticator app). On in
+# production by default; see "Admin two-step login" in the README.
+ADMIN_REQUIRE_2FA = os.environ.get("ADMIN_REQUIRE_2FA", "0" if DEBUG else "1") == "1"
+OTP_TOTP_ISSUER = APP_NAME
 
 
 # --- API --------------------------------------------------------------------

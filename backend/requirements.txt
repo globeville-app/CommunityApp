@@ -4,3 +4,13 @@ djangorestframework==3.18.3 # JSON API + token login
 shapely==2.2.0              # "is this point inside this polygon?"
 httpx==0.28.1               # calls the geocoder, with a timeout
 pillow==12.3.0              # checks photos and strips EXIF metadata
+
+# Production (docs/GO_LIVE.md). Harmless in development.
+gunicorn==26.2.0            # web server on DigitalOcean App Platform
+dj-database-url==3.1.2      # reads DATABASE_URL (managed Postgres)
+psycopg[binary]==3.3.6      # Postgres driver
+django-storages[s3]==1.14.6 # photos in DigitalOcean Spaces (S3-compatible)
+boto3==1.43.114             # used by django-storages for Spaces
+whitenoise==6.12.0          # serves the admin's CSS and JS
+django-otp==1.7.5           # two-step login for the admin
+qrcode==8.2                 # shows the admin's two-step setup code as a QR

@@ -1,0 +1,13 @@
+# Keep local data, secrets and big folders out of the server image.
+**/.venv
+**/__pycache__
+**/*.pyc
+backend/db.sqlite3
+backend/media
+backend/private_media
+backend/staticfiles
+mobile/node_modules
+mobile/web-demo
+mobile/.expo
+mobile/.env
+.git

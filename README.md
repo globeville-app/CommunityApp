@@ -381,6 +381,94 @@ its tests (`backend/accounts/tests/test_delete_account.py`). For Milestone 2:
 
 ---
 
+## Going live (DigitalOcean, docs/GO_LIVE.md)
+
+Everything below is done once, by the owner, in web dashboards. The code is
+ready: `Dockerfile` builds the server, `.do/app.yaml` describes the whole app,
+and `mobile/eas.json` has the three app build profiles. Secrets only ever go
+into the DigitalOcean dashboard, never into this repository.
+
+### 1. Accounts and the domain
+1. Buy `globeville.app` (any registrar) and create accounts at DigitalOcean,
+   Postmark, Expo, Apple Developer and Google Play.
+2. In Postmark, add the sender `hello@globeville.app` and the DNS records it
+   asks for (DKIM and Return-Path), so emails aren't marked as spam.
+
+### 2. Storage for photos (Spaces)
+1. DigitalOcean → Spaces → create a bucket, e.g. `globeville-media`, in
+   `sfo3`, with **File listing: Restricted** (private).
+2. API → Spaces Keys → generate a key. Keep the key and secret for step 3.
+
+### 3. The app (server, database, domain)
+1. Apps → Create App → **Import from app spec** → upload `.do/app.yaml`.
+2. Fill in every `CHANGE_ME` (Settings → App-Level / Component environment
+   variables):
+
+| Setting | What to put |
+| --- | --- |
+| `DJANGO_SECRET_KEY` | 60+ random characters (a password manager can make one). The same value in the `migrate` job. |
+| `ADMIN_URL` | A path only you know, ending in `/`, e.g. `team-7f3k/`. Admin then lives at `https://api.globeville.app/team-7f3k/`. |
+| `SPACES_BUCKET`, `SPACES_KEY`, `SPACES_SECRET` | From step 2 (`SPACES_ENDPOINT` and `SPACES_REGION` match the bucket's region). |
+| `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Postmark → Server → API Tokens: the server token, as both. |
+| `PROBLEM_REPORT_EMAILS` | Who gets problem reports, comma-separated. |
+| `DATABASE_URL` | Filled in by DigitalOcean from the database (`${db.DATABASE_URL}`). |
+
+3. Deploy. Every push to `main` deploys again; before each deploy the
+   `migrate` job updates the database and the neighborhood map.
+4. Settings → Domains: add `api.globeville.app` and create the DNS record it
+   shows. HTTPS certificates are automatic.
+5. Check from a phone's browser: `https://api.globeville.app/api/config`
+   shows the app name and categories.
+
+The server refuses to start if `DJANGO_SECRET_KEY` is missing, so a forgotten
+secret fails loudly instead of running insecurely.
+
+### 4. Admin, with two-step login
+In production the admin asks for a password **and** a 6-digit code from an
+authenticator app (Google Authenticator, 1Password, Authy...). Open the
+app's **Console** tab in DigitalOcean and run, once per staff member:
+
+```bash
+python manage.py createsuperuser
+python manage.py add_admin_2fa <their username>
+```
+
+Scan the QR code it prints with the authenticator app. Then sign in at
+`https://api.globeville.app/<ADMIN_URL>`. The owner stats page is linked at the
+top of the admin home page.
+
+### 5. Backups: practice one restore before the beta
+The managed database takes a daily backup automatically. Once, before Phase A:
+1. Databases → your cluster → **Backups & Restore** → **Restore from backup**
+   → pick the latest → restore to a **new** cluster (never over the live one).
+2. When it's ready, open the new cluster's **Connection details**, copy its
+   connection string, and in the app's Console run:
+   `DATABASE_URL="<that connection string>" python manage.py shell -c "from django.contrib.auth.models import User; print(User.objects.count())"`
+   The number should match the live member count on the owner stats page.
+3. Delete the scratch cluster (it costs money while it exists).
+
+Photos in Spaces aren't backed up separately yet; the Phase B checklist
+revisits that.
+
+### 6. App builds (EAS)
+From `mobile/`, after `npx eas login`:
+
+| Profile | Points at | Used for | Command |
+| --- | --- | --- | --- |
+| `development` | your computer's backend (`mobile/.env`) | testing auto check-in (Milestone 3), which Expo Go can't do | `npx eas build --profile development --platform android` |
+| `preview` | `https://api.globeville.app` | Phase A beta | `npx eas build --profile preview --platform all`, then `npx eas submit --profile preview` |
+| `production` | `https://api.globeville.app` | the stores (Phase B) | `npx eas build --profile production --platform all`, then `npx eas submit` |
+
+- The app's store ID is `app.globeville` (in `mobile/app.config.ts`). It can
+  never change once the app is in a store.
+- Raise `VERSION` in `mobile/app.config.ts` for each store release; EAS
+  counts up the build number by itself.
+- iPhone builds need the Apple Developer membership; EAS walks you through
+  signing the first time.
+- Store privacy answers are drafted in `docs/STORE_PRIVACY.md`.
+
+---
+
 ## Not in this milestone (and still needed before real users)
 
 - Email verification and password reset

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django_otp.admin import OTPAdminSite
 from django.urls import include, path
 
 from events import views as event_views
@@ -9,9 +10,15 @@ from stats.views import owner_stats
 
 from . import views
 
+if settings.ADMIN_REQUIRE_2FA:
+    # Admin login also asks for a 6-digit code from an authenticator app.
+    # Set one up with: python manage.py add_admin_2fa <username>
+    admin.site.__class__ = OTPAdminSite
+
 urlpatterns = [
-    # The owner stats page sits inside admin, before admin's own pages.
-    path(f"{settings.ADMIN_URL}stats/", owner_stats, name="owner-stats"),
+    # The owner stats page sits inside admin, behind the same login (and
+    # two-step code, when on) as the rest of admin.
+    path(f"{settings.ADMIN_URL}stats/", admin.site.admin_view(owner_stats), name="owner-stats"),
     path(settings.ADMIN_URL, admin.site.urls),
     path("api/config", views.app_config, name="app-config"),
     path("api/auth/", include("accounts.urls")),

@@ -34,7 +34,14 @@ class PrivateStorage(FileSystemStorage):
         return os.path.abspath(self.base_location)
 
 
-private_storage = PrivateStorage()
+def private_storage():
+    """
+    Where screenshots go: the "private" storage from settings.STORAGES, a
+    folder on disk in development and a private Spaces folder in production.
+    """
+    from django.core.files.storage import storages
+
+    return storages["private"]
 
 
 def random_screenshot_path(instance, filename):

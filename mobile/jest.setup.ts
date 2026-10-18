@@ -107,3 +107,6 @@ jest.mock("@react-native-community/datetimepicker", () => {
       }),
   };
 });
+
+// Tests run like Expo Go: the build number comes from the app's config.
+jest.mock("expo-application", () => ({ nativeBuildVersion: null, nativeApplicationVersion: null }));
