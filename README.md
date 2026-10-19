@@ -208,6 +208,27 @@ Neighborhood calendar (Milestone 2). You need more than one account; see
    The event isn't there.
 4. Log back in as A. Open the event, **Edit** it, then **Cancel event**.
 
+Badges and attendance (Milestone 3, `docs/MILESTONE_3.md`). Step 2 needs an
+EAS **development** build (see "App builds" below), because auto check-in
+can't run in Expo Go; everything else works in Expo Go.
+
+1. With account A, post an event and drop its pin on the map (the last step).
+2. With account B on a second phone running the development build: tap
+   **I'm going**, choose **Turn on** for auto check-in and allow location
+   **Always**. During the event, walk to the pin. Without tapping anything,
+   B's badge grows: Profile → **My Impact** shows it, and an unlock moment
+   appears the next time the app opens.
+3. With account C on a third phone: tap **I'm going** and choose **Not now**.
+   After the event ends, Profile → **My Impact** → **Collect**. Then tap
+   **I didn't make it** on another event's card.
+4. Log back in as A and open **My Impact**: "Your events brought together 2
+   neighbors" (the event counts as hosted once 2 people went).
+5. Open a badge (Profile → Badges) → **Share** → pick Messages. The picture
+   shows only the first name, and the message has the invite link.
+
+To try collecting without waiting for a real event, give an account an event
+that's already over in the admin (change its start and end to yesterday).
+
 ### Test accounts
 
 Each account needs its own email, but it doesn't have to be real: nothing
@@ -301,8 +322,8 @@ Your own icon only shows in a real build; Expo Go always shows its own icon. Col
 and spacing live in one place, `mobile/src/theme.ts`; the shared pieces
 (buttons, fields, glass cards, the slide-up panel) are in `mobile/src/ui.tsx`,
 and the moving glow behind every screen is `mobile/src/components/GlowBackground.tsx`.
-The glow holds still when the phone's Reduce Motion setting is on. Stats,
-badges and the bottom tab bar from the design come in later milestones.
+The glow holds still when the phone's Reduce Motion setting is on. Stats
+from the design come in a later milestone.
 
 ### Privacy guarantees and the tests that check them
 
@@ -314,7 +335,10 @@ badges and the bottom tab bar from the design come in later milestones.
 | Unexpected errors log only the error type | `backend/neighborhoods/tests/test_match_api.py` |
 | EXIF/GPS stripped from JPEG and PNG | `backend/profiles/tests/test_profile_api.py` |
 | Address field cleared after a match, never stored or passed between screens | `mobile/__tests__/join-flow.test.tsx` |
-| No analytics libraries on the phone; AsyncStorage only for the language, in one file | `mobile/__tests__/privacy.test.ts` |
+| No analytics libraries on the phone; AsyncStorage only for the language and the maps app choice | `mobile/__tests__/privacy.test.ts` |
+| Auto check-in sends no location: the request has no body, the server refuses one, nothing stores one | `mobile/__tests__/privacy.test.ts`, `backend/badges/tests/test_api.py` |
+| Share counts keep no member; hosts never see who declined | `backend/badges/tests/test_api.py` |
+| Attending a resource fair or donation drive never counts or shows in a hint | `backend/badges/tests/test_engine.py`, `mobile/__tests__/badges.test.tsx` |
 | App name only in `shared/app_config.json` | `backend/config/tests/test_app_name.py` |
 
 ### API
@@ -338,6 +362,17 @@ badges and the bottom tab bar from the design come in later milestones.
 | POST | `/api/events/{id}/report` | report an event (appears in admin) |
 | POST | `/api/events/partiful-preview` | `{url}` → `{title, suggested_category}` |
 | POST | `/api/events/{id}/translate` | `{target}` → title and description in that language |
+| GET | `/api/badges/catalog` | every badge's rules (thresholds from `backend/badges/config.py`) |
+| GET | `/api/me/badges` | your 15 badges: stage, count, next threshold |
+| GET | `/api/members/{id}` (`/badges`) | a neighbor's member page; badges empty if they chose Only me |
+| GET | `/api/me/collect` | Ready to collect cards, plus `show_checkin_reoffer` |
+| POST | `/api/events/{id}/collect` · `/decline` | collect attendance · "I didn't make it" |
+| POST | `/api/events/{id}/checkin` | auto check-in; **the body must be empty** |
+| GET | `/api/me/geofences` | the next 20 events to watch (pin and time window) |
+| GET | `/api/me/impact` | host numbers; `{}` until an event counts as hosted |
+| GET / POST | `/api/me/celebrations` · `/seen` | unlock moments not shown yet · mark shown |
+| POST | `/api/badges/{key}/shared` | count a share (badge and date only) |
+| POST | `/api/me/checkin-offer/seen` | `{"which": "first" or "reoffer"}` |
 
 Events in another neighborhood answer 404, as if they didn't exist. Times go
 in and come out in Denver time and are stored in UTC.
@@ -468,6 +503,32 @@ From `mobile/`, after `npx eas login`:
 - Store privacy answers are drafted in `docs/STORE_PRIVACY.md`.
 
 ---
+
+## Milestone 3: what needs you
+
+- **Android maps key:** create a Google Maps key for Android and set
+  `GOOGLE_MAPS_ANDROID_KEY` (in `mobile/.env`, and as an EAS secret for
+  builds). Without it, Android shows an empty map; iPhone needs no key.
+- **Apple Developer account** to put a development build on an iPhone for
+  testing auto check-in (Android needs none).
+- **Location wording:** approve the auto check-in screen
+  (`checkin.*` in `mobile/src/i18n/en.json` / `es.json`) and the phone's
+  permission text (`expo-location` in `mobile/app.config.ts`), in both languages.
+- **Spanish review:** badge names and descriptions, stage names, and the new
+  screens (`badges`, `impact`, `checkin`, `share`, `celebrate`, `maps` in `es.json`).
+- **Invite link:** `https://globeville.app` (`invite_url` in
+  `shared/app_config.json`) should exist before Phase B.
+
+Known limits:
+
+- Android's share sheet takes the picture but not the message text; the
+  link printed on the card does the inviting there. iPhone gets both.
+- Auto check-in notices arriving, so someone already inside the area more
+  than 30 minutes before the start isn't checked in; they can still collect.
+- Emblem accents follow Lucide 1.59.0. Where a part moved since 1.47.0, it
+  matches the description in `BADGE_UI.md` (see `mobile/src/components/badges/emblems.ts`).
+- Lucide icons are copied in by `node mobile/scripts/gen-badge-icons.mjs`
+  (run it again after updating `lucide-static`).
 
 ## Not in this milestone (and still needed before real users)
 
