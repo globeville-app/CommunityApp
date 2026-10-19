@@ -7,8 +7,8 @@ changes until the owner approves `review/PLAN.md`).
 | --- | --- | --- |
 | 0 – Orientation | done | `review/00-overview.md` |
 | 1 – Requirements vs code | done | `review/01-acceptance.md` |
-| 2 – Architecture | next | `review/02-architecture.md` |
-| 3 – Security & compliance | not started | `review/03-security.md` |
+| 2 – Architecture | done | `review/02-architecture.md` |
+| 3 – Security & compliance | next | `review/03-security.md` |
 | 4 – Tests | not started | `review/04-tests.md` |
 | 5 – CI/CD & operations | not started | `review/05-ops.md` |
 | 6 – Skeptic pass | not started | notes added to each file + `review/06-skeptic.md` |
@@ -31,7 +31,9 @@ changes until the owner approves `review/PLAN.md`).
 
 ## Next action
 
-Step 2: architecture review, written to `review/02-architecture.md`. It
-covers the backend as a server for iOS and Android: API versioning, token
-lifetime/refresh/revocation, errors, pagination, retries, push, scale, and
-the DB schema and migrations. Proposals only; no code changes.
+Step 3: security and compliance, written to `review/03-security.md`. It
+covers secrets in code and git history, permissions on every endpoint,
+validation and injection, rate limits, CORS, password and token storage,
+personal data in logs, and dependency vulnerabilities (OWASP API Top 10). It
+also covers Apple/Google store rules and GDPR, and ends with an "Actions for
+the owner (no code)" section.
