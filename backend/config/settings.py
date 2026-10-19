@@ -241,7 +241,8 @@ REST_FRAMEWORK = {
     # Every error response has the same shape: {"code": ..., "detail": ...}
     "EXCEPTION_HANDLER": "config.errors.api_exception_handler",
     # Only the views that opt in (with throttle_scope) are rate-limited.
-    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
+    # Signed-out callers are told apart by a trusted address only (config/throttling.py).
+    "DEFAULT_THROTTLE_CLASSES": ["config.throttling.ClientIPScopedRateThrottle"],
     "DEFAULT_THROTTLE_RATES": {
         # Slows down password guessing.
         "auth": "20/min",
@@ -254,6 +255,12 @@ REST_FRAMEWORK = {
         "org_admins": "20/hour",
     },
 }
+
+
+# The header our host's proxy fills in with the caller's real address; empty
+# means "use the connecting address". DigitalOcean: DO-Connecting-IP.
+# Check it after the first deploy (README, "Going live").
+CLIENT_IP_HEADER = os.environ.get("CLIENT_IP_HEADER", "")
 
 
 # --- Neighborhood data and geocoding ----------------------------------------

@@ -514,6 +514,13 @@ Scan the QR code it prints with the authenticator app. Then sign in at
 `https://api.globeville.app/<ADMIN_URL>`. The owner stats page is linked at the
 top of the admin home page.
 
+**Check once after the first deploy: rate limits see real addresses.** At
+the bottom of the owner stats page, "Your address as the server sees it"
+should match what https://ifconfig.me shows on the same computer. If it
+shows something else (or the same address from your phone on cellular),
+the `CLIENT_IP_HEADER` setting is wrong: tell your developer, because then
+everyone shares one login limit.
+
 ### 5. Backups: practice one restore before the beta
 The managed database takes a daily backup automatically. Once, before Phase A:
 1. Databases → your cluster → **Backups & Restore** → **Restore from backup**

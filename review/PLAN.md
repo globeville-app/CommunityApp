@@ -42,10 +42,13 @@ References in brackets point to the review files, for example
   - **Verify:** the new test uploads a tiny 13,000 × 13,000 PNG and gets
     `photo_wrong_type` quickly, and the existing photo tests still pass.
 
-- [ ] **P2. Stop clients from faking their address for rate limits** [S1]
-  - **What:** add a `TRUSTED_PROXY_COUNT` setting, read from the
-    environment and passed to DRF's `NUM_PROXIES`, so only the address added
-    by DigitalOcean's proxy is trusted. Then add a test, and a README step
+- [x] **P2. Stop clients from faking their address for rate limits** [S1]
+  - **What (as built):** rate limits ignore `X-Forwarded-For` completely and
+    trust only the header DigitalOcean's proxy sets itself
+    (`CLIENT_IP_HEADER=DO-Connecting-IP`), or the connecting address in
+    development. This replaced the planned `NUM_PROXIES` count, which
+    depends on an unknown proxy chain. The owner stats page shows the
+    address the server sees. Then add a test, and a README step
     to confirm the number at the first deploy.
   - **Why:** right now anyone can guess passwords without ever being slowed
     down.

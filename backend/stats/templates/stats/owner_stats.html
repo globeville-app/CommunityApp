@@ -106,5 +106,10 @@
     <h2>Support</h2>
     <p><a href="{% url 'admin:support_problemreport_changelist' %}"><b>{{ support.open_reports }}</b> open problem reports</a> (not yet resolved)</p>
   </section>
+
+  <section>
+    <h2>Server check</h2>
+    <p>Your address as the server sees it: <b>{{ your_address }}</b>. After a deploy this should be your own internet address, not one of the host's (README, "Going live").</p>
+  </section>
 </div>
 {% endblock %}

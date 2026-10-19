@@ -30,6 +30,10 @@ services:
       - key: ADMIN_URL
         type: SECRET
         value: CHANGE_ME/
+      # Where the caller's real address comes from, for rate limits
+      # (backend/config/throttling.py). Check it after the first deploy.
+      - key: CLIENT_IP_HEADER
+        value: DO-Connecting-IP
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}
