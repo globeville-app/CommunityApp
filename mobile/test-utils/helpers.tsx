@@ -14,6 +14,13 @@ import MyImpact from "../src/app/impact";
 import MapsApp from "../src/app/maps-app";
 import Member from "../src/app/member/[id]";
 import SharePreview from "../src/app/share/[key]";
+import MyOrganizations from "../src/app/my-organizations";
+import NotifOffer from "../src/app/notif-offer";
+import OrganizationAdmins from "../src/app/organization-admins";
+import OrganizationForm from "../src/app/organization-form";
+import OrganizationImpact from "../src/app/organization-impact";
+import OrganizationPage from "../src/app/organizations/[id]";
+import Organizations from "../src/app/organizations/index";
 import ComingSoon from "../src/app/coming-soon";
 import DeleteAccount from "../src/app/delete-account";
 import Start from "../src/app/index";
@@ -65,6 +72,13 @@ export function renderApp(initialUrl = "/") {
       "share/[key]": SharePreview,
       "maps-app": MapsApp,
       credits: Credits,
+      "notif-offer": NotifOffer,
+      "my-organizations": MyOrganizations,
+      "organization-form": OrganizationForm,
+      "organization-admins": OrganizationAdmins,
+      "organization-impact": OrganizationImpact,
+      "organizations/index": Organizations,
+      "organizations/[id]": OrganizationPage,
     },
     { initialUrl },
   );

@@ -163,6 +163,7 @@ export default function Settings() {
             accessibilityLabel={t("notifications.reminders")}
             value={reminders && phone !== "denied"}
             disabled={phone === "denied"}
+            accessibilityState={{ disabled: phone === "denied" }}
             onValueChange={(on) => onNotifications("reminders_enabled", on)}
             trackColor={{ true: colors.glowTurquoise, false: "rgba(255,255,255,0.2)" }}
             thumbColor="#FFFFFF"
@@ -174,6 +175,7 @@ export default function Settings() {
             accessibilityLabel={t("notifications.cancellations")}
             value={alerts && phone === "granted"}
             disabled={phone === "denied"}
+            accessibilityState={{ disabled: phone === "denied" }}
             onValueChange={(on) => onNotifications("cancellation_alerts_enabled", on)}
             trackColor={{ true: colors.glowTurquoise, false: "rgba(255,255,255,0.2)" }}
             thumbColor="#FFFFFF"

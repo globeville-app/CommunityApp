@@ -45,6 +45,22 @@ const SERVER_CALLS = [
   "markCelebrationsSeen",
   "logShare",
   "markCheckinOfferSeen",
+  "registerPushToken",
+  "removePushToken",
+  "markNotifOfferSeen",
+  "listNeighborhoods",
+  "listOrganizations",
+  "getMyOrganizations",
+  "requestOrganization",
+  "getOrganization",
+  "updateOrganization",
+  "uploadOrganizationPhoto",
+  "addOrganizationAdmin",
+  "removeOrganizationAdmin",
+  "setFollowing",
+  "reportOrganization",
+  "translateOrganization",
+  "getOrganizationImpact",
 ] as const;
 
 export function fakeApi() {
@@ -70,5 +86,16 @@ export function useDefaultReplies(mocked: jest.Mocked<typeof Api>) {
   mocked.markCheckinOfferSeen.mockResolvedValue(undefined);
   mocked.logShare.mockResolvedValue(undefined);
   mocked.declineEvent.mockResolvedValue(undefined);
+  mocked.registerPushToken.mockResolvedValue(undefined);
+  mocked.markNotifOfferSeen.mockResolvedValue(undefined);
+  mocked.getMyOrganizations.mockResolvedValue({ organizations: [] });
+  mocked.listOrganizations.mockResolvedValue({ organizations: [] });
+  mocked.listNeighborhoods.mockResolvedValue({
+    neighborhoods: [
+      { id: 7, name: "Elyria Swansea" },
+      { id: 1, name: "Hale" },
+      { id: 3, name: "Highland" },
+    ],
+  });
   mocked.updateProfileSettings.mockImplementation(async (_token, settings) => ({ ...HIGHLAND_PROFILE, ...settings }));
 }
