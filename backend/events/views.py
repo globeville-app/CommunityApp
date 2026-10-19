@@ -258,6 +258,12 @@ class EventCancelView(APIView):
         event = get_event(request, profile, event_id)
         if not can_manage(event, request.user):
             raise ApiError("not_organizer", status_code=status.HTTP_403_FORBIDDEN)
+        if event.status == Event.Status.CANCELLED:
+            raise ApiError("event_cancelled", status_code=status.HTTP_409_CONFLICT)
+        # A finished event can't be cancelled: it would send a pointless
+        # notice and take back everyone's attendance (review N3).
+        if has_ended(event, timezone.now()):
+            raise ApiError("event_past", status_code=status.HTTP_409_CONFLICT)
         Event.objects.filter(pk=event.pk).update(status=Event.Status.CANCELLED, updated_at=timezone.now())
         event = get_event(request, profile, event.pk)
         # One notice right away to everyone going (if they allow it).

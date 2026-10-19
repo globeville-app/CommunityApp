@@ -225,6 +225,21 @@ class EditAndCancelTests(EventTestCase):
         edit = self.client.patch(f"/api/events/{self.event_id}", {"title": "Back on"}, format="json")
         self.assertEqual(edit.data, {"code": "event_cancelled"})
 
+    def test_an_ended_or_cancelled_event_cant_be_cancelled(self):
+        self.as_user(self.ben)
+        self.client.put(f"/api/events/{self.event_id}/going")
+        self.as_user(self.ana)
+        Event.objects.filter(pk=self.event_id).update(
+            starts_at=timezone.now() - timedelta(hours=3), ends_at=timezone.now() - timedelta(hours=1)
+        )
+        response = self.client.post(f"/api/events/{self.event_id}/cancel")
+        self.assertEqual((response.status_code, response.data), (409, {"code": "event_past"}))
+        self.assertEqual(Event.objects.get().status, "active")
+
+        Event.objects.filter(pk=self.event_id).update(status="cancelled", starts_at=timezone.now() + timedelta(days=2), ends_at=None)
+        again = self.client.post(f"/api/events/{self.event_id}/cancel")
+        self.assertEqual((again.status_code, again.data), (409, {"code": "event_cancelled"}))
+
     def test_a_started_event_cant_be_moved(self):
         Event.objects.filter(pk=self.event_id).update(starts_at=timezone.now() - timedelta(minutes=5))
         moved = self.client.patch(f"/api/events/{self.event_id}", {"starts_at": self.later(days=1)}, format="json")

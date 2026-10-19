@@ -156,7 +156,7 @@ References in brackets point to the review files, for example
   - **Verify:** tests for invite, accept and decline, and that unknown and
     known emails get identical replies.
 
-- [ ] **P9. Refuse cancelling an event that has ended** [N3]
+- [x] **P9. Refuse cancelling an event that has ended** [N3]
   - **What:** cancel returns `event_past` once the event is over.
   - **Why:** stops pointless "cancelled" notifications for past events, and
     stops a host from wiping attendees' badge progress.
