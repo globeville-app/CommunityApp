@@ -16,6 +16,12 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 ALLOWED_FORMATS = {"JPEG": ".jpg", "PNG": ".png"}
 # Big enough for any profile screen, small enough to keep storage sane.
 MAX_SIDE_PIXELS = 2048
+# A small file can still unpack into a huge picture (a 20 KB PNG can be
+# 13,000 x 13,000 pixels and need hundreds of MB to open), so we check the
+# picture's size before opening it. JPEGs can be opened at a quarter or an
+# eighth of their size, which keeps even a 48-megapixel phone photo small in
+# memory; PNGs can't, so their limit is lower (screenshots are ~3-4 MP).
+MAX_PIXELS = {"JPEG": 50_000_000, "PNG": 20_000_000}
 
 
 class PhotoError(Exception):
@@ -39,6 +45,12 @@ def clean_photo(upload):
         image_format = image.format
         if image_format not in ALLOWED_FORMATS:
             raise PhotoError("photo_wrong_type")
+        width, height = image.size  # read from the file's header, nothing unpacked yet
+        if width * height > MAX_PIXELS[image_format]:
+            raise PhotoError("photo_wrong_type")
+        if image_format == "JPEG":
+            # Unpack at the smallest scale that's still at least MAX_SIDE_PIXELS.
+            image.draft(image.mode, (MAX_SIDE_PIXELS, MAX_SIDE_PIXELS))
         image.load()
     except PhotoError:
         raise

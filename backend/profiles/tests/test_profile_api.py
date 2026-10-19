@@ -2,6 +2,7 @@ import io
 import shutil
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.test import override_settings
@@ -184,6 +185,28 @@ class PhotoTests(ProfileTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["code"], "photo_too_large")
         self.assertFalse(Profile.objects.get().photo)
+
+    def test_tiny_file_with_a_huge_picture_is_rejected(self):
+        # 13,000 x 13,000 black-and-white pixels compress to a few KB, but
+        # would need hundreds of MB to open (review/06-skeptic.md, N1).
+        output = io.BytesIO()
+        Image.new("1", (13000, 13000)).save(output, format="PNG")
+        self.assertLess(len(output.getvalue()), 100_000)
+        response = self.post_photo(upload(output.getvalue(), name="a.png", content_type="image/png"))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["code"], "photo_wrong_type")
+        self.assertFalse(Profile.objects.get().photo)
+
+    def test_jpeg_over_the_pixel_limit_is_rejected(self):
+        with mock.patch.dict("profiles.photos.MAX_PIXELS", {"JPEG": 40 * 20 - 1}):
+            response = self.post_photo(upload(image_bytes("JPEG", size=(40, 20))))
+        self.assertEqual(response.data["code"], "photo_wrong_type")
+
+    def test_large_jpeg_is_shrunk_to_the_maximum_side(self):
+        response = self.post_photo(upload(image_bytes("JPEG", size=(4100, 3000))))
+        self.assertEqual(response.status_code, 200)
+        _, image = self.stored_image()
+        self.assertEqual(max(image.size), 2048)
 
     def test_replacing_a_photo_deletes_the_old_file(self):
         self.post_photo(upload(image_bytes()))

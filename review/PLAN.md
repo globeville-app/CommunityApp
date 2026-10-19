@@ -28,7 +28,7 @@ References in brackets point to the review files, for example
 
 ## Critical / high: before any real users
 
-- [ ] **P1. Reject images with too many pixels** [N1]
+- [x] **P1. Reject images with too many pixels** [N1]
   - **What:** check width × height before the image is decoded, and refuse
     anything over about 60 million pixels with the existing
     `photo_wrong_type` code. This covers profile photos, organization

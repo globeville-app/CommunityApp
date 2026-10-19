@@ -1,5 +1,6 @@
 """Report a problem: saving, limits, screenshots, admin and the team email."""
 
+import io
 import shutil
 import tempfile
 
@@ -85,6 +86,14 @@ class ProblemReportTests(APITestCase):
     def test_screenshot_over_the_size_limit_is_rejected(self):
         response = self.report(screenshot=upload(image_bytes(size=(400, 400))))
         self.assertEqual(response.data, {"code": "bad_image"})
+
+    def test_screenshot_with_a_huge_picture_is_rejected(self):
+        # A tiny file that unpacks into 169 million pixels (review N1).
+        output = io.BytesIO()
+        Image.new("1", (13000, 13000)).save(output, format="PNG")
+        response = self.report(screenshot=upload(output.getvalue(), name="s.png", content_type="image/png"))
+        self.assertEqual(response.data, {"code": "bad_image"})
+        self.assertFalse(ProblemReport.objects.exists())
 
     def test_screenshot_exif_is_stripped_and_never_returned(self):
         response = self.report(screenshot=upload(image_bytes(exif=exif_with_gps())))
