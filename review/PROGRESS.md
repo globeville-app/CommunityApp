@@ -43,7 +43,10 @@ changes until the owner approves `review/PLAN.md`).
 
 ## Next action
 
-**STOP: waiting for the owner to approve `review/PLAN.md`** (all of it, or
+**Owner decisions recorded in PLAN.md (2026-10-19). Still waiting for: a
+clear go-ahead for the whole plan (P1–P25), and answers on D2, D3 and D5.**
+
+Original note: STOP, waiting for the owner to approve `review/PLAN.md` (all of it, or
 a list of task numbers, plus answers to the "needs you" items).
 
 After approval (Phase 2):

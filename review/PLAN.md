@@ -311,15 +311,43 @@ References in brackets point to the review files, for example
   - **Risk:** low.
   - **Verify:** a CI `docker build` (P4).
 
+## Owner decisions (2026-10-19)
+
+- P5 approved. It is built with the email printed to the console. Real
+  emails start once Postmark is set up.
+- P6 (Block this member) approved.
+- P14 approved, and the "no third-party crash reporting" promise is kept:
+  DigitalOcean alerts, a job heartbeat and Django's own error emails only.
+  No Sentry.
+- D1 (email verification) approved.
+- D4: **don't record attendance at sensitive events at all.** Added as task
+  P25.
+- D2, D3, D5: explained to the owner. Waiting for answers.
+
+- [ ] **P25. Don't record attendance at sensitive events** [D4]
+  - **What:** collect and check-in at resource fairs and donation drives
+    are accepted, but nothing is stored; the server answers "ok, nothing
+    to collect". Existing rows are removed by a data migration. Hosting
+    them still counts, using the attendee count at the moment of check-in.
+  - **Why:** whether someone went to a food or resource event can reveal
+    that they needed help. Not storing it at all is the safest choice.
+  - **Files:** `backend/badges/engine.py`, a migration, tests, and
+    `docs/BADGES.md` (rule wording).
+  - **Risk:** medium. Hosting credit for these events needs the attendee
+    count from somewhere, so the design is settled in the commit and
+    described in its message.
+  - **Verify:** new tests that no attendance row exists after collecting a
+    sensitive event, and that every badge test still passes.
+
 ## Needs your decision first (not code yet)
 
-- [ ] **D1. Email verification at signup.** Recommended with P5, but it
+- [x] **D1. Email verification at signup.** Approved; built together with P5. Recommended with P5, but it
   adds a step for new members.
 - [ ] **D2. "Download my data" (GDPR-style export).** Answer requests by
   email for now, or build an endpoint?
 - [ ] **D3. How long to keep data** (problem reports, old events, logs).
   A cleanup job follows once you decide.
-- [ ] **D4. Attendance at sensitive events** (resource fairs, donation
+- [x] **D4. Attendance at sensitive events.** Decided: don't record (P25). (resource fairs, donation
   drives): keep storing it, or don't record it at all?
 - [ ] **D5. A staging server for the beta** (optional, about $5–12 a month).
 
