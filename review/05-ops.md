@@ -124,7 +124,9 @@ nets:
 - **Proposal:**
   1. turn on DigitalOcean's built-in alerts (deploy failed, high CPU or
      memory, app down) for the owner's email. No code needed;
-  2. add Sentry, which has a free tier, to the backend for crash reports.
+  2. *(Corrected in Step 6: `docs/STORE_PRIVACY.md:26` promises no
+     third-party crash reporting, so this needs the owner's decision first;
+     see PLAN.md P14.)* Add Sentry, which has a free tier, to the backend for crash reports.
      It's about 5 lines in `settings.py` plus a `SENTRY_DSN` secret. It must
      be set up to **not** send personal data (`send_default_pii=False`)
      and to drop request bodies, so addresses can't leak;

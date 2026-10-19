@@ -11,8 +11,8 @@ changes until the owner approves `review/PLAN.md`).
 | 3 – Security & compliance | done | `review/03-security.md` |
 | 4 – Tests | done | `review/04-tests.md` |
 | 5 – CI/CD & operations | done | `review/05-ops.md` |
-| 6 – Skeptic pass | next | notes added to each file + `review/06-skeptic.md` |
-| 7 – Refactoring plan | not started | `review/PLAN.md`, then STOP for approval |
+| 6 – Skeptic pass | done | notes added to each file + `review/06-skeptic.md` |
+| 7 – Refactoring plan | done: waiting for approval | `review/PLAN.md`, then STOP for approval |
 
 ## Key decisions
 
@@ -35,10 +35,20 @@ changes until the owner approves `review/PLAN.md`).
   Postgres run used a temporary local Postgres 16 server
   (`/var/lib/postgresql/review-test`, port 5499), which disappears with the
   container.
+- Step 6 was done by a separate, independent agent told to disprove the
+  findings. It confirmed 11 of 13, rated 2 lower, and found 8 new ones
+  (N1–N8). N1, the image memory crash, was reproduced by hand. Its Sentry
+  suggestion conflicts with `docs/STORE_PRIVACY.md`, so that is now an
+  owner decision (PLAN P14).
 
 ## Next action
 
-Step 6: the skeptic pass. Re-check every critical/high finding in
-01–05 against the code, remove false positives, mark confidence, and add
-anything missed. Output: `review/06-skeptic.md`. Then Step 7: write
-`review/PLAN.md` and STOP for the owner's approval.
+**STOP: waiting for the owner to approve `review/PLAN.md`** (all of it, or
+a list of task numbers, plus answers to the "needs you" items).
+
+After approval (Phase 2):
+1. `git checkout claude/community-social-network-v1-x411pw && git checkout -b review-fixes`
+2. Do the approved tasks in the suggested order. One task = one commit.
+   Run `python manage.py test` (and `npx jest` for app changes) after each.
+3. Tick each task in `PLAN.md` and update this file after every task.
+4. Push `review-fixes`. Don't merge anything.
