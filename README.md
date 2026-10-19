@@ -229,6 +229,23 @@ can't run in Expo Go; everything else works in Expo Go.
 To try collecting without waiting for a real event, give an account an event
 that's already over in the admin (change its start and end to yesterday).
 
+Reminders and organizations (Milestone 4, `docs/MILESTONE_4.md`). Push
+notifications need a development build too (see "Push notifications" below).
+
+1. Profile → gear → turn on **Event reminders** (allow notifications).
+2. Tap **I'm going** on an event for tomorrow. At 5:00 PM Denver time today a
+   push arrives: "Tomorrow 10:00 AM · [title]", with no meeting spot. (To try
+   it sooner, run `python manage.py send_due_notifications` after changing the
+   reminder's "send at" time in admin, under Scheduled notifications.)
+3. With another account, post an event; tap **I'm going** from the first
+   account, then cancel the event. The cancellation notice arrives right away.
+4. Settings → **Your organizations** → **Request an organization**. Approve it
+   in admin (Organizations → select it → "Approve"). Post an event as it
+   (**Post as**), and **Follow** it from a second account.
+5. Collect that event from two accounts. The organization's Host badge grows
+   (its page, and **Organization impact**), while the posting admin's own
+   Host badge doesn't.
+
 ### Test accounts
 
 Each account needs its own email, but it doesn't have to be real: nothing
@@ -373,6 +390,19 @@ from the design come in a later milestone.
 | GET / POST | `/api/me/celebrations` · `/seen` | unlock moments not shown yet · mark shown |
 | POST | `/api/badges/{key}/shared` | count a share (badge and date only) |
 | POST | `/api/me/checkin-offer/seen` | `{"which": "first" or "reoffer"}` |
+| POST / DELETE | `/api/me/push-tokens` | register / forget this phone's Expo push token |
+| POST | `/api/me/notif-offer/seen` | the one-time notification ask was shown |
+| PATCH | `/api/profile/me` | also `reminders_enabled`, `cancellation_alerts_enabled` |
+| GET / POST | `/api/organizations` | approved organizations serving your neighborhood, A–Z / request a new one |
+| GET / PATCH | `/api/organizations/{id}` | an organization's page / edit (admins; name, type and neighborhoods wait for approval) |
+| POST | `/api/organizations/{id}/photo` | its photo (admins) |
+| POST / DELETE | `/api/organizations/{id}/admins` | add (by email) / remove an admin; 1–5 |
+| PUT / DELETE | `/api/organizations/{id}/follow` | follow / unfollow |
+| POST | `/api/organizations/{id}/report` · `/translate` | report it · its description in another language |
+| GET | `/api/organizations/{id}/impact` | admins: impact numbers and badge progress |
+| GET | `/api/me/organizations` | the ones you run, with status (for **Post as**) |
+| GET | `/api/neighborhoods` | Denver's 78 neighborhoods |
+| GET | `/api/events?following=true` | events from organizations you follow |
 
 Events in another neighborhood answer 404, as if they didn't exist. Times go
 in and come out in Denver time and are stored in UTC.
@@ -503,6 +533,64 @@ From `mobile/`, after `npx eas login`:
 - Store privacy answers are drafted in `docs/STORE_PRIVACY.md`.
 
 ---
+
+## Push notifications (Milestone 4)
+
+Reminders go out at 5:00 PM Denver time the day before (change
+`REMINDER_HOUR` in `backend/notifications/config.py`). The server sends them
+through Expo's push service:
+
+- **The sending job.** `python manage.py send_due_notifications` sends every
+  reminder that's due. On DigitalOcean it runs every 15 minutes as a
+  scheduled job (`send-notifications` in `.do/app.yaml`); confirm it shows
+  under the app's Jobs after the first deploy. It's safe to run twice. On
+  your computer, run it by hand when you want to test.
+- **Expo project.** In `mobile/`, run `npx eas init` once; put the project id
+  it prints in `mobile/.env` as `EAS_PROJECT_ID=...` (and in the EAS build
+  profiles). Push tokens need it.
+- **Android (Firebase).** Create a free Firebase project, add an Android app
+  with the package `app.globeville`, download `google-services.json` into
+  `mobile/`, and upload a Firebase service-account key in the Expo account
+  (Project → Credentials → Android → FCM V1). Expo's guide: "Push
+  notifications setup" in the Expo docs.
+- **iPhone.** Needs the Apple Developer membership; `eas build` sets up the
+  push key the first time.
+- **Expo access token** (optional, recommended). Turn on "enhanced push
+  security" in the Expo account, create an access token, and set it as
+  `EXPO_ACCESS_TOKEN` on the server (`.do/app.yaml` has a slot for it).
+
+Push text is only the event's title and start time, never the meeting spot,
+because it shows on locked screens. Push tokens are removed on logout from
+that phone and on account deletion.
+
+## Milestone 4: what needs you
+
+- **Firebase project** for Android push, and the Expo project id (above).
+- **Approval checklist:** what the team checks before approving an
+  organization (a real group, a real local presence, an authorized requester).
+- **First organizations:** 3–5 real groups to invite first.
+- **Business rule wording:** approve `organizations.business_rule` in
+  `mobile/src/i18n/en.json` and `es.json` (Django admin shows it too).
+- **Spanish review** of the new screens (`notifications`, `organizations`,
+  and `push` for the notification text).
+
+Decisions made while building (approved defaults):
+
+- Organization admins can open, edit and cancel their organization's events
+  in any neighborhood; other members still see only their own neighborhood.
+  On an organization's page, members see only their neighborhood's events.
+- A reminder is created for every "I'm going" and the settings are checked
+  when it's sent, so turning reminders on later still covers earlier taps.
+  Reminders move with the event's time; none is sent twice.
+- Pushes use the organizer's own Spanish title when there is one, never a
+  machine translation.
+- Cancellation notices go out at once (retried by the job if Expo is down),
+  also when an organizer's account deletion cancels their events.
+- Organization events are never cancelled by an account deletion. If the
+  last admin leaves, the organization is hidden and its events stay listed;
+  the team assigns a new admin in Django admin, then uses "Approve".
+- "Admins don't get attendance credit" is checked when attendance is
+  recorded (at most 7 days after the event).
 
 ## Milestone 3: what needs you
 
