@@ -10,8 +10,8 @@ changes until the owner approves `review/PLAN.md`).
 | 2 – Architecture | done | `review/02-architecture.md` |
 | 3 – Security & compliance | done | `review/03-security.md` |
 | 4 – Tests | done | `review/04-tests.md` |
-| 5 – CI/CD & operations | next | `review/05-ops.md` |
-| 6 – Skeptic pass | not started | notes added to each file + `review/06-skeptic.md` |
+| 5 – CI/CD & operations | done | `review/05-ops.md` |
+| 6 – Skeptic pass | next | notes added to each file + `review/06-skeptic.md` |
 | 7 – Refactoring plan | not started | `review/PLAN.md`, then STOP for approval |
 
 ## Key decisions
@@ -38,6 +38,7 @@ changes until the owner approves `review/PLAN.md`).
 
 ## Next action
 
-Step 5: CI/CD and operations, written to `review/05-ops.md`. It covers the
-CI pipeline, tests on push, dev/staging/prod separation, secrets, migrations
-in deploy, backups, logging, monitoring and alerts, and the deploy docs.
+Step 6: the skeptic pass. Re-check every critical/high finding in
+01–05 against the code, remove false positives, mark confidence, and add
+anything missed. Output: `review/06-skeptic.md`. Then Step 7: write
+`review/PLAN.md` and STOP for the owner's approval.
