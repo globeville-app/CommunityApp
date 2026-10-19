@@ -165,3 +165,23 @@ jest.mock("react-native-maps", () => {
 
 jest.mock("react-native-view-shot", () => ({ captureRef: jest.fn(async () => "file:///tmp/badge-card.png") }));
 jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(async () => undefined), isAvailableAsync: jest.fn(async () => true) }));
+
+// ---- Milestone 4 ----
+
+// Push notifications: tests set the phone's answer with __setPermission.
+jest.mock("expo-notifications", () => {
+  let mockStatus = "undetermined";
+  let mockCanAskAgain = true;
+  return {
+    __setPermission: (status: string, canAskAgain = true) => {
+      mockStatus = status;
+      mockCanAskAgain = canAskAgain;
+    },
+    getPermissionsAsync: jest.fn(async () => ({ status: mockStatus, canAskAgain: mockCanAskAgain })),
+    requestPermissionsAsync: jest.fn(async () => {
+      if (mockStatus === "undetermined") mockStatus = "granted";
+      return { status: mockStatus, canAskAgain: mockCanAskAgain };
+    }),
+    getExpoPushTokenAsync: jest.fn(async () => ({ data: "ExponentPushToken[test-phone]", type: "expo" })),
+  };
+});

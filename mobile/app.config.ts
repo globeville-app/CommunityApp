@@ -16,6 +16,11 @@
  *     owner provides it (MILESTONE_3.md, Open items); iPhone needs none.
  *   - Background location ("Always") and geofencing need an EAS
  *     development build; they don't work in Expo Go.
+ *
+ * Milestone 4 (push notifications):
+ *   - EAS_PROJECT_ID: from `npx eas init` (Expo account). Push tokens need it.
+ *   - Android push also needs a Firebase project, set up in the Expo account
+ *     (README, "Push notifications").
  */
 import type { ExpoConfig } from "expo/config";
 
@@ -94,6 +99,7 @@ const config: ExpoConfig = {
     ],
     ["react-native-maps", { androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_ANDROID_KEY ?? "" }],
     "./plugins/withMapAppQueries",
+    ["expo-notifications", { color: "#FFF3A3" }],
     [
       "expo-image-picker",
       {
@@ -113,6 +119,8 @@ const config: ExpoConfig = {
     inviteUrl: shared.invite_url,
     // The same number for every platform, so Settings can show it anywhere.
     buildNumber: String(BUILD_NUMBER),
+    // Push notifications need the Expo project's id.
+    ...(process.env.EAS_PROJECT_ID ? { eas: { projectId: process.env.EAS_PROJECT_ID } } : {}),
   },
 };
 

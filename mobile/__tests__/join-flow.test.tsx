@@ -332,7 +332,7 @@ describe("logging out (Settings)", () => {
     mocked.logout.mockResolvedValue(undefined);
     await logOutFromSettings();
     expect(await screen.findByRole("button", { name: "Sign up" })).toBeTruthy();
-    expect(mocked.logout).toHaveBeenCalledWith("tok-123");
+    expect(mocked.logout).toHaveBeenCalledWith("tok-123", null);
     expect(fakeStore.has("auth_token")).toBe(false);
   });
 

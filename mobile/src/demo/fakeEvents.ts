@@ -17,6 +17,7 @@ import {
   save,
   userFor,
 } from "./fakeBackend";
+import { seedOrgs } from "./fakeOrgs";
 
 const DENVER = "America/Denver";
 const HOUR = 60 * 60 * 1000;
@@ -77,6 +78,7 @@ export const SAMPLE_MEMBER_IDS: Record<string, number> = { "Rosa M.": 9001, "Kim
 function seed(db: Db, neighborhoodId: number) {
   if (db.seededNeighborhoods.includes(neighborhoodId)) return;
   db.seededNeighborhoods.push(neighborhoodId);
+  const orgs = seedOrgs(db, neighborhoodId);
   const center = neighborhoodCenter(neighborhoodId);
   // Pins a short walk from the neighborhood's middle.
   const near = (north: number, east: number) => ({
@@ -104,6 +106,7 @@ function seed(db: Db, neighborhoodId: number) {
       ends_at: daysFromNow(2, 21),
       location_text: "Rec center, back room",
       organizerName: "Rosa M.",
+      orgId: orgs.recClub,
       extraGoing: 11,
       ...near(1, -2),
     },
@@ -164,6 +167,7 @@ function seed(db: Db, neighborhoodId: number) {
       ends_at: daysFromNow(-1, 11),
       location_text: "Trailhead by the bridge",
       organizerName: "Kim T.",
+      orgId: orgs.riverFriends,
       extraGoing: 9,
       viewerGoing: true,
       ...near(2, 2),
@@ -230,9 +234,11 @@ export function isGoing(db: Db, event: DemoEvent, email: string) {
   return event.goingEmails.includes(email) || (!!event.viewerGoing && !db.badges[email]?.declined.includes(event.id));
 }
 
-function toJson(db: Db, event: DemoEvent, email: string): EventData {
+export function toJson(db: Db, event: DemoEvent, email: string): EventData {
   const profile = db.profiles[email];
   const organizer = event.organizerEmail ? db.profiles[event.organizerEmail] : null;
+  const org = event.orgId ? db.orgs?.[event.orgId] : null;
+  const manages = org ? org.adminEmails.includes(email) : event.organizerEmail === email;
   return {
     id: event.id,
     group: groupOf(event.category),
@@ -248,24 +254,37 @@ function toJson(db: Db, event: DemoEvent, email: string): EventData {
     location_text: event.location_text,
     latitude: event.latitude ?? null,
     longitude: event.longitude ?? null,
-    needs_pin: event.organizerEmail === email && event.latitude == null && !ended(event) && event.status === "active",
+    needs_pin: manages && event.latitude == null && !ended(event) && event.status === "active",
     partiful_url: event.partiful_url,
     status: event.status,
     is_past: ended(event),
-    organizer_name: event.organizerEmail === null ? null : (organizer?.display_name ?? event.organizerName),
+    // Organization events never show who posted them.
+    organizer_name: org || event.organizerEmail === null ? null : (organizer?.display_name ?? event.organizerName),
     organizer_member_id:
-      event.organizerEmail === null ? null : organizer ? (organizer.id ?? 1) : (SAMPLE_MEMBER_IDS[event.organizerName] ?? null),
-    is_organizer: event.organizerEmail === email,
+      org || event.organizerEmail === null
+        ? null
+        : organizer
+          ? (organizer.id ?? 1)
+          : (SAMPLE_MEMBER_IDS[event.organizerName] ?? null),
+    organization: org ? { id: org.id, name: org.name, type: org.type, has_page: org.status === "approved" } : null,
+    is_following: !!org && org.followerEmails.includes(email),
+    is_organizer: manages,
     going_count: event.goingEmails.length + event.extraGoing + (isGoing(db, event, email) && !event.goingEmails.includes(email) ? 1 : 0),
     is_going: isGoing(db, event, email),
     matches_interests: (profile?.interests ?? []).includes(event.category),
   };
 }
 
-function findEvent(db: Db, id: number, neighborhoodId: number) {
+function findEvent(db: Db, id: number, neighborhoodId: number, email?: string) {
   const event = db.events[id];
-  if (!event || event.neighborhoodId !== neighborhoodId) throw new ApiError("event_not_found", 404);
+  // Admins also see their organizations' events in other neighborhoods.
+  const admin = !!email && !!event?.orgId && !!db.orgs?.[event.orgId]?.adminEmails.includes(email);
+  if (!event || (event.neighborhoodId !== neighborhoodId && !admin)) throw new ApiError("event_not_found", 404);
   return event;
+}
+
+function canManage(db: Db, event: DemoEvent, email: string) {
+  return event.orgId ? !!db.orgs?.[event.orgId]?.adminEmails.includes(email) : event.organizerEmail === email;
 }
 
 function check(input: Partial<EventInput>, existing?: DemoEvent) {
@@ -323,7 +342,7 @@ function check(input: Partial<EventInput>, existing?: DemoEvent) {
 
 // ---- The endpoints ----------------------------------------------------------------
 
-export async function listEvents(token: string, filter: { group?: string; forYou?: boolean } = {}) {
+export async function listEvents(token: string, filter: { group?: string; forYou?: boolean; following?: boolean } = {}) {
   await pause(300);
   const { email, db, profile } = member(token);
   save(db);
@@ -332,6 +351,7 @@ export async function listEvents(token: string, filter: { group?: string; forYou
     .filter((e) => e.neighborhoodId === profile.neighborhoodId && !ended(e))
     .filter((e) => !groupKeys || groupKeys.includes(e.category))
     .filter((e) => !filter.forYou || profile.interests.includes(e.category))
+    .filter((e) => !filter.following || (!!e.orgId && !!db.orgs?.[e.orgId]?.followerEmails.includes(email)))
     .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
   return { events: events.map((e) => toJson(db, e, email)) };
 }
@@ -342,7 +362,7 @@ export async function getEvent(token: string, id: number) {
   await pause(200);
   const { email, db, profile } = member(token);
   save(db);
-  return toJson(db, findEvent(db, id, profile.neighborhoodId), email);
+  return toJson(db, findEvent(db, id, profile.neighborhoodId, email), email);
 }
 
 export async function createEvent(token: string, input: EventInput) {
@@ -352,11 +372,25 @@ export async function createEvent(token: string, input: EventInput) {
     (e) => e.organizerEmail === email && Date.now() - new Date(e.createdAt).getTime() < DAY,
   );
   if (today.length >= 10) throw new ApiError("daily_limit", 429);
+  // Posting as an organization: its admins, one of its neighborhoods.
+  let orgId: number | null = null;
+  let neighborhoodId = profile.neighborhoodId;
+  if (input.organization) {
+    const org = db.orgs?.[input.organization];
+    if (!org || !org.adminEmails.includes(email)) throw new ApiError("not_org_admin", 403);
+    if (org.status !== "approved") throw new ApiError("org_not_approved", 409);
+    if (!input.neighborhood || !org.neighborhoodIds.includes(input.neighborhood)) {
+      throw new ApiError("neighborhood_not_served", 400);
+    }
+    orgId = org.id;
+    neighborhoodId = input.neighborhood;
+  }
   const id = db.nextEventId++;
   db.events[id] = {
     ...check(input),
     id,
-    neighborhoodId: profile.neighborhoodId,
+    orgId,
+    neighborhoodId,
     organizerEmail: email,
     organizerName: profile.display_name,
     goingEmails: [],
@@ -364,7 +398,7 @@ export async function createEvent(token: string, input: EventInput) {
     status: "active",
     createdAt: new Date().toISOString(),
   };
-  db.profiles[email].role = "organizer";
+  if (!orgId) db.profiles[email].role = "organizer";
   save(db);
   return toJson(db, db.events[id], email);
 }
@@ -372,8 +406,8 @@ export async function createEvent(token: string, input: EventInput) {
 export async function updateEvent(token: string, id: number, changes: Partial<EventInput>) {
   await pause();
   const { email, db, profile } = member(token);
-  const event = findEvent(db, id, profile.neighborhoodId);
-  if (event.organizerEmail !== email) throw new ApiError("not_organizer", 403);
+  const event = findEvent(db, id, profile.neighborhoodId, email);
+  if (!canManage(db, event, email)) throw new ApiError("not_organizer", 403);
   if (event.status === "cancelled") throw new ApiError("event_cancelled", 409);
   db.events[id] = { ...event, ...check(changes, event) };
   save(db);
@@ -383,8 +417,8 @@ export async function updateEvent(token: string, id: number, changes: Partial<Ev
 export async function cancelEvent(token: string, id: number) {
   await pause();
   const { email, db, profile } = member(token);
-  const event = findEvent(db, id, profile.neighborhoodId);
-  if (event.organizerEmail !== email) throw new ApiError("not_organizer", 403);
+  const event = findEvent(db, id, profile.neighborhoodId, email);
+  if (!canManage(db, event, email)) throw new ApiError("not_organizer", 403);
   event.status = "cancelled";
   save(db);
   return toJson(db, event, email);

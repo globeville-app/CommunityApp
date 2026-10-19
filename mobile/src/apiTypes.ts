@@ -61,8 +61,12 @@ export type EventData = {
   is_past: boolean;
   /** null once the organizer deleted their account ("Former neighbor"). */
   organizer_name: string | null;
-  /** For the organizer's member page; null once they deleted their account. */
+  /** For the organizer's member page; null once they deleted their account, and for organization events. */
   organizer_member_id: number | null;
+  /** "Hosted by [Organization]". has_page is false while its page is hidden. */
+  organization: { id: number; name: string; type: OrgType; has_page: boolean } | null;
+  /** The member follows this event's organization. */
+  is_following: boolean;
   is_organizer: boolean;
   going_count: number;
   is_going: boolean;
@@ -84,6 +88,9 @@ export type EventInput = {
   latitude: number | null;
   longitude: number | null;
   partiful_url?: string;
+  /** Post as an organization the member runs, in one of its neighborhoods. */
+  organization?: number;
+  neighborhood?: number;
 };
 
 export type Translation = { title: string; description: string; target: Language; machine: boolean };
@@ -113,6 +120,10 @@ export type Profile = {
   badge_visibility: BadgeVisibility;
   /** The first auto check-in offer was shown (it never shows again). */
   checkin_offer_shown: boolean;
+  reminders_enabled: boolean;
+  cancellation_alerts_enabled: boolean;
+  /** The one-time notification ask was shown. */
+  notif_offer_shown: boolean;
   language: Language;
   joined_at: string;
 };
@@ -214,4 +225,50 @@ export type Geofence = {
   closes_at: string;
 };
 
-export type ProfileSettings = { auto_checkin?: boolean; badge_visibility?: BadgeVisibility };
+export type ProfileSettings = {
+  auto_checkin?: boolean;
+  badge_visibility?: BadgeVisibility;
+  reminders_enabled?: boolean;
+  cancellation_alerts_enabled?: boolean;
+};
+
+// ---- Organizations (docs/MILESTONE_4.md) ----
+
+export const ORG_TYPES = ["nonprofit", "club", "collective", "faith", "school", "civic", "business"] as const;
+export type OrgType = (typeof ORG_TYPES)[number];
+export type OrgStatus = "pending" | "approved" | "rejected" | "hidden";
+
+export type NeighborhoodRef = { id: number; name: string; center?: LatLng | null };
+
+export type OrgSummary = { id: number; name: string; type: OrgType; photo_url: string | null };
+
+/** An organization's page. The admin-only fields are absent for everyone else. */
+export type OrgPage = OrgSummary & {
+  description: string;
+  description_alt: string | null;
+  language: Language;
+  link: string | null;
+  neighborhoods: NeighborhoodRef[];
+  badges: BadgeData[];
+  upcoming_events: EventData[];
+  past_event_count: number;
+  is_following: boolean;
+  is_admin: boolean;
+  status?: OrgStatus;
+  follower_count?: number;
+  change_pending?: boolean;
+  admins?: { member_id: number | null; display_name: string | null; is_you: boolean }[];
+};
+
+export type MyOrg = OrgSummary & { status: OrgStatus; neighborhoods: NeighborhoodRef[] };
+
+export type OrgInput = {
+  name: string;
+  type: OrgType;
+  neighborhoods: number[];
+  description: string;
+  description_alt?: string;
+  language?: Language;
+  link?: string;
+  business_rule_accepted?: boolean;
+};

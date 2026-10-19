@@ -1,4 +1,3 @@
-import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,6 +7,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ApiError, getMyProfile, saveProfile, uploadPhoto } from "../api";
 import { neighborhoodLabel } from "../format";
+import { PickedPhoto, pickSquarePhoto } from "../photos";
 import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
 import { useLanguage } from "../language";
@@ -29,9 +29,7 @@ import {
   styles,
 } from "../ui";
 
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
-type PickedPhoto = { uri: string; mimeType: string };
 
 export default function ProfileSetup() {
   const { t } = useTranslation();
@@ -75,26 +73,9 @@ export default function ProfileSetup() {
 
   async function pickPhoto() {
     setError(null);
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      // Compressing makes both iPhone and Android hand back a JPEG, so
-      // iPhone HEIC photos are converted before upload. 0.6 keeps a phone
-      // photo to roughly 1 MB, which uploads quickly over home Wi-Fi.
-      quality: 0.6,
-      preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
-      // Don't give EXIF to the app. (This does NOT clean the file itself;
-      // the backend strips EXIF/GPS from every photo it receives.)
-      exif: false,
-    });
-    if (result.canceled || !result.assets?.length) return;
-    const asset = result.assets[0];
-    if (asset.fileSize && asset.fileSize > MAX_PHOTO_BYTES) {
-      setError(new ApiError("photo_too_large"));
-      return;
-    }
-    setPhoto({ uri: asset.uri, mimeType: asset.mimeType === "image/png" ? "image/png" : "image/jpeg" });
+    const picked = await pickSquarePhoto();
+    if (picked === "too_large") setError(new ApiError("photo_too_large"));
+    else if (picked) setPhoto(picked);
   }
 
   async function onSave() {

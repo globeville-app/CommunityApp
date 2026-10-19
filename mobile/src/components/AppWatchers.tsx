@@ -2,6 +2,7 @@
  * Things that happen when the app opens or comes back to the foreground:
  *   - unlock moments: unseen celebrations show once, never mid-post
  *   - auto check-in: refresh which event places the phone watches
+ *   - push notifications: make sure the server has this phone's token
  */
 import { router, usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
@@ -10,6 +11,7 @@ import { AppState } from "react-native";
 import { getCelebrations } from "../api";
 import { useAuth } from "../auth";
 import { syncGeofences } from "../checkin/geofencing";
+import { registerThisPhone } from "../notifications/push";
 
 /** Screens an unlock moment may appear over. Never the post/edit flow or joining. */
 export function canCelebrateOn(pathname: string) {
@@ -39,7 +41,9 @@ export function AppWatchers() {
   }, [token]);
 
   useEffect(() => {
-    if (token) syncGeofences(token).catch(() => undefined);
+    if (!token) return;
+    syncGeofences(token).catch(() => undefined);
+    registerThisPhone(token).catch(() => undefined);
   }, [token]);
 
   useEffect(() => {

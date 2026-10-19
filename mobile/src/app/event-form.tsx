@@ -1,5 +1,7 @@
 /**
  * Post an event, a short guided flow (docs/MILESTONE_2.md):
+ *   0. Post as: You / [Organization] (Milestone 4; only for admins of an
+ *      approved organization), then which of its neighborhoods
  *   1. What kind of event? (category picker)
  *   2. Got a Partiful link? (optional; prefills the title, may suggest a category)
  *   3. Details
@@ -13,7 +15,19 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 
-import { ApiError, createEvent, EventInput, getEvent, getMyProfile, LatLng, partifulPreview, updateEvent } from "../api";
+import {
+  ApiError,
+  createEvent,
+  EventInput,
+  getEvent,
+  getMyOrganizations,
+  getMyProfile,
+  LatLng,
+  MyOrg,
+  NeighborhoodRef,
+  partifulPreview,
+  updateEvent,
+} from "../api";
 import { useAuth } from "../auth";
 import { categoryLabel, groupOf, useCategories } from "../categories";
 import { CategoryChip } from "../components/CategoryChip";
@@ -29,6 +43,7 @@ import {
   BackButton,
   Button,
   Caption,
+  Choice,
   ErrorMessage,
   Field,
   GlassCard,
@@ -41,7 +56,7 @@ import {
   Title,
 } from "../ui";
 
-type Step = "category" | "partiful" | "details" | "pin";
+type Step = "who" | "where" | "category" | "partiful" | "details" | "pin";
 
 // Downtown Denver, if the server can't say where the neighborhood is.
 const DENVER: LatLng = { latitude: 39.7392, longitude: -104.9903 };
@@ -67,6 +82,10 @@ export default function EventForm() {
 
   const [step, setStep] = useState<Step>(editingId ? (startStep === "pin" ? "pin" : "details") : "category");
   const [loaded, setLoaded] = useState(!editingId);
+  // Posting as an organization (new events only): which one, and where.
+  const [orgs, setOrgs] = useState<MyOrg[] | null>(editingId ? [] : null);
+  const [asOrg, setAsOrg] = useState<MyOrg | null>(null);
+  const [orgNeighborhood, setOrgNeighborhood] = useState<NeighborhoodRef | null>(null);
   const [category, setCategory] = useState<string | null>(null);
   const [otherText, setOtherText] = useState("");
   const [partifulUrl, setPartifulUrl] = useState("");
@@ -101,6 +120,34 @@ export default function EventForm() {
       })
       .catch(() => undefined);
   }, [token]);
+
+  // Admins of an approved organization choose who's posting first.
+  useEffect(() => {
+    if (!token || editingId) return;
+    getMyOrganizations(token)
+      .then((data) => {
+        const approved = data.organizations.filter((o) => o.status === "approved");
+        setOrgs(approved);
+        if (approved.length > 0) setStep("who");
+      })
+      .catch(() => setOrgs([]));
+  }, [token, editingId]);
+
+  function chooseWho(org: MyOrg | null) {
+    setAsOrg(org);
+    if (org && org.neighborhoods.length > 1) {
+      setOrgNeighborhood(null);
+      setStep("where");
+      return;
+    }
+    chooseWhere(org ? org.neighborhoods[0] : null);
+  }
+
+  function chooseWhere(neighborhood: NeighborhoodRef | null) {
+    setOrgNeighborhood(neighborhood);
+    if (neighborhood?.center) setMapCenter(neighborhood.center);
+    setStep("category");
+  }
 
   // Editing: fill the form from the saved event.
   useEffect(() => {
@@ -181,6 +228,7 @@ export default function EventForm() {
       latitude: pin?.latitude ?? null,
       longitude: pin?.longitude ?? null,
       partiful_url: partifulUrl.trim(),
+      ...(asOrg && orgNeighborhood ? { organization: asOrg.id, neighborhood: orgNeighborhood.id } : {}),
     };
     setBusy(true);
     setError(null);
@@ -199,9 +247,39 @@ export default function EventForm() {
     }
   }
 
-  if (!ready || !loaded) return <Loading />;
+  if (!ready || !loaded || !orgs) return <Loading />;
 
   const otherLanguage: Language = writing === "es" ? "en" : "es";
+
+  if (step === "who") {
+    return (
+      <Screen>
+        <BackButton />
+        <Title>{t("post.who_title")}</Title>
+        <View style={{ gap: space.s }}>
+          <Choice label={t("post.as_you")} selected={false} onPress={() => chooseWho(null)} />
+          {orgs.map((org) => (
+            <Choice key={org.id} label={org.name} selected={false} onPress={() => chooseWho(org)} />
+          ))}
+        </View>
+      </Screen>
+    );
+  }
+
+  if (step === "where" && asOrg) {
+    return (
+      <Screen>
+        <BackButton />
+        <Title>{t("post.where_title")}</Title>
+        <Intro>{t("post.where_intro", { name: asOrg.name })}</Intro>
+        <View style={{ gap: space.s }}>
+          {asOrg.neighborhoods.map((n) => (
+            <Choice key={n.id} label={n.name} selected={orgNeighborhood?.id === n.id} onPress={() => chooseWhere(n)} />
+          ))}
+        </View>
+      </Screen>
+    );
+  }
 
   if (step === "pin") {
     return (
@@ -259,6 +337,10 @@ export default function EventForm() {
     <Screen>
       <BackButton />
       <Title>{editingId ? t("post.edit_title") : t("post.details_title")}</Title>
+      {asOrg && orgNeighborhood ? (
+        <Caption>{t("post.posting_as", { name: asOrg.name, neighborhood: orgNeighborhood.name })}</Caption>
+      ) : null}
+      {asOrg?.type === "business" ? <Notice message={t("organizations.business_rule")} /> : null}
 
       <GlassCard>
         <Section>{t("post.category_label")}</Section>

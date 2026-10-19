@@ -1,6 +1,7 @@
 /**
  * An event in the list: date block, category chip, title, time and place,
- * how many neighbors are going, and "For you" / "Cancelled" tags.
+ * how many neighbors are going, "Hosted by [Organization]", and "For you" /
+ * "Following" / "Cancelled" tags.
  */
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -49,6 +50,11 @@ export function EventCard({ event }: { event: EventData }) {
               <Text style={styles.forYouText}>{t("events.for_you_tag")}</Text>
             </View>
           ) : null}
+          {event.is_following && !cancelled ? (
+            <View style={styles.following}>
+              <Text style={styles.followingText}>{t("events.following_tag")}</Text>
+            </View>
+          ) : null}
           {cancelled ? (
             <View style={styles.cancelled}>
               <Text style={styles.cancelledText}>{t("events.cancelled")}</Text>
@@ -56,6 +62,10 @@ export function EventCard({ event }: { event: EventData }) {
           ) : null}
         </View>
         <Text style={[type.section, styles.title, cancelled && styles.struck]}>{title}</Text>
+        {/* Organization names are never translated. */}
+        {event.organization ? (
+          <Text style={[type.caption, styles.hostedBy]}>{t("events.hosted_by", { name: event.organization.name })}</Text>
+        ) : null}
         <Text style={[type.caption, styles.muted]}>
           {timeRange(event.starts_at, event.ends_at, language)} · {event.location_text}
         </Text>
@@ -95,6 +105,9 @@ const styles = StyleSheet.create({
   going: { color: colors.glowTurquoise },
   forYou: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: colors.glowYellow },
   forYouText: { color: colors.base, fontFamily: "Outfit_600SemiBold", fontSize: 12 },
+  following: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: colors.glowTurquoise },
+  followingText: { color: colors.glowTurquoise, fontFamily: "Outfit_600SemiBold", fontSize: 12 },
+  hostedBy: { color: colors.textSoft },
   cancelled: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: colors.danger },
   cancelledText: { color: colors.danger, fontFamily: "Outfit_600SemiBold", fontSize: 12 },
 });

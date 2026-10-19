@@ -239,7 +239,7 @@ describe("log out", () => {
     await pressAndSettle((await screen.findAllByRole("button", { name: "Cerrar sesión" })).at(-1)!);
 
     expect(await screen.findByRole("button", { name: "Crear cuenta" })).toBeTruthy();
-    expect(mocked.logout).toHaveBeenCalledWith("tok-123");
+    expect(mocked.logout).toHaveBeenCalledWith("tok-123", null);
     expect(fakeStore.has("auth_token")).toBe(false);
     expect(await languageStore()).toMatchObject({ "app.language": "es" });
   });

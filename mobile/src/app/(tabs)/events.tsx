@@ -1,6 +1,7 @@
 /**
  * Events tab: the neighborhood's upcoming events, soonest first, with
- * "For you", All and group filters.
+ * "For you", Following (Milestone 4), All and group filters, and a link to
+ * the organizations serving the neighborhood.
  */
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
@@ -14,9 +15,9 @@ import { EventCard } from "../../components/EventCard";
 import { errorMessage } from "../../i18n/errors";
 import { resetTo } from "../../navigation";
 import { colors, MIN_TOUCH, space, type } from "../../theme";
-import { Button, Caption, ErrorMessage, GlassCard, Hero, Intro, Loading, Screen, TabScene } from "../../ui";
+import { Button, Caption, ErrorMessage, GlassCard, Hero, Intro, Loading, Screen, TabScene, TextLink } from "../../ui";
 
-/** "for_you", "all", or a group key. */
+/** "for_you", "following", "all", or a group key. */
 type Filter = string;
 
 export default function EventsTab() {
@@ -45,7 +46,8 @@ function Events() {
           getMyProfile(token),
           listEvents(token, {
             forYou: which === "for_you",
-            group: which !== "all" && which !== "for_you" ? which : undefined,
+            following: which === "following",
+            group: !["all", "for_you", "following"].includes(which) ? which : undefined,
           }),
         ]);
         setProfile(me);
@@ -87,11 +89,18 @@ function Events() {
   const noInterests = profile.interests.length === 0;
   const filters: { key: Filter; label: string }[] = [
     { key: "for_you", label: noInterests ? t("events.filter_pick_interests") : t("events.filter_for_you") },
+    { key: "following", label: t("events.filter_following") },
     { key: "all", label: t("events.filter_all") },
     ...groups.map((g) => ({ key: g.key, label: t(`category_groups_short.${g.key}`) })),
   ];
   const empty =
-    filter === "for_you" ? t("events.empty_for_you") : filter === "all" ? t("events.empty") : t("events.empty_group");
+    filter === "for_you"
+      ? t("events.empty_for_you")
+      : filter === "following"
+        ? t("events.empty_following")
+        : filter === "all"
+          ? t("events.empty")
+          : t("events.empty_group");
 
   return (
     <Screen>
@@ -104,6 +113,7 @@ function Events() {
         title={t("events.post_button")}
         onPress={() => router.push("/event-form")}
       />
+      <TextLink label={t("organizations.list_link")} onPress={() => router.push("/organizations")} />
 
       <ScrollView
         horizontal

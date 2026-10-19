@@ -24,6 +24,7 @@ from events.models import Event
 from events.timing import has_ended
 from events.translation import TranslationUnavailable, get_translator
 from events.views import event_json, events_for, member_profile
+from neighborhoods.geo import neighborhood_center
 from neighborhoods.models import Neighborhood
 from profiles.models import Profile
 from profiles.photos import PhotoError, clean_photo
@@ -226,7 +227,11 @@ class MyOrganizationsView(APIView):
                     {
                         **org_summary(o, request),
                         "status": o.status,
-                        "neighborhoods": [{"id": n.pk, "name": n.name} for n in o.neighborhoods.order_by("name")],
+                        # center: where the pin map opens when posting there.
+                        "neighborhoods": [
+                            {"id": n.pk, "name": n.name, "center": neighborhood_center(n.pk)}
+                            for n in o.neighborhoods.order_by("name")
+                        ],
                     }
                     for o in orgs
                 ]

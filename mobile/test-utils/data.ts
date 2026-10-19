@@ -16,6 +16,9 @@ export const HIGHLAND_PROFILE: ProfileData = {
   badge_visibility: "neighborhood",
   // Already offered, so tapping "I'm going" in older tests stays on the event.
   checkin_offer_shown: true,
+  reminders_enabled: false,
+  cancellation_alerts_enabled: true,
+  notif_offer_shown: true,
   language: "en",
   joined_at: "2026-10-07T12:00:00Z",
 };
@@ -60,6 +63,8 @@ export function sampleEvent(overrides: Partial<EventData> = {}): EventData {
     is_past: false,
     organizer_name: "Ben R.",
     organizer_member_id: 52,
+    organization: null,
+    is_following: false,
     is_organizer: false,
     going_count: 12,
     is_going: false,

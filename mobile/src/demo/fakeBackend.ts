@@ -21,6 +21,7 @@ import {
   ProblemReportInput,
   Profile,
   ProfileInput,
+  OrgType,
 } from "../apiTypes";
 import { isLanguage, Language } from "../i18n";
 
@@ -53,6 +54,9 @@ const DATA: DemoData = (globalThis as { __DEMO_DATA__?: DemoData }).__DEMO_DATA_
 };
 
 export const BADGE_RULES = DATA.badgeRules;
+/** All of Denver's neighborhoods, A–Z, for "Neighborhoods served". */
+export const ALL_NEIGHBORHOODS = () =>
+  [...DATA.neighborhoods].sort((a, b) => a.name.localeCompare(b.name)).map(({ id, name }) => ({ id, name }));
 export const CATEGORY_GROUPS = DATA.categoryGroups;
 export const CATEGORY_KEYS = CATEGORY_GROUPS.flatMap((group) => group.categories);
 const NEIGHBORHOODS = [...DATA.neighborhoods].sort((a, b) => a.id - b.id);
@@ -98,7 +102,7 @@ export const SIMULATE_OUTAGE = "#down";
 
 // ---- Pretend database, saved in this browser -------------------------------
 
-export type DemoEvent = Omit<EventData, "group" | "is_past" | "organizer_name" | "is_organizer" | "going_count" | "is_going" | "matches_interests" | "needs_pin" | "organizer_member_id"> & {
+export type DemoEvent = Omit<EventData, "group" | "is_past" | "organizer_name" | "is_organizer" | "going_count" | "is_going" | "matches_interests" | "needs_pin" | "organizer_member_id" | "organization" | "is_following"> & {
   neighborhoodId: number;
   organizerEmail: string | null; // null once deleted
   organizerName: string; // made-up neighbors in the samples
@@ -108,6 +112,25 @@ export type DemoEvent = Omit<EventData, "group" | "is_past" | "organizer_name" |
   // Samples from before you joined that pretend you tapped "I'm going",
   // so My Impact has something to collect.
   viewerGoing?: boolean;
+  // Posted as an organization (fakeOrgs.ts).
+  orgId?: number | null;
+};
+
+/** A pretend organization (fakeOrgs.ts). */
+export type DemoOrg = {
+  id: number;
+  name: string;
+  type: OrgType;
+  description: string;
+  description_alt: string | null;
+  language: Language;
+  link: string | null;
+  photo_url: string | null;
+  status: "pending" | "approved" | "rejected" | "hidden";
+  neighborhoodIds: number[];
+  adminEmails: string[];
+  followerEmails: string[];
+  extraFollowers: number;
 };
 
 /** The demo's attendance, badges and celebrations for one person. */
@@ -131,9 +154,19 @@ export type Db = {
   seededNeighborhoods: number[];
   badges: Record<string, DemoBadges>; // by email
   nextCelebrationId: number;
+  orgs: Record<string, DemoOrg>;
+  nextOrgId: number;
+  seededOrgNeighborhoods: number[];
 };
 
-type Milestone3Settings = "id" | "auto_checkin" | "badge_visibility" | "checkin_offer_shown";
+type Milestone3Settings =
+  | "id"
+  | "auto_checkin"
+  | "badge_visibility"
+  | "checkin_offer_shown"
+  | "reminders_enabled"
+  | "cancellation_alerts_enabled"
+  | "notif_offer_shown";
 // Older saved demo profiles lack the Milestone 3 settings, so they're optional here.
 type DemoProfile = Omit<Profile, "neighborhood" | "language" | Milestone3Settings> &
   Partial<Pick<Profile, Milestone3Settings>> & { neighborhoodId: number };
@@ -151,6 +184,9 @@ function emptyDb(): Db {
     seededNeighborhoods: [],
     badges: {},
     nextCelebrationId: 1,
+    orgs: {},
+    nextOrgId: 1,
+    seededOrgNeighborhoods: [],
   };
 }
 
@@ -242,6 +278,9 @@ export function toProfile(db: Db, email: string): Profile {
     auto_checkin: rest.auto_checkin ?? false,
     badge_visibility: rest.badge_visibility ?? "neighborhood",
     checkin_offer_shown: rest.checkin_offer_shown ?? false,
+    reminders_enabled: rest.reminders_enabled ?? false,
+    cancellation_alerts_enabled: rest.cancellation_alerts_enabled ?? true,
+    notif_offer_shown: rest.notif_offer_shown ?? false,
     neighborhood: { id: neighborhood.id, name: neighborhood.name, center: neighborhoodCenter(neighborhood.id) },
     language: languageOf(db, email),
   };

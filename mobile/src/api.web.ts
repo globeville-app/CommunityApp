@@ -50,6 +50,24 @@ export {
   markCheckinOfferSeen,
   updateProfileSettings,
 } from "./demo/fakeBadges";
+export {
+  addOrganizationAdmin,
+  getMyOrganizations,
+  getOrganization,
+  getOrganizationImpact,
+  listNeighborhoods,
+  listOrganizations,
+  markNotifOfferSeen,
+  registerPushToken,
+  removeOrganizationAdmin,
+  removePushToken,
+  reportOrganization,
+  requestOrganization,
+  setFollowing,
+  translateOrganization,
+  updateOrganization,
+  uploadOrganizationPhoto,
+} from "./demo/fakeOrgs";
 
 export async function getConfig(): Promise<AppConfig> {
   return {

@@ -87,10 +87,10 @@ describe("the Events tab", () => {
     renderApp();
     await screen.findByText("No events yet. Post the first one.");
     await pressAndSettle(screen.getByRole("button", { name: "Community" }));
-    await waitFor(() => expect(mocked.listEvents).toHaveBeenLastCalledWith("tok-123", { forYou: false, group: "community" }));
+    await waitFor(() => expect(mocked.listEvents).toHaveBeenLastCalledWith("tok-123", { following: false, forYou: false, group: "community" }));
     expect(await screen.findByText("No upcoming events in this group yet.")).toBeTruthy();
     await pressAndSettle(screen.getByRole("button", { name: "All" }));
-    await waitFor(() => expect(mocked.listEvents).toHaveBeenLastCalledWith("tok-123", { forYou: false, group: undefined }));
+    await waitFor(() => expect(mocked.listEvents).toHaveBeenLastCalledWith("tok-123", { following: false, forYou: false, group: undefined }));
   });
 
   it("tags only matching events 'For you', and filters to them", async () => {
@@ -109,7 +109,7 @@ describe("the Events tab", () => {
 
     // The filter chip comes first in the screen, before the cards.
     await pressAndSettle(screen.getAllByRole("button", { name: "For you" })[0]);
-    await waitFor(() => expect(mocked.listEvents).toHaveBeenLastCalledWith("tok-123", { forYou: true, group: undefined }));
+    await waitFor(() => expect(mocked.listEvents).toHaveBeenLastCalledWith("tok-123", { following: false, forYou: true, group: undefined }));
     expect(await screen.findByText("No upcoming events match your interests yet.")).toBeTruthy();
   });
 

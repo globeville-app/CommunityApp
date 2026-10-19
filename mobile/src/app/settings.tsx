@@ -15,9 +15,10 @@ import { LanguageToggle } from "../components/LanguageToggle";
 import { APP_VERSION, BUILD_NUMBER, PRIVACY_URL, TERMS_URL } from "../config";
 import { getRememberedMapApp } from "../maps/mapsPreference";
 import { MapApp } from "../maps/openIn";
+import { allowNotifications, openPhoneSettings, phonePermission, PhonePermission, pushTokenForThisPhone } from "../notifications/push";
 import { resetTo } from "../navigation";
 import { colors } from "../theme";
-import { BackButton, Caption, Choice, ConfirmDialog, Divider, GlassCard, ListRow, Screen, Title } from "../ui";
+import { BackButton, Caption, Choice, ConfirmDialog, Divider, GlassCard, ListRow, Screen, Section, TextLink, Title } from "../ui";
 
 type LegalPage = "privacy" | "terms";
 
@@ -28,20 +29,41 @@ export default function Settings() {
   const [autoCheckin, setAutoCheckin] = useState(false);
   const [visibility, setVisibility] = useState<BadgeVisibility | null>(null);
   const [mapApp, setMapApp] = useState<MapApp | null>(null);
+  const [reminders, setReminders] = useState(false);
+  const [alerts, setAlerts] = useState(true);
+  const [phone, setPhone] = useState<PhonePermission>("undetermined");
 
   // Reload on return, e.g. after turning auto check-in on or picking a maps app.
   useFocusEffect(
     useCallback(() => {
       getRememberedMapApp().then(setMapApp);
+      phonePermission()
+        .then(setPhone)
+        .catch(() => undefined);
       if (!token) return;
       getMyProfile(token)
         .then((profile) => {
           setAutoCheckin(profile.auto_checkin);
           setVisibility(profile.badge_visibility);
+          setReminders(profile.reminders_enabled);
+          setAlerts(profile.cancellation_alerts_enabled);
         })
         .catch(() => undefined);
     }, [token]),
   );
+
+  /** Event reminders or cancellation alerts. Turning one on asks the phone first, if needed. */
+  async function onNotifications(field: "reminders_enabled" | "cancellation_alerts_enabled", on: boolean) {
+    if (!token) return;
+    const set = field === "reminders_enabled" ? setReminders : setAlerts;
+    if (on && phone !== "granted") {
+      const answer = await allowNotifications(token).catch(() => "denied" as const);
+      setPhone(answer);
+      if (answer !== "granted") return;
+    }
+    set(on);
+    await updateProfileSettings(token, { [field]: on }).catch(() => set(!on));
+  }
 
   async function onAutoCheckin(on: boolean) {
     if (!token) return;
@@ -69,7 +91,8 @@ export default function Settings() {
     setConfirmingLogOut(false);
     // The server deletes the token. If it can't be reached, we still log
     // out on this phone. The language choice is kept (docs/LANGUAGE.md).
-    if (token) await logout(token).catch(() => undefined);
+    // This phone also stops getting notifications for this account.
+    if (token) await logout(token, await pushTokenForThisPhone()).catch(() => undefined);
     await signOut();
     resetTo("/welcome");
   }
@@ -125,6 +148,41 @@ export default function Settings() {
         <ListRow label={t("settings.credits")} chevron onPress={() => router.push("/credits")} />
         <Divider />
         <ListRow label={t("settings.log_out")} onPress={() => setConfirmingLogOut(true)} />
+      </GlassCard>
+
+      <GlassCard style={{ gap: 0, paddingVertical: 6, marginTop: 16 }}>
+        <Section>{t("notifications.settings_title")}</Section>
+        {phone === "denied" ? (
+          <View style={{ paddingVertical: 8, gap: 4 }}>
+            <Caption onGlass>{t("notifications.phone_off")}</Caption>
+            <TextLink label={t("notifications.open_phone_settings")} onPress={openPhoneSettings} />
+          </View>
+        ) : null}
+        <ListRow label={t("notifications.reminders")}>
+          <Switch
+            accessibilityLabel={t("notifications.reminders")}
+            value={reminders && phone !== "denied"}
+            disabled={phone === "denied"}
+            onValueChange={(on) => onNotifications("reminders_enabled", on)}
+            trackColor={{ true: colors.glowTurquoise, false: "rgba(255,255,255,0.2)" }}
+            thumbColor="#FFFFFF"
+          />
+        </ListRow>
+        <Divider />
+        <ListRow label={t("notifications.cancellations")}>
+          <Switch
+            accessibilityLabel={t("notifications.cancellations")}
+            value={alerts && phone === "granted"}
+            disabled={phone === "denied"}
+            onValueChange={(on) => onNotifications("cancellation_alerts_enabled", on)}
+            trackColor={{ true: colors.glowTurquoise, false: "rgba(255,255,255,0.2)" }}
+            thumbColor="#FFFFFF"
+          />
+        </ListRow>
+      </GlassCard>
+
+      <GlassCard style={{ gap: 0, paddingVertical: 6, marginTop: 16 }}>
+        <ListRow label={t("organizations.yours")} chevron onPress={() => router.push("/my-organizations")} />
       </GlassCard>
 
       {/* Set apart from the rest, and the only row in color. */}

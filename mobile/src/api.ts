@@ -18,6 +18,11 @@ import {
   Geofence,
   Impact,
   MemberPage,
+  MyOrg,
+  NeighborhoodRef,
+  OrgInput,
+  OrgPage,
+  OrgSummary,
   ProfileSettings,
   EventData,
   EventInput,
@@ -107,8 +112,9 @@ export function updateLanguage(token: string, language: Language) {
   return request<{ language: Language }>("/api/profile/me", { method: "PATCH", token, json: { language } });
 }
 
-export function logout(token: string) {
-  return request<void>("/api/auth/logout", { method: "POST", token });
+/** pushToken: this phone's, so it stops getting notifications. */
+export function logout(token: string, pushToken?: string | null) {
+  return request<void>("/api/auth/logout", { method: "POST", token, json: pushToken ? { push_token: pushToken } : {} });
 }
 
 export function matchAddress(token: string, address: string) {
@@ -157,10 +163,11 @@ export function updateInterests(token: string, interests: string[]) {
 
 // ---- Events ----
 
-export function listEvents(token: string, filter: { group?: string; forYou?: boolean } = {}) {
+export function listEvents(token: string, filter: { group?: string; forYou?: boolean; following?: boolean } = {}) {
   const query = new URLSearchParams();
   if (filter.group) query.set("group", filter.group);
   if (filter.forYou) query.set("for_you", "true");
+  if (filter.following) query.set("following", "true");
   const suffix = query.toString() ? `?${query}` : "";
   return request<{ events: EventData[] }>(`/api/events${suffix}`, { token });
 }
@@ -268,4 +275,83 @@ export function logShare(token: string, badgeKey: string) {
 
 export function markCheckinOfferSeen(token: string, which: "first" | "reoffer") {
   return request<void>("/api/me/checkin-offer/seen", { method: "POST", token, json: { which } });
+}
+
+// ---- Notifications (Milestone 4) ----
+
+export function registerPushToken(token: string, pushToken: string, platform: string) {
+  return request<void>("/api/me/push-tokens", { method: "POST", token, json: { token: pushToken, platform } });
+}
+
+export function removePushToken(token: string, pushToken: string) {
+  return request<void>("/api/me/push-tokens", { method: "DELETE", token, json: { token: pushToken } });
+}
+
+export function markNotifOfferSeen(token: string) {
+  return request<void>("/api/me/notif-offer/seen", { method: "POST", token });
+}
+
+// ---- Organizations (Milestone 4) ----
+
+export function listNeighborhoods(token: string) {
+  return request<{ neighborhoods: NeighborhoodRef[] }>("/api/neighborhoods", { token });
+}
+
+export function listOrganizations(token: string) {
+  return request<{ organizations: OrgSummary[] }>("/api/organizations", { token });
+}
+
+export function getMyOrganizations(token: string) {
+  return request<{ organizations: MyOrg[] }>("/api/me/organizations", { token });
+}
+
+export function requestOrganization(token: string, org: OrgInput) {
+  return request<OrgPage>("/api/organizations", { method: "POST", token, json: org });
+}
+
+export function getOrganization(token: string, id: number) {
+  return request<OrgPage>(`/api/organizations/${id}`, { token });
+}
+
+/** Description, link and language change now; name, type and neighborhoods wait for approval. */
+export function updateOrganization(token: string, id: number, changes: Partial<OrgInput>) {
+  return request<OrgPage>(`/api/organizations/${id}`, { method: "PATCH", token, json: changes });
+}
+
+export function uploadOrganizationPhoto(token: string, id: number, photo: { uri: string; mimeType: string }) {
+  const form = new FormData();
+  const extension = photo.mimeType === "image/png" ? "png" : "jpg";
+  form.append("photo", { uri: photo.uri, name: `photo.${extension}`, type: photo.mimeType } as any);
+  return request<OrgPage>(`/api/organizations/${id}/photo`, { method: "POST", token, form, timeoutMs: UPLOAD_TIMEOUT_MS });
+}
+
+export function addOrganizationAdmin(token: string, id: number, email: string) {
+  return request<OrgPage>(`/api/organizations/${id}/admins`, { method: "POST", token, json: { email } });
+}
+
+export function removeOrganizationAdmin(token: string, id: number, memberId: number) {
+  return request<OrgPage | void>(`/api/organizations/${id}/admins`, { method: "DELETE", token, json: { member_id: memberId } });
+}
+
+export function setFollowing(token: string, id: number, follow: boolean) {
+  return request<{ is_following: boolean }>(`/api/organizations/${id}/follow`, {
+    method: follow ? "PUT" : "DELETE",
+    token,
+  });
+}
+
+export function reportOrganization(token: string, id: number, reason: string) {
+  return request<{ ok: boolean }>(`/api/organizations/${id}/report`, { method: "POST", token, json: { reason } });
+}
+
+export function translateOrganization(token: string, id: number, target: Language) {
+  return request<{ description: string; target: Language; machine: boolean }>(`/api/organizations/${id}/translate`, {
+    method: "POST",
+    token,
+    json: { target },
+  });
+}
+
+export function getOrganizationImpact(token: string, id: number) {
+  return request<{ impact: Impact; badges: BadgeData[] }>(`/api/organizations/${id}/impact`, { token });
 }

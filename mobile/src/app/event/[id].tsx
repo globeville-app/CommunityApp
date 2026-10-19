@@ -139,10 +139,18 @@ export default function EventDetail() {
       // Watch (or stop watching) this event's place, if auto check-in is on.
       syncGeofences(token).catch(() => undefined);
       if (result.is_going) {
-        // The auto check-in offer: once, ever, on the first "I'm going".
+        // Once, ever, on the first "I'm going": the auto check-in offer, then
+        // the notification ask right after it.
         const profile = await getMyProfile(token).catch(() => null);
-        if (profile && !profile.checkin_offer_shown && !profile.auto_checkin) {
-          router.push({ pathname: "/checkin-offer", params: { which: "first" } });
+        const checkin = profile && !profile.checkin_offer_shown && !profile.auto_checkin;
+        const notifications = profile && !profile.notif_offer_shown;
+        if (checkin) {
+          router.push({
+            pathname: "/checkin-offer",
+            params: notifications ? { which: "first", then: "notifications" } : { which: "first" },
+          });
+        } else if (notifications) {
+          router.push("/notif-offer");
         }
       }
     } catch (e) {
@@ -222,19 +230,36 @@ export default function EventDetail() {
           <Text style={[type.body, styles.link]}>{event.location_text}</Text>
           <Ionicons name="navigate-outline" size={16} color={colors.textSecondary} />
         </Pressable>
-        <Pressable
-          accessibilityRole={event.organizer_member_id ? "button" : undefined}
-          disabled={!event.organizer_member_id}
-          onPress={() =>
-            router.push({ pathname: "/member/[id]", params: { id: String(event.organizer_member_id) } })
-          }
-          style={({ pressed }) => [styles.line, styles.tappable, pressed && { opacity: 0.75 }]}
-        >
-          <Ionicons name="person-outline" size={18} color={colors.glowTurquoise} />
-          <Text style={[type.body, event.organizer_member_id ? styles.link : styles.plain]}>
-            {t("events.posted_by", { name: event.organizer_name ?? t("events.former_neighbor") })}
-          </Text>
-        </Pressable>
+        {event.organization ? (
+          // "Hosted by [Organization]", opening its page (unless it's hidden).
+          <Pressable
+            accessibilityRole={event.organization.has_page ? "button" : undefined}
+            disabled={!event.organization.has_page}
+            onPress={() =>
+              router.push({ pathname: "/organizations/[id]", params: { id: String(event.organization!.id) } })
+            }
+            style={({ pressed }) => [styles.line, styles.tappable, pressed && { opacity: 0.75 }]}
+          >
+            <Ionicons name="people-outline" size={18} color={colors.glowTurquoise} />
+            <Text style={[type.body, event.organization.has_page ? styles.link : styles.plain]}>
+              {t("events.hosted_by", { name: event.organization.name })}
+            </Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            accessibilityRole={event.organizer_member_id ? "button" : undefined}
+            disabled={!event.organizer_member_id}
+            onPress={() =>
+              router.push({ pathname: "/member/[id]", params: { id: String(event.organizer_member_id) } })
+            }
+            style={({ pressed }) => [styles.line, styles.tappable, pressed && { opacity: 0.75 }]}
+          >
+            <Ionicons name="person-outline" size={18} color={colors.glowTurquoise} />
+            <Text style={[type.body, event.organizer_member_id ? styles.link : styles.plain]}>
+              {t("events.posted_by", { name: event.organizer_name ?? t("events.former_neighbor") })}
+            </Text>
+          </Pressable>
+        )}
         {description ? <Body>{description}</Body> : null}
       </GlassCard>
 
