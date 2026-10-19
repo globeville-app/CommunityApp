@@ -18,6 +18,8 @@ from accounts.models import language_of
 from config.errors import ApiError
 from profiles.models import Profile
 
+from notifications import scheduling
+
 from .categories import GROUP_KEYS, GROUPS, group_of, suggest_category
 from .models import Event, EventReport, Going, TranslationCache
 from .partiful import fetch_og_title
@@ -171,7 +173,11 @@ class EventDetailView(APIView):
             Event.objects.filter(pk=event.pk).update(updated_at=now, **fields)
             # The text may have changed, so old machine translations are stale.
             TranslationCache.objects.filter(event=event).delete()
+        moved = fields.get("starts_at", event.starts_at) != event.starts_at
         event = get_event(request, profile, event.pk)
+        if moved:
+            # Reminders move with the event.
+            scheduling.event_time_changed(event, now)
         return Response(event_json(event, request, profile, now))
 
 
@@ -184,6 +190,8 @@ class EventCancelView(APIView):
             raise ApiError("not_organizer", status_code=status.HTTP_403_FORBIDDEN)
         Event.objects.filter(pk=event.pk).update(status=Event.Status.CANCELLED, updated_at=timezone.now())
         event = get_event(request, profile, event.pk)
+        # One notice right away to everyone going (if they allow it).
+        scheduling.event_cancelled(event)
         return Response(event_json(event, request, profile, timezone.now()))
 
 
@@ -210,11 +218,13 @@ class GoingView(APIView):
     def put(self, request, event_id):
         event = self._check(request, event_id)
         Going.objects.get_or_create(event=event, user=request.user)
+        scheduling.schedule_reminder(request.user, event)
         return self._reply(event, request)
 
     def delete(self, request, event_id):
         event = self._check(request, event_id)
         Going.objects.filter(event=event, user=request.user).delete()
+        scheduling.unschedule_reminder(request.user, event)
         return self._reply(event, request)
 
 

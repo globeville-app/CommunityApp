@@ -40,6 +40,10 @@ LANGUAGE_FILES = [
     REPO_ROOT / "mobile" / "src" / "i18n" / "es.json",
 ]
 
+# Expo push (docs/MILESTONE_4.md). Optional: with "enhanced push security"
+# on in the Expo account, only requests carrying this token can send pushes.
+EXPO_ACCESS_TOKEN = os.environ.get("EXPO_ACCESS_TOKEN", "")
+
 # Languages the app is available in (docs/LANGUAGE.md). New members default
 # to English until they pick.
 LANGUAGES_AVAILABLE = ["en", "es"]
@@ -92,6 +96,7 @@ INSTALLED_APPS = [
     "events",
     "stats",
     "badges",
+    "notifications",
 ]
 
 MIDDLEWARE = [

@@ -58,6 +58,14 @@ class Profile(models.Model):
     checkin_offer_shown_at = models.DateTimeField(null=True, blank=True)
     checkin_reoffer_shown_at = models.DateTimeField(null=True, blank=True)
 
+    # Milestone 4: push notifications are opt-in. Reminders are off until the
+    # member says yes; cancellation alerts are on once the phone allows
+    # notifications (it registers a push token only after that).
+    reminders_enabled = models.BooleanField(default=False)
+    cancellation_alerts_enabled = models.BooleanField(default=True)
+    # The one-time "Get a reminder the day before?" ask.
+    notif_offer_shown_at = models.DateTimeField(null=True, blank=True)
+
     @property
     def display_name(self):
         return f"{self.first_name} {self.last_initial}."

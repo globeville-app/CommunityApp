@@ -106,7 +106,8 @@ class DeleteAccountView(APIView):
             ProblemReport.objects.filter(user=user).update(user=None, contact_email="")
             # Their upcoming events are cancelled. Past ones stay, and once
             # the user is gone they show "Former neighbor" as the organizer.
-            Event.objects.filter(organizer=user, starts_at__gt=timezone.now()).update(status=Event.Status.CANCELLED)
+            cancelled = list(Event.objects.filter(organizer=user, starts_at__gt=timezone.now(), status=Event.Status.ACTIVE))
+            Event.objects.filter(pk__in=[e.pk for e in cancelled]).update(status=Event.Status.CANCELLED)
             # Deleting the user also deletes, through the database: the
             # profile (and its interests), the account settings, the
             # neighborhood match, every login token and their "I'm going"
@@ -117,6 +118,12 @@ class DeleteAccountView(APIView):
             # never lowered (badges/engine.py), only the counts change.
             for host in hosts:
                 update_badges(host)
+
+        # Neighbors going to their cancelled events get a notice.
+        from notifications.scheduling import event_cancelled
+
+        for event in cancelled:
+            event_cancelled(event)
 
         # Remove the photo file only once the database change has stuck.
         if photo:

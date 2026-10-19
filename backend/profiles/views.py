@@ -76,7 +76,8 @@ class MyProfileView(APIView):
         data = ProfileUpdateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         values = data.validated_data
-        profile_fields = [f for f in ("interests", "auto_checkin", "badge_visibility") if f in values]
+        settable = ("interests", "auto_checkin", "badge_visibility", "reminders_enabled", "cancellation_alerts_enabled")
+        profile_fields = [f for f in settable if f in values]
         if profile_fields:
             profile = get_profile_or_404(request.user)
             for field in profile_fields:

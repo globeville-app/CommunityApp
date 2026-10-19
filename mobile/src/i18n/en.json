@@ -556,5 +556,14 @@
     "title": "Open-source credits",
     "intro": "This app is built with open-source software. Thank you to everyone who made it.",
     "lucide_use": "Badge emblems and stage icons."
+  },
+  "push": {
+    "reminder": "Tomorrow {time} · {title}",
+    "cancelled": "Cancelled: {title} · {day}, {time}",
+    "am": "AM",
+    "pm": "PM",
+    "weekdays": "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
+    "months": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+    "date": "{weekday}, {month} {day}"
   }
 }

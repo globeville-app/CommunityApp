@@ -62,6 +62,10 @@ services:
       - key: PROBLEM_REPORT_EMAILS
         type: SECRET
         value: CHANGE_ME
+      # From the Expo account (Access tokens), for push notifications.
+      - key: EXPO_ACCESS_TOKEN
+        type: SECRET
+        value: CHANGE_ME
     domains:
       - domain: api.globeville.app
         type: PRIMARY
@@ -88,6 +92,34 @@ jobs:
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}
+
+  # Every 15 minutes: send event reminders and any cancellation notices
+  # that couldn't go out right away (docs/MILESTONE_4.md). Safe to run twice.
+  - name: send-notifications
+    kind: SCHEDULED
+    schedule:
+      cron: "*/15 * * * *"
+      time_zone: America/Denver
+    dockerfile_path: Dockerfile
+    github:
+      repo: indubitably-dubin/CommunityApp-Milestone-1
+      branch: main
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    run_command: python manage.py send_due_notifications
+    envs:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        type: SECRET
+        value: CHANGE_ME
+      - key: ALLOWED_HOSTS
+        value: api.globeville.app
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: ${db.DATABASE_URL}
+      - key: EXPO_ACCESS_TOKEN
+        type: SECRET
+        value: CHANGE_ME
 
 databases:
   - name: db

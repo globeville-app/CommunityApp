@@ -556,5 +556,14 @@
     "title": "Créditos de código abierto",
     "intro": "Esta app usa software de código abierto. Gracias a todas las personas que lo hicieron.",
     "lucide_use": "Emblemas de insignias e íconos de etapas."
+  },
+  "push": {
+    "reminder": "Mañana {time} · {title}",
+    "cancelled": "Cancelado: {title} · {day}, {time}",
+    "am": "a. m.",
+    "pm": "p. m.",
+    "weekdays": "lun,mar,mié,jue,vie,sáb,dom",
+    "months": "ene,feb,mar,abr,may,jun,jul,ago,sep,oct,nov,dic",
+    "date": "{weekday} {day} {month}"
   }
 }

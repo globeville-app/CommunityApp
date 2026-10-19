@@ -321,6 +321,18 @@ When a member earns a keepsake, a growth badge reaches a new stage, or a Grove b
 - Members can share any earned badge later from their profile or the My Impact screen, not only at the unlock moment.
 - The app records only that a share happened and for which badge, for counting. It never records where it was shared or to whom.
 
+## Organization badges (Milestone 4)
+
+Organizations earn only the **hosting side** of the badges above. They use the same thresholds and design, with a section labeled "Organization badges."
+- **Badges they can earn:** `host`, the five group badges, `clean_sweeper`, `civic_voice` and the `open_door` keepsake.
+- **Badges they can't earn:** attendance badges (`local`, `best_guest`, `day_one`, `ambassador`, `familiar_face`, `year_rounder`), which belong to people.
+- **Host credit:** an organization's event credits the organization, never the member who posted it, so nothing counts twice. The same 2-attendee rule applies.
+- **Admins:** they don't get attendance credit at their own organization's events.
+- **For attendees:** an organization counts as one host for Best Guest, and its first counted event counts for Day One.
+- **No rankings:** organization badges are never ranked against people or other organizations.
+
+Details are in `MILESTONE_4.md`.
+
 ## Considered and rejected
 
 - **Founding Neighbor (first 100 members).** It rewards arriving early, not taking part, and makes later joiners feel second-class.

@@ -99,4 +99,7 @@ class AddressIsNeverStoredTests(FixtureNeighborhoodsMixin, APITestCase):
                 continue
             for field in model._meta.get_fields():
                 with self.subTest(model=model.__name__, field=field.name):
-                    self.assertFalse(any(word in field.name.lower() for word in forbidden))
+                    # Word starts, so "latitude" and "home_address" are caught
+                    # but "cancellation" (which contains "lat") isn't.
+                    parts = field.name.lower().split("_")
+                    self.assertFalse(any(part.startswith(word) for part in parts for word in forbidden))

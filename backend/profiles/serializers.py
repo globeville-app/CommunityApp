@@ -27,6 +27,8 @@ class ProfileUpdateSerializer(serializers.Serializer):
     interests = serializers.JSONField(required=False)
     auto_checkin = serializers.BooleanField(required=False)
     badge_visibility = serializers.ChoiceField(choices=["neighborhood", "private"], required=False)
+    reminders_enabled = serializers.BooleanField(required=False)
+    cancellation_alerts_enabled = serializers.BooleanField(required=False)
 
     def validate_interests(self, value):
         return clean_interests(value)
@@ -66,6 +68,9 @@ def profile_json(profile, request):
         "auto_checkin": profile.auto_checkin,
         "badge_visibility": profile.badge_visibility,
         "checkin_offer_shown": profile.checkin_offer_shown_at is not None,
+        "reminders_enabled": profile.reminders_enabled,
+        "cancellation_alerts_enabled": profile.cancellation_alerts_enabled,
+        "notif_offer_shown": profile.notif_offer_shown_at is not None,
         "language": language_of(profile.user),
         "joined_at": profile.joined_at.isoformat(),
     }

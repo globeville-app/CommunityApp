@@ -11,7 +11,7 @@
 | Phase | Who | What's in it | How it's distributed |
 |---|---|---|---|
 | **A. Private beta** | 15–30 Globeville neighbors invited by the owner | Milestone 1, Settings & Support, Language, Milestone 2, and the owner stats page (below) | TestFlight (iPhone) and Google Play internal testing (Android) |
-| **B. Public launch** | Anyone in Denver | Phase A, plus Milestone 3 (badges, event map pins, attendance), plus Milestone 4 (reminders), approved by the owner | App Store and Google Play |
+| **B. Public launch** | Anyone in Denver | Phase A, plus Milestone 3 (badges, event map pins, attendance), plus Milestone 4 (reminders, organization profiles and organization badges) | App Store and Google Play |
 
 - Phase A runs on the **same production setup** as Phase B. It's real data, just a small, invited group.
 - **Moving from A to B:** the owner decides, based on the stats page and beta feedback.
@@ -164,6 +164,8 @@ These must be done before Phase A, unless marked.
 
 ### Before Phase B (public)
 - [ ] Milestones 3 and 4 are shipped and tested.
+- [ ] The first 3–5 organizations are approved and have posted events.
+- [ ] Push notifications work on both platforms (iPhone push needs the Apple Developer account).
 - [ ] Location permission wording is approved in both languages.
 - [ ] The store privacy label and data safety form are updated for badges and check-in.
 - [ ] The open-source credits screen is in place.
