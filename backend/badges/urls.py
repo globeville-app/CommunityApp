@@ -4,6 +4,7 @@ from . import views
 
 # Mounted at /api/ in config/urls.py.
 urlpatterns = [
+    path("organizations/<int:org_id>/impact", views.OrganizationImpactView.as_view(), name="organization-impact"),
     path("badges/catalog", views.CatalogView.as_view(), name="badge-catalog"),
     path("badges/<str:badge_key>/shared", views.SharedView.as_view(), name="badge-shared"),
     path("me/badges", views.MyBadgesView.as_view(), name="my-badges"),

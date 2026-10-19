@@ -92,10 +92,16 @@ class DeleteAccountView(APIView):
 
         from badges.engine import update_badges
 
+        from organizations.models import Organization
+
         # Hosts whose numbers include this member, to refresh afterwards.
         hosts = list(
             get_user_model().objects.filter(organized_events__attendances__user=user).exclude(pk=user.pk).distinct()
         )
+        hosts += list(Organization.objects.filter(events__attendances__user=user).distinct())
+        # Organizations they run: if they're the last admin, it's hidden
+        # until the team assigns a new one (MILESTONE_4.md changes SETTINGS.md).
+        their_orgs = list(Organization.objects.filter(admins__user=user))
 
         photo = None
         profile = Profile.objects.filter(user=user).first()
@@ -106,7 +112,12 @@ class DeleteAccountView(APIView):
             ProblemReport.objects.filter(user=user).update(user=None, contact_email="")
             # Their upcoming events are cancelled. Past ones stay, and once
             # the user is gone they show "Former neighbor" as the organizer.
-            cancelled = list(Event.objects.filter(organizer=user, starts_at__gt=timezone.now(), status=Event.Status.ACTIVE))
+            # Organization events aren't theirs to cancel: they belong to the organization.
+            cancelled = list(
+                Event.objects.filter(
+                    organizer=user, organization__isnull=True, starts_at__gt=timezone.now(), status=Event.Status.ACTIVE
+                )
+            )
             Event.objects.filter(pk__in=[e.pk for e in cancelled]).update(status=Event.Status.CANCELLED)
             # Deleting the user also deletes, through the database: the
             # profile (and its interests), the account settings, the
@@ -118,6 +129,10 @@ class DeleteAccountView(APIView):
             # never lowered (badges/engine.py), only the counts change.
             for host in hosts:
                 update_badges(host)
+            for organization in their_orgs:
+                if not organization.admins.exists():
+                    organization.status = Organization.Status.HIDDEN
+                    organization.save(update_fields=["status", "updated_at"])
 
         # Neighbors going to their cancelled events get a notice.
         from notifications.scheduling import event_cancelled

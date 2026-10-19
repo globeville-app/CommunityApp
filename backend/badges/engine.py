@@ -10,6 +10,11 @@ scheduled jobs: collect cards and impact numbers are computed on request.
 
 Every count is recomputed from Attendance rows, so it's always correct. The
 stored stage is the highest ever reached and is never lowered.
+
+Milestone 4: an event's host is its organization when it has one, otherwise
+the member who posted it (host_of). The admin who posts for an organization
+gets no host credit for that event. Organizations earn only the hosting
+side of the badges, and have no unlock moments.
 """
 
 from datetime import timedelta
@@ -49,9 +54,45 @@ def attendance_for_badges(user):
     )
 
 
-def counted_hosted_events(user):
-    """Events the member organized that count as hosted (2+ counted attendees)."""
-    return _live(Event.objects.filter(organizer=user, counted_hosted_at__isnull=False))
+def is_org(host):
+    from organizations.models import Organization
+
+    return isinstance(host, Organization)
+
+
+def host_of(event):
+    """Who gets host credit: the event's organization, or else the member who posted it."""
+    return event.organization if event.organization_id else event.organizer
+
+
+def host_key(event):
+    """("org", id) or ("member", id): one distinct host each (Best Guest)."""
+    if event.organization_id:
+        return ("org", event.organization_id)
+    return ("member", event.organizer_id) if event.organizer_id else None
+
+
+def hosted_by(host):
+    """Every event this member or organization hosts (a member's organization events don't count)."""
+    if is_org(host):
+        return Event.objects.filter(organization=host)
+    return Event.objects.filter(organizer=host, organization__isnull=True)
+
+
+def counted_hosted_events(host):
+    """Events the member or organization hosted that count (2+ counted attendees)."""
+    return _live(hosted_by(host).filter(counted_hosted_at__isnull=False))
+
+
+def is_host(user, event):
+    """
+    The host can't collect at their own event. For an organization event:
+    its admins (checked when attendance is recorded, at most 7 days after
+    the event) and the admin who posted it.
+    """
+    if event.organizer_id == user.id:
+        return True
+    return bool(event.organization_id) and event.organization.admins.filter(user=user).exists()
 
 
 def _matches(rule, event):
@@ -88,7 +129,7 @@ def compute(user):
         if rule == "any":
             counts[key] = len(attended)
         elif rule == "distinct_hosts":
-            counts[key] = len({e.organizer_id for e in attended if e.organizer_id})
+            counts[key] = len({host_key(e) for e in attended if host_key(e)})
         elif rule == "hosts_first_event":
             counts[key] = sum(1 for e in attended if e.is_hosts_first_counted)
         elif rule == "neighbors_brought_together":
@@ -114,13 +155,37 @@ def compute(user):
     return counts, keepsakes
 
 
-def update_badges(user, now=None):
-    """Bring the member's badges up to date. Returns the new Celebration rows."""
+def compute_org(organization):
+    """An organization's hosting badges: ({growth badge: count}, {keepsakes})."""
+    hosted = list(counted_hosted_events(organization))
+    counts = {}
+    for key, _track, rule in config.GROWTH_BADGES:
+        if key not in config.ORG_GROWTH_KEYS:
+            continue
+        if rule == "neighbors_brought_together":
+            counts[key] = Attendance.objects.filter(event__in=hosted).values("user").distinct().count()
+        else:
+            counts[key] = sum(1 for e in hosted if _matches(rule, e))
+    keepsakes = {"open_door"} if any(e.title_alt for e in hosted) else set()
+    return counts, keepsakes
+
+
+def update_badges(host, now=None):
+    """
+    Bring a member's (or an organization's) badges up to date. Returns the
+    new Celebration rows; organizations have no unlock moments.
+    """
     now = now or timezone.now()
-    counts, keepsakes = compute(user)
+    if is_org(host):
+        owner, counts, keepsakes = {"organization": host}, *compute_org(host)
+        growth_keys, keepsake_keys = config.ORG_GROWTH_KEYS, config.ORG_KEEPSAKES
+    else:
+        owner, counts, keepsakes = {"user": host}, *compute(host)
+        growth_keys, keepsake_keys = config.GROWTH_KEYS, config.KEEPSAKES
+    user = None if is_org(host) else host
     new = []
-    for key in config.GROWTH_KEYS:
-        state, _ = BadgeState.objects.get_or_create(user=user, badge_key=key)
+    for key in growth_keys:
+        state, _ = BadgeState.objects.get_or_create(badge_key=key, **owner)
         count = counts[key]
         reached = config.stage_for(key, count)
         if reached > state.stage:  # only ever up
@@ -145,11 +210,13 @@ def update_badges(user, now=None):
                         )
                     )
         state.save()
-    for key in config.KEEPSAKES:
+    for key in keepsake_keys:
         if key in keepsakes:
-            _, created = Keepsake.objects.get_or_create(user=user, badge_key=key)
+            _, created = Keepsake.objects.get_or_create(badge_key=key, **owner)
             if created:
                 new.append(Celebration(user=user, badge_key=key, kind=Celebration.Kind.EARNED))
+    if user is None:
+        return []  # organizations: new stages show on their impact screen instead
     return Celebration.objects.bulk_create(new)
 
 
@@ -169,7 +236,7 @@ def record_attendance(user, event, method, now=None):
             raise ApiError("already_recorded", status_code=CONFLICT)
         if event.status == Event.Status.CANCELLED:
             raise ApiError("event_cancelled", status_code=CONFLICT)
-        if event.organizer_id == user.id:
+        if is_host(user, event):
             raise ApiError("is_host", status_code=CONFLICT)  # hosting counts separately
         if not Going.objects.filter(user=user, event=event).exists():
             raise ApiError("not_going", status_code=CONFLICT)
@@ -199,25 +266,24 @@ def record_attendance(user, event, method, now=None):
         )
 
         affected = {user}
-        if event.organizer_id:
+        host = host_of(event)
+        if host is not None:
             attendees = Attendance.objects.filter(event=event).count()
             if event.counted_hosted_at is None and attendees >= config.HOSTED_MIN_ATTENDEES:
                 # It counts as hosted from now on. Is it the host's first?
-                first = not Event.objects.filter(
-                    organizer_id=event.organizer_id, counted_hosted_at__isnull=False
-                ).exists()
+                first = not counted_hosted_events(host).exists()
                 event.counted_hosted_at = now
                 event.is_hosts_first_counted = first
                 event.save(update_fields=["counted_hosted_at", "is_hosts_first_counted"])
                 if first:
                     # Day One goes to everyone who came, including earlier collectors.
                     affected.update(a.user for a in Attendance.objects.filter(event=event).select_related("user"))
-            if event.counted_hosted_at is not None:
-                affected.add(event.organizer)
 
         celebrations = {}
         for member in affected:
             celebrations[member.pk] = update_badges(member, now)
+        if host is not None and event.counted_hosted_at is not None:
+            update_badges(host, now)
         return celebrations[user.pk]
 
 
@@ -243,7 +309,16 @@ def decline(user, event, now=None):
 
 
 def _going_events(user):
-    return _live(Event.objects.filter(goings__user=user).exclude(organizer=user)).exclude(attendances__user=user)
+    """Events the member is going to and could still collect: not their own, nor their organizations'."""
+    from organizations.models import OrganizationAdmin
+
+    runs = OrganizationAdmin.objects.filter(user=user).values("organization")
+    return (
+        _live(Event.objects.filter(goings__user=user))
+        .exclude(organizer=user)
+        .exclude(organization__in=runs)
+        .exclude(attendances__user=user)
+    )
 
 
 def collect_events(user, now=None):
@@ -265,11 +340,9 @@ def badges_an_event_grows(user, event, states):
     """
     if event.category in config.SENSITIVE_CATEGORIES:
         return []
-    known_hosts = {
-        e.organizer_id for e in (a.event for a in attendance_for_badges(user)) if e.organizer_id
-    }
+    known_hosts = {host_key(a.event) for a in attendance_for_badges(user)}
     keys = ["local"]
-    if event.organizer_id and event.organizer_id not in known_hosts:
+    if host_key(event) and host_key(event) not in known_hosts:
         keys.append("best_guest")
     if event.is_hosts_first_counted:
         keys.append("day_one")
@@ -314,16 +387,19 @@ def show_checkin_reoffer(user, profile, now=None):
 # ---- Impact numbers (private to the host) --------------------------------------------
 
 
-def impact(user):
+def impact(host):
     """
-    The host's My Impact numbers (BADGES.md, "Impact metric definitions").
-    Empty until their first event counts as hosted. Distinct people only;
-    deleted members have no rows, so they drop out by themselves.
+    The host's My Impact numbers (BADGES.md, "Impact metric definitions"),
+    for a member or an organization. Empty until their first event counts as
+    hosted. Distinct people only; deleted members have no rows, so they drop
+    out by themselves.
     """
-    hosted = counted_hosted_events(user)
+    hosted = counted_hosted_events(host)
     if not hosted.exists():
         return {}
-    came = Attendance.objects.filter(event__in=hosted).exclude(user=user)
+    came = Attendance.objects.filter(event__in=hosted)
+    if not is_org(host):
+        came = came.exclude(user=host)
     later_elsewhere = _live(
         Attendance.objects.filter(
             user=OuterRef("user"),

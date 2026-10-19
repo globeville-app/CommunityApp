@@ -62,6 +62,52 @@ def badges_json(user, earned_only=False):
     return result
 
 
+def badges_json_for_org(organization, earned_only=False):
+    """An organization's hosting badges, in the same shape as a member's."""
+    states = {s.badge_key: s for s in BadgeState.objects.filter(organization=organization)}
+    keepsakes = {k.badge_key: k for k in Keepsake.objects.filter(organization=organization)}
+    result = []
+    for key in config.ORG_GROWTH_KEYS:
+        state = states.get(key)
+        stage, count = (state.stage, state.count) if state else (0, 0)
+        if earned_only and stage == 0:
+            continue
+        result.append(
+            {
+                "key": key,
+                "kind": "growth",
+                "stage": stage,
+                "count": count,
+                "next_threshold": config.next_threshold(key, stage),
+                "earned_at": state.earned_at.isoformat() if state and state.earned_at else None,
+            }
+        )
+    for key in config.ORG_KEEPSAKES:
+        keepsake = keepsakes.get(key)
+        if earned_only and not keepsake:
+            continue
+        result.append(
+            {
+                "key": key,
+                "kind": "keepsake",
+                "stage": 1 if keepsake else 0,
+                "count": 0,
+                "next_threshold": None,
+                "earned_at": keepsake.earned_at.isoformat() if keepsake else None,
+            }
+        )
+    return result
+
+
+class OrganizationImpactView(APIView):
+    def get(self, request, org_id):
+        """Admins only: the three numbers, the most popular event and badge progress. No names."""
+        from organizations.views import admin_org
+
+        organization = admin_org(request, member_profile(request), org_id)
+        return Response({"impact": engine.impact(organization), "badges": badges_json_for_org(organization)})
+
+
 class CatalogView(APIView):
     def get(self, request):
         """Every badge's rules. The words (names, descriptions) live in the app."""

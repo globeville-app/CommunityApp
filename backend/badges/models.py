@@ -33,10 +33,27 @@ class Attendance(models.Model):
         constraints = [models.UniqueConstraint(fields=["user", "event"], name="one_attendance_per_event")]
 
 
-class BadgeState(models.Model):
-    """A member's growth badge. `stage` is the highest reached and never goes down."""
+def _one_owner(name):
+    """A badge belongs to a member or to an organization, never both or neither."""
+    return models.CheckConstraint(
+        condition=models.Q(user__isnull=False, organization__isnull=True)
+        | models.Q(user__isnull=True, organization__isnull=False),
+        name=name,
+    )
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="badge_states")
+
+class BadgeState(models.Model):
+    """
+    A growth badge of a member or (Milestone 4) an organization. `stage` is
+    the highest reached and never goes down.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="badge_states"
+    )
+    organization = models.ForeignKey(
+        "organizations.Organization", null=True, blank=True, on_delete=models.CASCADE, related_name="badge_states"
+    )
     badge_key = models.CharField(max_length=30)
     count = models.PositiveIntegerField(default=0)  # the current qualifying count
     stage = models.PositiveSmallIntegerField(default=0)  # 0 = not earned, 1-5 = Seed-Grove
@@ -45,16 +62,41 @@ class BadgeState(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "badge_key"], name="one_state_per_badge")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "badge_key"], condition=models.Q(user__isnull=False), name="one_state_per_badge"
+            ),
+            models.UniqueConstraint(
+                fields=["organization", "badge_key"],
+                condition=models.Q(organization__isnull=False),
+                name="one_org_state_per_badge",
+            ),
+            _one_owner("badge_state_has_one_owner"),
+        ]
 
 
 class Keepsake(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="keepsakes")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE, related_name="keepsakes"
+    )
+    organization = models.ForeignKey(
+        "organizations.Organization", null=True, blank=True, on_delete=models.CASCADE, related_name="keepsakes"
+    )
     badge_key = models.CharField(max_length=30)
     earned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "badge_key"], name="one_keepsake_each")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "badge_key"], condition=models.Q(user__isnull=False), name="one_keepsake_each"
+            ),
+            models.UniqueConstraint(
+                fields=["organization", "badge_key"],
+                condition=models.Q(organization__isnull=False),
+                name="one_org_keepsake_each",
+            ),
+            _one_owner("keepsake_has_one_owner"),
+        ]
 
 
 class Celebration(models.Model):

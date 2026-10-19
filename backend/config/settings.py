@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     "stats",
     "badges",
     "notifications",
+    "organizations",
 ]
 
 MIDDLEWARE = [
@@ -247,6 +248,8 @@ REST_FRAMEWORK = {
         "join_match": "10/min",
         # "Report a problem": per member, or per IP address when signed out.
         "problem_report": "5/day",
+        # Adding organization admins by email.
+        "org_admins": "20/hour",
     },
 }
 

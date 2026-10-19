@@ -42,16 +42,40 @@ def member_profile(request):
     return profile
 
 
-def events_for(profile, user):
-    """Events in the member's neighborhood, with the counts the app shows."""
+def admin_org_ids(user):
+    """The organizations this member runs (any status)."""
+    from organizations.models import OrganizationAdmin
+
+    return list(OrganizationAdmin.objects.filter(user=user).values_list("organization_id", flat=True))
+
+
+def events_for(profile, user, own_neighborhood_only=False):
+    """
+    Events the member can see, with the counts the app shows: their own
+    neighborhood's, plus (for organization admins) their organizations'
+    events in any neighborhood, so they can manage them.
+    """
+    from organizations.models import Follow
+
+    visible = Q(neighborhood_id=profile.neighborhood_id)
+    if not own_neighborhood_only:
+        visible |= Q(organization_id__in=admin_org_ids(user))
     return (
-        Event.objects.filter(neighborhood_id=profile.neighborhood_id)
-        .select_related("organizer__profile")
+        Event.objects.filter(visible)
+        .select_related("organizer__profile", "organization")
         .annotate(
             going_count=Count("goings", distinct=True),
             is_going=Exists(Going.objects.filter(event=OuterRef("pk"), user=user)),
+            is_following=Exists(Follow.objects.filter(organization=OuterRef("organization"), user=user)),
         )
     )
+
+
+def can_manage(event, user):
+    """Edit and cancel: the member who posted it, or any admin of its organization."""
+    if event.organization_id:
+        return event.organization.is_admin(user)
+    return event.organizer_id == user.id
 
 
 def get_event(request, profile, event_id):
@@ -67,7 +91,12 @@ def organizer_profile(event):
 
 
 def organizer_name(event):
-    """Display name only ("Ana R."). None once the organizer deleted their account."""
+    """
+    Display name only ("Ana R."). None once the organizer deleted their
+    account, and for organization events: who posted those is for the team only.
+    """
+    if event.organization_id:
+        return None
     profile = organizer_profile(event)
     return profile.display_name if profile else None
 
@@ -92,14 +121,27 @@ def event_json(event, request, profile, now):
         "latitude": float(event.latitude) if event.latitude is not None else None,
         "longitude": float(event.longitude) if event.longitude is not None else None,
         # Organizers of upcoming pinless events are asked to add one.
-        "needs_pin": event.latitude is None and event.organizer_id == request.user.id and not has_ended(event, now),
+        "needs_pin": event.latitude is None and can_manage(event, request.user) and not has_ended(event, now),
         "partiful_url": event.partiful_url or None,
         "status": event.status,
         "is_past": has_ended(event, now),
         "organizer_name": organizer_name(event),
-        # Opens the organizer's member page (null for a former neighbor).
-        "organizer_member_id": organizer_profile(event).pk if organizer_profile(event) else None,
-        "is_organizer": event.organizer_id == request.user.id,
+        # Opens the organizer's member page (null for a former neighbor or an organization event).
+        "organizer_member_id": organizer_profile(event).pk if organizer_name(event) else None,
+        # "Hosted by [Organization]"; the page may be hidden (no admin left).
+        "organization": (
+            {
+                "id": event.organization_id,
+                "name": event.organization.name,
+                "type": event.organization.type,
+                "has_page": event.organization.status == "approved",
+            }
+            if event.organization_id
+            else None
+        ),
+        "is_following": bool(getattr(event, "is_following", False)) if event.organization_id else False,
+        # Can edit and cancel it.
+        "is_organizer": can_manage(event, request.user),
         "going_count": event.going_count,
         "is_going": event.is_going,
         "matches_interests": event.category in (profile.interests or []),
@@ -109,6 +151,30 @@ def event_json(event, request, profile, now):
 # ---- List and create -------------------------------------------------------------
 
 
+def posting_as(request, profile):
+    """
+    (organization, neighborhood id) for a new event. Members post in their
+    own neighborhood, never one sent by the app. Organization admins may
+    pick any neighborhood the organization serves.
+    """
+    from organizations.models import Organization
+
+    org_id = request.data.get("organization")
+    if org_id in (None, ""):
+        return None, profile.neighborhood_id
+    organization = Organization.objects.filter(pk=org_id).first() if str(org_id).isdigit() else None
+    if organization is None or not organization.is_admin(request.user):
+        raise ApiError("not_org_admin", status_code=status.HTTP_403_FORBIDDEN)
+    if organization.status != Organization.Status.APPROVED:
+        raise ApiError("org_not_approved", status_code=status.HTTP_409_CONFLICT)
+    neighborhood_id = request.data.get("neighborhood")
+    served = organization.neighborhoods.filter(pk=neighborhood_id).exists() if str(neighborhood_id).isdigit() else False
+    if not served:
+        raise ApiError("neighborhood_not_served")
+    return organization, int(neighborhood_id)
+
+
+
 class EventListView(APIView):
     def get(self, request):
         """Upcoming events (active and cancelled), soonest first."""
@@ -116,7 +182,7 @@ class EventListView(APIView):
         now = timezone.now()
         # Not ended yet. An event with no end time lasts until midnight, so
         # look back a day, then apply the exact rule (events/timing.py).
-        events = events_for(profile, request.user).filter(
+        events = events_for(profile, request.user, own_neighborhood_only=True).filter(
             Q(starts_at__gte=now - timedelta(days=1)) | Q(ends_at__gte=now)
         )
 
@@ -127,6 +193,8 @@ class EventListView(APIView):
             events = events.filter(category__in=dict(GROUPS)[group])
         if request.query_params.get("for_you") == "true":
             events = events.filter(category__in=profile.interests or [])
+        if request.query_params.get("following") == "true":
+            events = events.filter(is_following=True)
 
         events = [e for e in events.order_by("starts_at", "pk") if not has_ended(e, now)]
         return Response({"events": [event_json(e, request, profile, now) for e in events]})
@@ -139,10 +207,12 @@ class EventListView(APIView):
             raise ApiError("daily_limit", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
 
         fields = clean_event(request.data, default_language=language_of(request.user), now=now)
+        organization, neighborhood_id = posting_as(request, profile)
         with transaction.atomic():
-            # Always the caller's own neighborhood, never one sent by the app.
-            event = Event.objects.create(neighborhood_id=profile.neighborhood_id, organizer=request.user, **fields)
-            if profile.role != Profile.Role.ORGANIZER:
+            event = Event.objects.create(
+                neighborhood_id=neighborhood_id, organizer=request.user, organization=organization, **fields
+            )
+            if organization is None and profile.role != Profile.Role.ORGANIZER:
                 profile.role = Profile.Role.ORGANIZER
                 profile.save(update_fields=["role"])
         event = get_event(request, profile, event.pk)
@@ -162,7 +232,7 @@ class EventDetailView(APIView):
         """Edit (organizer only). The category can change too."""
         profile = member_profile(request)
         event = get_event(request, profile, event_id)
-        if event.organizer_id != request.user.id:
+        if not can_manage(event, request.user):
             raise ApiError("not_organizer", status_code=status.HTTP_403_FORBIDDEN)
         if event.status == Event.Status.CANCELLED:
             raise ApiError("event_cancelled", status_code=status.HTTP_409_CONFLICT)
@@ -186,7 +256,7 @@ class EventCancelView(APIView):
         """Cancel (organizer only). The event and its "going" records stay."""
         profile = member_profile(request)
         event = get_event(request, profile, event_id)
-        if event.organizer_id != request.user.id:
+        if not can_manage(event, request.user):
             raise ApiError("not_organizer", status_code=status.HTTP_403_FORBIDDEN)
         Event.objects.filter(pk=event.pk).update(status=Event.Status.CANCELLED, updated_at=timezone.now())
         event = get_event(request, profile, event.pk)

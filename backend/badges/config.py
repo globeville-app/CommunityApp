@@ -76,3 +76,8 @@ def next_threshold(badge_key, stage):
     """The count for the next stage, or None after Grove."""
     levels = thresholds(badge_key)
     return levels[stage] if stage < len(levels) else None
+
+# Milestone 4: organizations earn only the hosting side (docs/MILESTONE_4.md):
+# Host, the group and signature badges, and the Open Door keepsake.
+ORG_GROWTH_KEYS = [key for key, _, rule in GROWTH_BADGES if rule == "neighbors_brought_together" or ":" in rule]
+ORG_KEEPSAKES = ["open_door"]

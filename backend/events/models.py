@@ -30,6 +30,11 @@ class Event(models.Model):
     organizer = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="organized_events"
     )
+    # Milestone 4: posted as an organization ("Hosted by ..."). The organizer
+    # above is then the admin who posted it, visible to the team only.
+    organization = models.ForeignKey(
+        "organizations.Organization", null=True, blank=True, on_delete=models.PROTECT, related_name="events"
+    )
     category = models.CharField(max_length=40, choices=[(key, key) for key in ALL_CATEGORY_KEYS])
     category_other = models.CharField(max_length=OTHER_MAX_LENGTH, blank=True)
 

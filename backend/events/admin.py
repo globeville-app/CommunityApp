@@ -5,8 +5,10 @@ from .models import Event, EventReport
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("title", "category", "neighborhood", "starts_at", "status", "organizer")
+    # "organizer" is who posted it, also for organization events (team only).
+    list_display = ("title", "category", "neighborhood", "starts_at", "status", "organization", "organizer")
     list_filter = ("status", "category", "neighborhood")
+    raw_id_fields = ("organization",)
     search_fields = ("title",)
 
 
