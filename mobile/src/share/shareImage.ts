@@ -11,11 +11,13 @@ import type { RefObject } from "react";
 import { Platform, Share, View } from "react-native";
 import { captureRef } from "react-native-view-shot";
 
-export async function shareCardImage(card: RefObject<View | null>, message: string) {
+/** False when the member closed the share sheet without sharing (iPhone only can tell). */
+export async function shareCardImage(card: RefObject<View | null>, message: string): Promise<boolean> {
   const uri = await captureRef(card, { format: "png", width: 1080, height: 1080, result: "tmpfile" });
   if (Platform.OS === "ios") {
-    await Share.share({ url: uri, message });
-  } else {
-    await Sharing.shareAsync(uri, { mimeType: "image/png", dialogTitle: message });
+    const result = await Share.share({ url: uri, message });
+    return result.action !== Share.dismissedAction;
   }
+  await Sharing.shareAsync(uri, { mimeType: "image/png", dialogTitle: message });
+  return true;
 }

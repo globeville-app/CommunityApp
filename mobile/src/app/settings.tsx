@@ -161,7 +161,7 @@ export default function Settings() {
         <ListRow label={t("notifications.reminders")}>
           <Switch
             accessibilityLabel={t("notifications.reminders")}
-            value={reminders && phone !== "denied"}
+            value={reminders && phone === "granted"}
             disabled={phone === "denied"}
             accessibilityState={{ disabled: phone === "denied" }}
             onValueChange={(on) => onNotifications("reminders_enabled", on)}

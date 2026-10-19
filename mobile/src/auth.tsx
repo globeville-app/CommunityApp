@@ -4,6 +4,7 @@
  */
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
+import { stopGeofencing } from "./checkin/geofencing";
 import { clearToken, readToken, saveToken } from "./tokenStorage";
 
 type AuthState = {
@@ -32,6 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    // Logged out (or deleted): this phone stops watching event places for
+    // this account. The next login sets them up again if it's on there.
+    await stopGeofencing().catch(() => undefined);
     await clearToken();
     setToken(null);
   }

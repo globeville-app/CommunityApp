@@ -108,3 +108,17 @@ describe("dates", () => {
     expect(dateBlock(october24, "es")).toEqual(["24", "OCT"]);
   });
 });
+
+describe("event end times", () => {
+  const { endServerTime } = require("../src/i18n/dates");
+
+  it("puts an end before the start on the next day (past midnight)", () => {
+    expect(endServerTime("2026-10-31", "22:00", "01:00")).toBe("2026-11-01T01:00");
+    expect(endServerTime("2026-12-31", "21:00", "00:30")).toBe("2027-01-01T00:30");
+  });
+
+  it("keeps a later end on the same day, and an equal one too (the server refuses it)", () => {
+    expect(endServerTime("2026-10-31", "18:00", "20:00")).toBe("2026-10-31T20:00");
+    expect(endServerTime("2026-10-31", "18:00", "18:00")).toBe("2026-10-31T18:00");
+  });
+});

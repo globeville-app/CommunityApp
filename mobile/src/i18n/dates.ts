@@ -69,3 +69,18 @@ export function denverParts(serverTime: string) {
 export function toServerTime(date: string, time: string) {
   return `${date}T${time}`;
 }
+
+/** The calendar day after a "2026-10-24" date: "2026-10-25". */
+export function nextDay(date: string) {
+  const [y, m, d] = date.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+}
+
+/**
+ * The end of an event that starts at `date` `start`: an end time before the
+ * start time is past midnight, on the next day (22:00 – 01:00). The same
+ * time as the start stays on that day, so the server says it's not after it.
+ */
+export function endServerTime(date: string, start: string, end: string) {
+  return toServerTime(end < start ? nextDay(date) : date, end);
+}

@@ -5,7 +5,8 @@
 import type { RefObject } from "react";
 import type { View } from "react-native";
 
-export async function shareCardImage(_card: RefObject<View | null>, message: string) {
+export async function shareCardImage(_card: RefObject<View | null>, message: string): Promise<boolean> {
   const nav = typeof navigator !== "undefined" ? (navigator as Navigator & { share?: (data: { text: string }) => Promise<void> }) : null;
   if (nav?.share) await nav.share({ text: message }).catch(() => undefined);
+  return true;
 }

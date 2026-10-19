@@ -56,8 +56,8 @@ export default function SharePreview() {
     if (!token) return;
     setBusy(true);
     try {
-      await shareCardImage(exportCard, message);
-      await logShare(token, badge!.key).catch(() => undefined);
+      // Only a real share is counted, not closing the sheet.
+      if (await shareCardImage(exportCard, message)) await logShare(token, badge!.key).catch(() => undefined);
     } finally {
       setBusy(false);
     }

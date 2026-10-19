@@ -5,7 +5,7 @@
  *   - push notifications: make sure the server has this phone's token
  */
 import { router, usePathname } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 
 import { getCelebrations } from "../api";
@@ -30,11 +30,15 @@ export function AppWatchers() {
   // Set on open and on every return to the foreground; cleared once checked.
   const due = useRef(true);
   const checking = useRef(false);
+  // Changing a ref doesn't re-render, so a return to the foreground also
+  // bumps this, to run the check below right away.
+  const [, setWoke] = useState(0);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (state) => {
       if (state !== "active") return;
       due.current = true;
+      setWoke((n) => n + 1);
       if (token) syncGeofences(token).catch(() => undefined);
     });
     return () => sub.remove();

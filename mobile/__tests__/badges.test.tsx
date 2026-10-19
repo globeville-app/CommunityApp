@@ -545,6 +545,31 @@ describe("the share card", () => {
     });
     expect(mocked.logShare).toHaveBeenCalledWith("tok-123", "clean_sweeper");
   });
+
+  it("doesn't count a share when the sheet is closed without sharing", async () => {
+    const { Share } = require("react-native");
+    jest.spyOn(Share, "share").mockResolvedValue({ action: Share.dismissedAction });
+    mocked.getMyBadges.mockResolvedValue(mine);
+    renderApp("/share/clean_sweeper");
+    await pressAndSettle(await screen.findByRole("button", { name: "Share" }));
+    expect(mocked.logShare).not.toHaveBeenCalled();
+  });
+});
+
+describe("logging out", () => {
+  it("stops watching event places on this phone", async () => {
+    location.__setPermission({ granted: true, canAskAgain: true });
+    mocked.getGeofences.mockResolvedValue({
+      geofences: [{ event_id: 1, latitude: 39.76, longitude: -105.01, radius_meters: 150, opens_at: iso(HOUR), closes_at: iso(3 * HOUR) }],
+    });
+    await syncGeofences("tok", true);
+    expect(location.__watched()).not.toBeNull();
+    mocked.logout.mockResolvedValue(undefined);
+    renderApp("/settings");
+    await pressAndSettle(await screen.findByRole("button", { name: "Log out" }));
+    await pressAndSettle(screen.getAllByRole("button", { name: "Log out" }).at(-1)!);
+    await waitFor(() => expect(location.__watched()).toBeNull());
+  });
 });
 
 // ---- Spanish ------------------------------------------------------------------------

@@ -46,8 +46,6 @@ export default function ProfileSetup() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
-  // Kept as they are when editing; chosen on their own screen (interests.tsx).
-  const [interests, setInterests] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   // Errors are kept as codes so they re-translate if the language changes.
   const [error, setError] = useState<ApiError | null>(null);
@@ -61,7 +59,6 @@ export default function ProfileSetup() {
         setFirstName(profile.first_name);
         // Only the initial of the last name is ever stored.
         setLastName(profile.last_initial);
-        setInterests(profile.interests);
         setAlias(profile.alias ?? "");
         setNeighborhood(neighborhoodLabel(profile));
         setSavedPhotoUrl(profile.photo_url);
@@ -84,6 +81,10 @@ export default function ProfileSetup() {
     setError(null);
     setPhotoFailed(false);
     try {
+      // Interests are chosen on their own screen (interests.tsx) and kept as
+      // they are here. Read them fresh: they may have changed there since
+      // this form opened, and the save replaces the whole profile.
+      const interests = editing ? (await getMyProfile(token)).interests : [];
       await saveProfile(token, {
         first_name: firstName.trim(),
         last_name: lastName.trim(),

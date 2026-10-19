@@ -71,6 +71,9 @@ export default function OrganizationForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [done, setDone] = useState(false);
+  // A new request that was sent but whose photo didn't upload: trying again
+  // only retries the photo, so the team never gets the request twice.
+  const [requestedId, setRequestedId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -95,7 +98,16 @@ export default function OrganizationForm() {
       .finally(() => setLoaded(true));
   }, [token, editingId]);
 
-  if (!all || !loaded) return <Loading />;
+  if (!all || !loaded) {
+    return error ? (
+      <Screen>
+        <BackButton />
+        <ErrorMessage message={errorMessage(t, error)} />
+      </Screen>
+    ) : (
+      <Loading />
+    );
+  }
 
   if (done) {
     return (
@@ -138,8 +150,11 @@ export default function OrganizationForm() {
     setBusy(true);
     setError(null);
     try {
-      const org = editingId ? await updateOrganization(token, editingId, body) : await requestOrganization(token, body);
-      if (photo) await uploadOrganizationPhoto(token, org.id, photo);
+      const orgId = editingId
+        ? (await updateOrganization(token, editingId, body)).id
+        : (requestedId ?? (await requestOrganization(token, body)).id);
+      if (!editingId) setRequestedId(orgId);
+      if (photo) await uploadOrganizationPhoto(token, orgId, photo);
       if (editingId) router.back();
       else setDone(true);
     } catch (e) {

@@ -34,7 +34,7 @@ import { CategoryChip } from "../components/CategoryChip";
 import { CategoryPicker } from "../components/CategoryPicker";
 import { DateTimeField } from "../components/DateTimeField";
 import type { Language } from "../i18n";
-import { denverParts, EVENT_TIME_ZONE, toServerTime } from "../i18n/dates";
+import { denverParts, endServerTime, EVENT_TIME_ZONE, toServerTime } from "../i18n/dates";
 import { errorMessage } from "../i18n/errors";
 import { useLanguage } from "../language";
 import { PinMap } from "../maps/PinMap";
@@ -111,12 +111,14 @@ export default function EventForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
 
-  // The map opens on the member's neighborhood.
+  // The map opens on the member's neighborhood, unless an organization's
+  // neighborhood was already chosen (this can answer after that choice).
   useEffect(() => {
     if (!token) return;
     getMyProfile(token)
       .then((profile) => {
-        if (profile.neighborhood.center) setMapCenter(profile.neighborhood.center);
+        const home = profile.neighborhood.center;
+        if (home) setMapCenter((current) => (current === DENVER ? home : current));
       })
       .catch(() => undefined);
   }, [token]);
@@ -223,7 +225,7 @@ export default function EventForm() {
       title_alt: showAlt ? titleAlt.trim() : "",
       description_alt: showAlt ? descriptionAlt.trim() : "",
       starts_at: toServerTime(date, start),
-      ends_at: hasEnd ? toServerTime(date, end) : null,
+      ends_at: hasEnd ? endServerTime(date, start, end) : null,
       location_text: location.trim(),
       latitude: pin?.latitude ?? null,
       longitude: pin?.longitude ?? null,

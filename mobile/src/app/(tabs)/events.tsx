@@ -4,7 +4,7 @@
  * the organizations serving the neighborhood.
  */
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -36,10 +36,14 @@ function Events() {
   const [events, setEvents] = useState<EventData[] | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [error, setError] = useState<ApiError | null>(null);
+  // Only the latest load may show: switching filters quickly must never
+  // leave an older filter's list on screen.
+  const latest = useRef(0);
 
   const load = useCallback(
     async (which: Filter) => {
       if (!token) return;
+      const request = ++latest.current;
       setError(null);
       try {
         const [me, list] = await Promise.all([
@@ -50,9 +54,11 @@ function Events() {
             group: !["all", "for_you", "following"].includes(which) ? which : undefined,
           }),
         ]);
+        if (request !== latest.current) return;
         setProfile(me);
         setEvents(list.events);
       } catch (e) {
+        if (request !== latest.current) return;
         const err = e as ApiError;
         if (err.code === "profile_not_found") resetTo("/address");
         else setError(err);
