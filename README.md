@@ -7,6 +7,8 @@ the server and not on the phone.
 
 The full spec is in [`docs/MILESTONE_1.md`](docs/MILESTONE_1.md).
 
+**Reviewing the code?** Start with [`docs/REVIEWERS_GUIDE.md`](docs/REVIEWERS_GUIDE.md).
+
 **Trying it on your phone for the first time on Windows?** Follow the
 step-by-step guide in [`docs/TESTING_ON_YOUR_PHONE.md`](docs/TESTING_ON_YOUR_PHONE.md),
 which covers every snag from a real first run. The sections below are the short version.
