@@ -322,7 +322,13 @@ References in brackets point to the review files, for example
 - D1 (email verification) approved.
 - D4: **don't record attendance at sensitive events at all.** Added as task
   P25.
-- D2, D3, D5: explained to the owner. Waiting for answers.
+- D2: data requests are handled **by email for now**. An in-app "Download
+  my data" button is listed under "Later" (the owner likes the idea).
+- D3: **keep everything needed for participation history and impact for as
+  long as the account exists. Delete everything else once its job is
+  done.** The proposed rules are in P26, waiting for the owner to confirm
+  the table.
+- D5: **set up the foundation for a staging server** (P27).
 
 - [ ] **P25. Don't record attendance at sensitive events** [D4]
   - **What:** collect and check-in at resource fairs and donation drives
@@ -339,17 +345,64 @@ References in brackets point to the review files, for example
   - **Verify:** new tests that no attendance row exists after collecting a
     sensitive event, and that every badge test still passes.
 
+- [ ] **P26. Automatic cleanup of data that's no longer needed** [D3]
+  - **What:** a daily job deletes what has done its job. Kept for the life
+    of the account: the account, profile, attendance, badges, keepsakes,
+    follows, organization roles, and each event's title, category,
+    neighborhood, time and host.
+  - **Deleted after the period shown:**
+
+    | Data | When |
+    | --- | --- |
+    | Meeting spot and descriptions of past events | 1 year after the event |
+    | Their cached translations | 1 year after the event |
+    | "I'm going" taps | 1 year after the event (check the re-offer rule first) |
+    | Reminders that were sent | 30 days after sending |
+    | Phone push tokens | not used for 90 days |
+    | Celebrations already seen | 90 days after being seen |
+    | Event and organization reports | 1 year after being filed |
+    | Organization change requests that were decided | 1 year after the decision |
+    | Problem reports | 1 year after being filed |
+
+  - **Files:** a new `cleanup_old_data` command, `.do/app.yaml` (a daily
+    job), `README.md`, tests.
+  - **Risk:** medium, because it deletes data. Every rule gets a test that
+    proves what is kept as well as what goes, and the job has a
+    `--dry-run` mode that only counts.
+  - **Verify:** tests per rule. Then run the command with `--dry-run` on a
+    copy of the data.
+
+- [ ] **P27. Foundation for a staging server** [D5]
+  - **What:**
+    - a second DigitalOcean spec, `.do/staging.yaml`, that deploys a
+      `staging` branch to its own small app, database and Spaces folder,
+      and sends **no real push notifications**;
+    - a setting that names the environment (`APP_ENVIRONMENT`), shown in
+      the admin header so nobody confuses the two;
+    - an app build profile (`eas.json` "staging") that points at the
+      staging server;
+    - README steps.
+  - **Files:** `.do/staging.yaml`, `backend/config/settings.py`,
+    `mobile/eas.json`, `mobile/app.config.ts`, `README.md`, tests.
+  - **Risk:** low. It changes nothing for production.
+  - **Verify:** a settings test for the environment name. Creating it on
+    DigitalOcean is an owner step.
+
+## Later (not in this round)
+
+- In-app "Download my data" button (D2).
+
 ## Needs your decision first (not code yet)
 
 - [x] **D1. Email verification at signup.** Approved; built together with P5. Recommended with P5, but it
   adds a step for new members.
-- [ ] **D2. "Download my data" (GDPR-style export).** Answer requests by
+- [x] **D2. "Download my data" (GDPR-style export).** Answer requests by
   email for now, or build an endpoint?
-- [ ] **D3. How long to keep data** (problem reports, old events, logs).
+- [x] **D3. How long to keep data** (problem reports, old events, logs).
   A cleanup job follows once you decide.
 - [x] **D4. Attendance at sensitive events.** Decided: don't record (P25). (resource fairs, donation
   drives): keep storing it, or don't record it at all?
-- [ ] **D5. A staging server for the beta** (optional, about $5–12 a month).
+- [x] **D5. A staging server for the beta** (optional, about $5–12 a month).
 
 The non-code owner actions (privacy policy, terms, minimum age, store
 forms, DigitalOcean alerts, branch protection, backup drill) are listed in
