@@ -20,7 +20,7 @@ side of the badges, and have no unlock moments.
 from datetime import timedelta
 
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef
+from django.db.models import Count, Exists, OuterRef, Q
 from django.utils import timezone
 from rest_framework import status
 
@@ -120,8 +120,8 @@ def compute(user):
     Returns ({growth badge: count}, {keepsakes earned}) from the data as it
     is right now.
     """
-    attended = [a.event for a in attendance_for_badges(user)]
     attendances = list(attendance_for_badges(user))
+    attended = [a.event for a in attendances]
     hosted = list(counted_hosted_events(user))
 
     counts = {}
@@ -170,6 +170,19 @@ def compute_org(organization):
     return counts, keepsakes
 
 
+def _locked_states(owner, keys):
+    """The owner's BadgeState rows (created if missing), locked until the transaction ends."""
+    with transaction.atomic():
+        for key in keys:
+            BadgeState.objects.get_or_create(badge_key=key, **owner)
+        return {s.badge_key: s for s in BadgeState.objects.select_for_update().filter(**owner).order_by("badge_key")}
+
+
+def lock_order(owner):
+    """Members first, then organizations, each by id: everyone locks in the same order, so no deadlocks."""
+    return (1, owner.pk) if is_org(owner) else (0, owner.pk)
+
+
 def update_badges(host, now=None):
     """
     Bring a member's (or an organization's) badges up to date. Returns the
@@ -177,15 +190,22 @@ def update_badges(host, now=None):
     """
     now = now or timezone.now()
     if is_org(host):
-        owner, counts, keepsakes = {"organization": host}, *compute_org(host)
+        owner = {"organization": host}
         growth_keys, keepsake_keys = config.ORG_GROWTH_KEYS, config.ORG_KEEPSAKES
     else:
-        owner, counts, keepsakes = {"user": host}, *compute(host)
+        owner = {"user": host}
         growth_keys, keepsake_keys = config.GROWTH_KEYS, config.KEEPSAKES
+    # Lock this member's (or organization's) badge rows before counting, so
+    # two collects at the same moment can't both save a stale count or both
+    # celebrate the same stage. The second waits, then counts again and sees
+    # the first one's attendance. (SQLite in development has no row locks;
+    # Postgres in production does.)
+    states = _locked_states(owner, growth_keys)
+    counts, keepsakes = compute_org(host) if is_org(host) else compute(host)
     user = None if is_org(host) else host
     new = []
     for key in growth_keys:
-        state, _ = BadgeState.objects.get_or_create(badge_key=key, **owner)
+        state = states[key]
         count = counts[key]
         reached = config.stage_for(key, count)
         if reached > state.stage:  # only ever up
@@ -279,11 +299,15 @@ def record_attendance(user, event, method, now=None):
                     # Day One goes to everyone who came, including earlier collectors.
                     affected.update(a.user for a in Attendance.objects.filter(event=event).select_related("user"))
 
-        celebrations = {}
-        for member in affected:
-            celebrations[member.pk] = update_badges(member, now)
+        owners = set(affected)
         if host is not None and event.counted_hosted_at is not None:
-            update_badges(host, now)
+            owners.add(host)
+        celebrations = {}
+        # Always the same order (see lock_order), so two collects never wait on each other in a circle.
+        for owner in sorted(owners, key=lock_order):
+            result = update_badges(owner, now)
+            if not is_org(owner):
+                celebrations[owner.pk] = result
         return celebrations[user.pk]
 
 
@@ -325,7 +349,11 @@ def collect_events(user, now=None):
     """Past events the member is going to, ended less than 7 days ago, not yet collected."""
     now = now or timezone.now()
     window = timedelta(days=config.COLLECT_WINDOW_DAYS)
-    candidates = _going_events(user).filter(starts_at__lte=now, starts_at__gte=now - window - timedelta(days=2))
+    # An event with no end time ends within a day of its start; one with an
+    # end time can run for days, so look at ends_at too.
+    candidates = _going_events(user).filter(starts_at__lte=now).filter(
+        Q(starts_at__gte=now - window - timedelta(days=2)) | Q(ends_at__gte=now - window)
+    )
     return sorted(
         (e for e in candidates if event_end(e) <= now <= event_end(e) + window),
         key=lambda e: event_end(e),
@@ -360,7 +388,9 @@ def badges_an_event_grows(user, event, states):
 def geofence_events(user, now=None):
     """The next 20 upcoming events with a pin that auto check-in should watch."""
     now = now or timezone.now()
-    upcoming = _going_events(user).filter(latitude__isnull=False, starts_at__gte=now - timedelta(days=1))
+    upcoming = _going_events(user).filter(latitude__isnull=False).filter(
+        Q(starts_at__gte=now - timedelta(days=1)) | Q(ends_at__gte=now)
+    )
     upcoming = [e for e in upcoming.order_by("starts_at") if not has_ended(e, now)]
     return upcoming[: config.MAX_GEOFENCES]
 

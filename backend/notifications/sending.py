@@ -10,7 +10,7 @@ from .push import PushUnavailable, send_to_user
 from .texts import push_text
 
 
-def should_deliver(notification):
+def should_deliver(notification, now=None):
     """Whether the member still wants this one, and it still makes sense."""
     from events.models import Event, Going
     from profiles.models import Profile
@@ -23,6 +23,8 @@ def should_deliver(notification):
         return (
             profile.reminders_enabled
             and event.status == Event.Status.ACTIVE
+            # A reminder held up (Expo down, a late job) is useless once the event starts.
+            and event.starts_at > (now or timezone.now())
             and Going.objects.filter(user=notification.user, event=event).exists()
         )
     return profile.cancellation_alerts_enabled
@@ -34,8 +36,8 @@ def send_notification(notification, now=None):
     claimed = ScheduledNotification.objects.filter(pk=notification.pk, sent_at__isnull=True).update(sent_at=now)
     if not claimed:
         return False  # another run already has it
-    notification.refresh_from_db()
-    if not should_deliver(notification):
+    notification.sent_at = now
+    if not should_deliver(notification, now):
         return False
     body = push_text(notification.kind, notification.event, notification.user)
     try:

@@ -102,7 +102,11 @@ class DeleteAccountView(APIView):
 
         # Hosts whose numbers include this member, to refresh afterwards.
         hosts = list(
-            get_user_model().objects.filter(organized_events__attendances__user=user).exclude(pk=user.pk).distinct()
+            # Only members' own events: an organization event's host is the organization.
+            get_user_model()
+            .objects.filter(organized_events__organization__isnull=True, organized_events__attendances__user=user)
+            .exclude(pk=user.pk)
+            .distinct()
         )
         hosts += list(Organization.objects.filter(events__attendances__user=user).distinct())
         # Organizations they run: if they're the last admin, it's hidden

@@ -47,12 +47,19 @@ def event_time_changed(event, now=None):
     reminder time has already passed, they're dropped. A reminder that was
     already sent isn't sent again.
     """
+    from events.models import Going
+
+    now = now or timezone.now()
     pending = ScheduledNotification.objects.filter(event=event, kind=REMINDER, sent_at__isnull=True)
     send_at = reminder_time(event)
-    if send_at <= (now or timezone.now()):
+    if send_at <= now:
         pending.delete()
-    else:
-        pending.update(send_at=send_at)
+        return
+    pending.update(send_at=send_at)
+    # Members who said yes when it was too late for a reminder (or whose
+    # reminder was dropped by an earlier move) get one now that there's time.
+    for going in Going.objects.filter(event=event).select_related("user"):
+        schedule_reminder(going.user, event, now)
 
 
 def event_cancelled(event, now=None):

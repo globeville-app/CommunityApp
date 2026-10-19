@@ -25,12 +25,12 @@ def celebration_json(c):
     return {"id": c.pk, "badge_key": c.badge_key, "kind": c.kind, "stage": c.stage, "count": c.count}
 
 
-def badges_json(user, earned_only=False):
-    """Every badge (or only earned ones) with stage, count and next threshold."""
-    states = {s.badge_key: s for s in BadgeState.objects.filter(user=user)}
-    keepsakes = {k.badge_key: k for k in Keepsake.objects.filter(user=user)}
+def _badges_json(owner, growth_keys, keepsake_keys, earned_only):
+    """Badges with stage, count and next threshold; `owner` is {"user": ...} or {"organization": ...}."""
+    states = {s.badge_key: s for s in BadgeState.objects.filter(**owner)}
+    keepsakes = {k.badge_key: k for k in Keepsake.objects.filter(**owner)}
     result = []
-    for key in config.GROWTH_KEYS:
+    for key in growth_keys:
         state = states.get(key)
         stage, count = (state.stage, state.count) if state else (0, 0)
         if earned_only and stage == 0:
@@ -45,7 +45,7 @@ def badges_json(user, earned_only=False):
                 "earned_at": state.earned_at.isoformat() if state and state.earned_at else None,
             }
         )
-    for key in config.KEEPSAKES:
+    for key in keepsake_keys:
         keepsake = keepsakes.get(key)
         if earned_only and not keepsake:
             continue
@@ -60,43 +60,16 @@ def badges_json(user, earned_only=False):
             }
         )
     return result
+
+
+def badges_json(user, earned_only=False):
+    """Every badge (or only earned ones) with stage, count and next threshold."""
+    return _badges_json({"user": user}, config.GROWTH_KEYS, config.KEEPSAKES, earned_only)
 
 
 def badges_json_for_org(organization, earned_only=False):
     """An organization's hosting badges, in the same shape as a member's."""
-    states = {s.badge_key: s for s in BadgeState.objects.filter(organization=organization)}
-    keepsakes = {k.badge_key: k for k in Keepsake.objects.filter(organization=organization)}
-    result = []
-    for key in config.ORG_GROWTH_KEYS:
-        state = states.get(key)
-        stage, count = (state.stage, state.count) if state else (0, 0)
-        if earned_only and stage == 0:
-            continue
-        result.append(
-            {
-                "key": key,
-                "kind": "growth",
-                "stage": stage,
-                "count": count,
-                "next_threshold": config.next_threshold(key, stage),
-                "earned_at": state.earned_at.isoformat() if state and state.earned_at else None,
-            }
-        )
-    for key in config.ORG_KEEPSAKES:
-        keepsake = keepsakes.get(key)
-        if earned_only and not keepsake:
-            continue
-        result.append(
-            {
-                "key": key,
-                "kind": "keepsake",
-                "stage": 1 if keepsake else 0,
-                "count": 0,
-                "next_threshold": None,
-                "earned_at": keepsake.earned_at.isoformat() if keepsake else None,
-            }
-        )
-    return result
+    return _badges_json({"organization": organization}, config.ORG_GROWTH_KEYS, config.ORG_KEEPSAKES, earned_only)
 
 
 class OrganizationImpactView(APIView):

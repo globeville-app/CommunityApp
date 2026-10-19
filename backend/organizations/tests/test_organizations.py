@@ -37,6 +37,7 @@ class RequestAndApprovalTests(OrgTestCase):
             ({"type": "church"}, "invalid_org_type"),
             ({"neighborhoods": []}, "neighborhoods_required"),
             ({"neighborhoods": [999]}, "invalid_neighborhood"),
+            ({"neighborhoods": [True]}, "invalid_neighborhood"),
             ({"description": "x" * 501}, "org_description_too_long"),
             ({"link": "http://example.org"}, "invalid_link"),
             ({"type": "business"}, "business_rule"),

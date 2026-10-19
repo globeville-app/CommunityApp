@@ -239,3 +239,44 @@ class LogoutTests(NotificationTestCase):
         PushToken.objects.create(user=self.ana, token="ExponentPushToken[other-phone]")
         self.api(self.ana).post("/api/auth/logout", {"push_token": TOKEN}, format="json")
         self.assertEqual(list(PushToken.objects.values_list("token", flat=True)), ["ExponentPushToken[other-phone]"])
+
+
+class ReviewFixTests(NotificationTestCase):
+    """Cases found by the automated code review."""
+
+    def test_a_late_yes_gets_a_reminder_when_the_event_moves_later(self):
+        self.opt_in(self.ana)
+        self.going(self.ana, when=denver(2026, 10, 23, 18))  # too late for a reminder
+        self.assertFalse(ScheduledNotification.objects.exists())
+        self.cleanup.starts_at = denver(2026, 10, 31, 10)
+        self.cleanup.ends_at = denver(2026, 10, 31, 12)
+        self.cleanup.save()
+        from notifications.scheduling import event_time_changed
+
+        with at(denver(2026, 10, 23, 19)):
+            event_time_changed(self.cleanup)
+        self.assertEqual(ScheduledNotification.objects.get().send_at, denver(2026, 10, 30, 17))
+
+    def test_a_held_up_reminder_isnt_sent_once_the_event_started(self):
+        self.opt_in(self.ana)
+        self.going(self.ana)
+        with at(denver(2026, 10, 24, 10, 15)):  # Expo was down until after the start
+            send_due_notifications()
+        self.assertEqual(self.sent, [])
+
+    def test_a_partial_batch_failure_isnt_retried(self):
+        from notifications.push import send_to_user
+
+        for i in range(101):
+            PushToken.objects.create(user=self.ana, token=f"ExponentPushToken[p{i}]")
+        calls = []
+
+        def first_ok_then_down(messages):
+            calls.append(len(messages))
+            if len(calls) > 1:
+                raise PushUnavailable
+            return expo_ok(messages)
+
+        self.expo.side_effect = first_ok_then_down
+        self.assertTrue(send_to_user(self.ana, "hi"))
+        self.assertEqual(calls, [100, 1])

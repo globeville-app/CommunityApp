@@ -72,7 +72,8 @@ def clean_type(value, business_rule_accepted):
 def clean_neighborhoods(value):
     if not isinstance(value, list) or not value:
         raise ApiError("neighborhoods_required")
-    if any(not isinstance(item, int) for item in value):
+    # bool is a subclass of int in Python, so rule it out explicitly (True would mean id 1).
+    if any(not isinstance(item, int) or isinstance(item, bool) for item in value):
         raise ApiError("invalid_neighborhood")
     ids = sorted(set(value))
     if Neighborhood.objects.filter(pk__in=ids).count() != len(ids):

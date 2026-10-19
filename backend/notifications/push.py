@@ -48,7 +48,14 @@ def send_to_user(user, body, data=None):
     accepted = False
     for start in range(0, len(messages), config.EXPO_BATCH_SIZE):
         batch = tokens[start : start + config.EXPO_BATCH_SIZE]
-        tickets = post_to_expo(messages[start : start + config.EXPO_BATCH_SIZE])
+        try:
+            tickets = post_to_expo(messages[start : start + config.EXPO_BATCH_SIZE])
+        except PushUnavailable:
+            # Some phones already got it: count it as sent rather than retry
+            # and push those phones twice. Only a total failure is retried.
+            if accepted:
+                return True
+            raise
         for token, ticket in zip(batch, tickets):
             if ticket.get("status") == "ok":
                 accepted = True

@@ -231,3 +231,33 @@ class DeletedAccountTests(BadgeTestCase):
         self.api(self.ana).post("/api/account/delete", {"password": "pw"}, format="json")
         for model in (Attendance, BadgeState, Keepsake, Celebration):
             self.assertFalse(model.objects.filter(user_id=self.ana.pk).exists(), model.__name__)
+
+
+class ReviewFixTests(BadgeTestCase):
+    """Cases found by the automated code review."""
+
+    def test_a_multi_day_event_can_be_collected_for_7_days_after_it_ends(self):
+        from badges import engine
+
+        long_event = self.event(starts=NOW - timedelta(days=10))
+        long_event.ends_at = NOW - timedelta(days=5)
+        long_event.save()
+        Going.objects.create(user=self.ana, event=long_event)
+        self.assertEqual(engine.collect_events(self.ana), [long_event])
+
+    def test_a_multi_day_event_is_watched_while_it_runs(self):
+        from badges import engine
+
+        running = self.event(starts=NOW - timedelta(days=3))
+        running.ends_at = NOW + timedelta(days=2)
+        running.save()
+        Going.objects.create(user=self.ana, event=running)
+        self.assertEqual(engine.geofence_events(self.ana), [running])
+
+    def test_badges_are_updated_in_one_order_members_then_organizations(self):
+        from badges.engine import lock_order
+        from organizations.models import Organization
+
+        org = Organization.objects.create(name="Club", type="club")
+        owners = sorted([org, self.host, self.ana], key=lock_order)
+        self.assertEqual(owners, sorted([self.host, self.ana], key=lambda u: u.pk) + [org])
