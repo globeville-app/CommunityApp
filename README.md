@@ -444,6 +444,16 @@ its tests (`backend/accounts/tests/test_delete_account.py`). For Milestone 2:
 - past events they organized show "Former neighbor"
 - their "I'm going" records are removed
 
+For Milestones 3 and 4:
+
+- their attendance, badges, keepsakes and unlock moments are removed; hosts'
+  numbers drop them, but hosts' stages are never lowered
+- their push tokens and scheduled notifications are removed; neighbors going
+  to their cancelled events get a cancellation notice
+- events they posted for an organization stay (they belong to the
+  organization); if they were its last admin, the organization is hidden
+  until the team assigns a new admin
+
 ---
 
 ## Going live (DigitalOcean, docs/GO_LIVE.md)
