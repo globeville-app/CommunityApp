@@ -8,8 +8,8 @@ changes until the owner approves `review/PLAN.md`).
 | 0 – Orientation | done | `review/00-overview.md` |
 | 1 – Requirements vs code | done | `review/01-acceptance.md` |
 | 2 – Architecture | done | `review/02-architecture.md` |
-| 3 – Security & compliance | next | `review/03-security.md` |
-| 4 – Tests | not started | `review/04-tests.md` |
+| 3 – Security & compliance | done | `review/03-security.md` |
+| 4 – Tests | next | `review/04-tests.md` |
 | 5 – CI/CD & operations | not started | `review/05-ops.md` |
 | 6 – Skeptic pass | not started | notes added to each file + `review/06-skeptic.md` |
 | 7 – Refactoring plan | not started | `review/PLAN.md`, then STOP for approval |
@@ -28,12 +28,13 @@ changes until the owner approves `review/PLAN.md`).
   The most important gaps (G1–G4, G10, and the dead code) were then
   re-checked in the code by hand. Phone-app rows are pointed to but not
   reviewed, as the brief limits this review to the backend.
+- Step 3: the throttle bypass (S1) was proven with a local script, and no
+  code was changed. `pip-audit` was installed in a throwaway environment in
+  the session's scratch folder, not in the project.
 
 ## Next action
 
-Step 3: security and compliance, written to `review/03-security.md`. It
-covers secrets in code and git history, permissions on every endpoint,
-validation and injection, rate limits, CORS, password and token storage,
-personal data in logs, and dependency vulnerabilities (OWASP API Top 10). It
-also covers Apple/Google store rules and GDPR, and ends with an "Actions for
-the owner (no code)" section.
+Step 4: run the backend tests (SQLite, and Postgres if available), measure
+coverage with `coverage` installed outside `requirements.txt`, and map each
+acceptance criterion to the tests that check it. Output:
+`review/04-tests.md`.
