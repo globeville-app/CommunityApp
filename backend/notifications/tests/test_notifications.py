@@ -231,3 +231,11 @@ class TokenAndSettingsTests(NotificationTestCase):
         self.assertEqual((changed["reminders_enabled"], changed["cancellation_alerts_enabled"]), (True, False))
         client.post("/api/me/notif-offer/seen")
         self.assertTrue(client.get("/api/profile/me").data["notif_offer_shown"])
+
+
+class LogoutTests(NotificationTestCase):
+    def test_logout_forgets_this_phone_only(self):
+        PushToken.objects.create(user=self.ana, token=TOKEN)
+        PushToken.objects.create(user=self.ana, token="ExponentPushToken[other-phone]")
+        self.api(self.ana).post("/api/auth/logout", {"push_token": TOKEN}, format="json")
+        self.assertEqual(list(PushToken.objects.values_list("token", flat=True)), ["ExponentPushToken[other-phone]"])

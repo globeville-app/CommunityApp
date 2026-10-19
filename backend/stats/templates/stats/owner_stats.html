@@ -81,6 +81,25 @@
       {% empty %}<tr><td>No neighborhood is "known for" anything yet.</td></tr>{% endfor %}
       </tbody>
     </table>
+
+    <h2>Organizations and notifications</h2>
+    <div class="tiles">
+      <div class="tile"><b>{{ organizations.pending_orgs }}</b><a href="{% url 'admin:organizations_organization_changelist' %}?status__exact=pending">organizations waiting for approval</a></div>
+      <div class="tile"><b>{{ organizations.pending_changes }}</b><a href="{% url 'admin:organizations_organizationchangerequest_changelist' %}?status__exact=pending">changes waiting for approval</a></div>
+      <div class="tile"><b>{{ organizations.follows }}</b>follows</div>
+      <div class="tile"><b>{{ organizations.events_by_orgs_30 }}</b>events posted by organizations (30 days)</div>
+      <div class="tile"><b>{{ organizations.events_by_members_30 }}</b>events posted by members (30 days)</div>
+      <div class="tile"><b>{{ organizations.reminders_sent_30 }}</b>reminders sent (30 days)</div>
+      <div class="tile"><b>{{ organizations.cancellations_sent_30 }}</b>cancellation notices sent (30 days)</div>
+      <div class="tile"><b>{{ organizations.notifications_on_pct }}%</b>of active members with notifications on</div>
+    </div>
+    <h3>Organizations by type and status</h3>
+    <table>
+      <thead><tr><th>Type</th>{% for state in organizations.statuses %}<th>{{ state }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for kind, counts in organizations.by_type %}<tr><td>{{ kind }}</td>{% for n in counts %}<td>{{ n }}</td>{% endfor %}</tr>{% endfor %}
+      </tbody>
+    </table>
   </section>
 
   <section>

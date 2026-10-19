@@ -20,6 +20,8 @@ from events.models import Event, Going
 from profiles.models import Profile
 from badges.community import known_for
 from badges.models import Attendance, Celebration, DeclineLog, ShareLog
+from notifications.models import PushToken, ScheduledNotification
+from organizations.models import TYPES, Follow, Organization, OrganizationChangeRequest
 from support.models import ProblemReport
 
 
@@ -78,7 +80,12 @@ def event_numbers(now):
         "by_group": [(group, recent.filter(category__in=keys).count()) for group, keys in GROUPS]
         + [("other", recent.filter(category="other").count())],
         "going_taps_7": Going.objects.filter(created_at__gte=_days_ago(now, 7)).count(),
-        "organizers": Event.objects.exclude(organizer=None).values("organizer").distinct().count(),
+        # Members who posted as themselves (organization events are counted below).
+        "organizers": Event.objects.filter(organization__isnull=True)
+        .exclude(organizer=None)
+        .values("organizer")
+        .distinct()
+        .count(),
     }
 
 
@@ -98,6 +105,35 @@ def badge_numbers(now):
     }
 
 
+def organization_numbers(now):
+    """Milestone 4: organizations, follows and notifications. Counts only."""
+    since = _days_ago(now, 30)
+    statuses = [value for value, _ in Organization.Status.choices]
+    by_type = [
+        (kind, [Organization.objects.filter(type=kind, status=state).count() for state in statuses]) for kind in TYPES
+    ]
+    recent = Event.objects.filter(created_at__gte=since)
+    sent = ScheduledNotification.objects.filter(sent_at__gte=since, delivered=True)
+    active = Account.objects.filter(user__is_staff=False, last_seen_at__gte=since).values("user")
+    active_count = active.count()
+    with_notifications = PushToken.objects.filter(user__in=active).values("user").distinct().count()
+    return {
+        "statuses": statuses,
+        "by_type": by_type,
+        "pending_orgs": Organization.objects.filter(status=Organization.Status.PENDING).count(),
+        "pending_changes": OrganizationChangeRequest.objects.filter(
+            status=OrganizationChangeRequest.Status.PENDING
+        ).count(),
+        "follows": Follow.objects.count(),
+        "events_by_orgs_30": recent.filter(organization__isnull=False).count(),
+        "events_by_members_30": recent.filter(organization__isnull=True).count(),
+        "reminders_sent_30": sent.filter(kind=ScheduledNotification.Kind.REMINDER).count(),
+        "cancellations_sent_30": sent.filter(kind=ScheduledNotification.Kind.CANCELLED).count(),
+        # Active members (last 30 days) whose phone allows notifications.
+        "notifications_on_pct": round(100 * with_notifications / active_count) if active_count else 0,
+    }
+
+
 def support_numbers():
     return {"open_reports": ProblemReport.objects.exclude(status=ProblemReport.Status.RESOLVED).count()}
 
@@ -109,5 +145,6 @@ def all_numbers(now=None):
         "events": event_numbers(now),
         "support": support_numbers(),
         "badges": badge_numbers(now),
+        "organizations": organization_numbers(now),
         "generated_at": timezone.localtime(now),
     }

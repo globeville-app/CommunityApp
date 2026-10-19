@@ -54,6 +54,12 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     def post(self, request):
+        # This phone stops getting notifications (the app sends its push token).
+        from notifications.models import PushToken
+
+        push_token = request.data.get("push_token") if hasattr(request.data, "get") else None
+        if push_token:
+            PushToken.objects.filter(user=request.user, token=str(push_token)).delete()
         # Deleting the token means it can never be used again, even if it
         # was copied off the phone.
         request.auth.delete()
