@@ -16,7 +16,7 @@ services:
     instance_size_slug: apps-s-1vcpu-0.5gb
     instance_count: 1
     health_check:
-      http_path: /api/config
+      http_path: /healthz
     envs:
       - key: DJANGO_DEBUG
         value: "0"

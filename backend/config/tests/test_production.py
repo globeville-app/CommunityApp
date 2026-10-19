@@ -110,3 +110,17 @@ class TwoStepAdminTests(TestCase):
         get_user_model().objects.create_user(username="member", password="x")
         with self.assertRaises(CommandError):
             call_command("add_admin_2fa", "member", stdout=open(os.devnull, "w"))
+
+
+@override_settings(ALLOWED_HOSTS=["api.example.org"], SECURE_SSL_REDIRECT=True)
+class HealthCheckTests(TestCase):
+    """DigitalOcean may call the server by its internal address over HTTP (review N2)."""
+
+    def test_answers_ok_by_internal_address_over_http(self):
+        response = self.client.get("/healthz", HTTP_HOST="10.0.0.5:8080")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"ok")
+
+    def test_the_rest_of_the_site_keeps_its_checks(self):
+        self.assertEqual(self.client.get("/api/config", HTTP_HOST="10.0.0.5:8080").status_code, 400)
+        self.assertEqual(self.client.get("/api/config", HTTP_HOST="api.example.org").status_code, 301)

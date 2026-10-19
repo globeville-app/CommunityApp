@@ -101,6 +101,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # GET /healthz for DigitalOcean, answered before the checks below.
+    "config.health.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # Serves the admin's CSS/JS in production (no separate file server needed).
     "whitenoise.middleware.WhiteNoiseMiddleware",

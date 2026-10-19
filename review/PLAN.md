@@ -57,7 +57,7 @@ References in brackets point to the review files, for example
   - **Verify:** the test sends 30 wrong logins with changing fake headers
     and gets blocked after 20.
 
-- [ ] **P3. Make the health check reliable** [N2]
+- [x] **P3. Make the health check reliable** [N2]
   - **What:** add a tiny `/healthz` reply that skips the host-name and HTTPS
     checks, and point `.do/app.yaml` at it.
   - **Why:** otherwise the very first deploy may fail its health check.
