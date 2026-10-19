@@ -165,7 +165,9 @@ matters more than we think):
   running the same steps by hand (migrate, collectstatic, gunicorn), not by a
   real Docker build or a DigitalOcean deploy. The scheduled-job section of
   the spec hasn't been confirmed in DigitalOcean.
-- **No CI:** tests run by hand; there is no GitHub Actions workflow yet.
+- **CI:** `.github/workflows/ci.yml` runs the backend tests on Postgres,
+  the app's tests, types and lint, a migrations check, `pip-audit` and a
+  Docker build on every push.
 - **No Python linter or formatter** is set up for the backend (the app has
   ESLint and TypeScript checks).
 - **Expo push receipts aren't checked.** Invalid tokens are removed when

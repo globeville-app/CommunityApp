@@ -71,7 +71,7 @@ References in brackets point to the review files, for example
     host and no HTTPS header, and gets 200. Confirm again on the first
     deploy.
 
-- [ ] **P4. Add automatic tests on GitHub (CI)** [O1, O2]
+- [x] **P4. Add automatic tests on GitHub (CI)** [O1, O2]
   - **What:** one GitHub Actions workflow on every push and pull request.
     It runs the backend tests on Postgres 16, `makemigrations --check`,
     `check --deploy`, the app's tests, TypeScript and lint, and
