@@ -193,7 +193,7 @@ References in brackets point to the review files, for example
   - **Verify:** the existing deletion tests pass, plus new tests that admin
     deletion does the same cleanup.
 
-- [ ] **P12. Admin screens follow the same rules as the app** [G3, G5, G9]
+- [x] **P12. Admin screens follow the same rules as the app** [G3, G5, G9]
   - **What:**
     - events can't be hard-deleted (cancel instead);
     - an organization needs 1–5 admins and at least 1 neighborhood;

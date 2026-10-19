@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from .models import (
     BUSINESS_RULE,
+    MAX_ADMINS,
     Follow,
     Organization,
     OrganizationAdmin,
@@ -23,6 +24,11 @@ from .models import (
 class NeighborhoodsInline(admin.TabularInline):
     model = OrganizationNeighborhood
     extra = 0
+    # Every organization serves at least one neighborhood (MILESTONE_4.md).
+    min_num = 1
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(request, obj, validate_min=True, **kwargs)
     autocomplete_fields = ["neighborhood"]
 
 
@@ -32,6 +38,11 @@ class AdminsInline(admin.TabularInline):
     raw_id_fields = ["user"]
     readonly_fields = ["added_at"]
     verbose_name = "admin (a member)"
+    # At most 5, as in the app. None is allowed: that's a hidden organization.
+    max_num = MAX_ADMINS
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(request, obj, validate_max=True, **kwargs)
 
 
 @admin.register(Organization)
@@ -148,9 +159,15 @@ class OrganizationReportAdmin(admin.ModelAdmin):
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
-    # Counts only in practice; the list exists for support questions.
+    # Following is private (MILESTONE_4.md), also from the team: the screen
+    # shows which organization and when, never which member.
     list_display = ("organization", "created_at")
     list_filter = ("organization",)
+    fields = ("organization", "created_at")
+    readonly_fields = ("organization", "created_at")
 
     def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
         return False

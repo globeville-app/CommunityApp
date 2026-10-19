@@ -11,6 +11,11 @@ class EventAdmin(admin.ModelAdmin):
     raw_id_fields = ("organization",)
     search_fields = ("title",)
 
+    def has_delete_permission(self, request, obj=None):
+        # Events are never deleted, only cancelled (MILESTONE_2.md): deleting
+        # one would also erase everyone's "going" and attendance history.
+        return False
+
 
 @admin.register(EventReport)
 class EventReportAdmin(admin.ModelAdmin):

@@ -11,6 +11,7 @@ neighborhoods.
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from neighborhoods.models import Neighborhood
@@ -29,6 +30,12 @@ BUSINESS_RULE = (
     "Businesses may post real events people attend (a tasting, a workshop, a "
     "game night), never sales, discounts or ads."
 )
+
+
+def validate_https(value):
+    """The same rule as the app's form (views.clean_link), so admin edits follow it too."""
+    if value and not value.lower().startswith("https://"):
+        raise ValidationError("The link must start with https://")
 
 
 def random_org_photo_path(instance, filename):
@@ -52,7 +59,7 @@ class Organization(models.Model):
     description_alt = models.TextField(max_length=DESCRIPTION_MAX, blank=True)
     language = models.CharField(max_length=2, choices=[("en", "English"), ("es", "Español")], default="en")
     photo = models.ImageField(upload_to=random_org_photo_path, blank=True)
-    link = models.URLField(blank=True)
+    link = models.URLField(max_length=200, blank=True, validators=[validate_https])
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     # Team only; never shown to members in this milestone.
     rejection_reason = models.TextField(blank=True)
