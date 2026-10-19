@@ -29,7 +29,7 @@ real first run, including every snag we hit and how to get past it.
 The repository is private, so download it in a browser where you're signed in
 to GitHub.
 
-1. Open **github.com/indubitably-dubin/CommunityApp-Milestone-1** (branch **main**).
+1. Open **github.com/globeville-app/CommunityApp** (branch **main**).
 2. Click the green **Code** button → **Download ZIP**.
 3. In **Downloads**, **right-click** the ZIP → **Extract All…** → **Extract**.
 
@@ -41,7 +41,7 @@ to GitHub.
 After extracting, the project is usually here (note the folder name twice):
 
 ```
-Downloads\CommunityApp-Milestone-1-main\CommunityApp-Milestone-1-main\
+Downloads\CommunityApp-main\CommunityApp-main\
 ```
 
 ### 3. Open PowerShell in the `backend` folder
@@ -117,7 +117,7 @@ In the **second** PowerShell window:
 
 | # | Paste this | You should see |
 | --- | --- | --- |
-| 1 | `cd "$HOME\Downloads\CommunityApp-Milestone-1-main\CommunityApp-Milestone-1-main\mobile"` | The prompt ends in **`\mobile>`** |
+| 1 | `cd "$HOME\Downloads\CommunityApp-main\CommunityApp-main\mobile"` | The prompt ends in **`\mobile>`** |
 | 2 | `node -v` | A version like `v22.x.x` |
 | 3 | `Set-Content -Path .env -Value "API_BASE_URL=http://10.0.0.29:8000"` | Nothing (it creates the settings file) |
 | 4 | `npm install` | A few minutes of text; yellow "warn" lines are fine |
@@ -204,7 +204,7 @@ python manage.py runserver 0.0.0.0:8000
 
 **App:** open a second PowerShell, then one line at a time:
 ```
-cd "$HOME\Downloads\CommunityApp-Milestone-1-main\CommunityApp-Milestone-1-main\mobile"
+cd "$HOME\Downloads\CommunityApp-main\CommunityApp-main\mobile"
 ```
 ```
 npx expo start

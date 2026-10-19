@@ -9,7 +9,7 @@ services:
   - name: api
     dockerfile_path: Dockerfile
     github:
-      repo: indubitably-dubin/CommunityApp-Milestone-1
+      repo: globeville-app/CommunityApp
       branch: main
       deploy_on_push: true
     http_port: 8080
@@ -77,7 +77,7 @@ jobs:
     kind: PRE_DEPLOY
     dockerfile_path: Dockerfile
     github:
-      repo: indubitably-dubin/CommunityApp-Milestone-1
+      repo: globeville-app/CommunityApp
       branch: main
     instance_size_slug: apps-s-1vcpu-0.5gb
     run_command: sh -c "python manage.py migrate --noinput && python manage.py load_neighborhoods"
@@ -102,7 +102,7 @@ jobs:
       time_zone: America/Denver
     dockerfile_path: Dockerfile
     github:
-      repo: indubitably-dubin/CommunityApp-Milestone-1
+      repo: globeville-app/CommunityApp
       branch: main
     instance_size_slug: apps-s-1vcpu-0.5gb
     run_command: python manage.py send_due_notifications
