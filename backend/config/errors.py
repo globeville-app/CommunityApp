@@ -7,6 +7,8 @@ into a message in the person's language (mobile/src/i18n/*.json, under
 "errors"), and shows a generic message for any code it doesn't know.
 """
 
+from django.http import JsonResponse
+from django.views import defaults
 from rest_framework import status
 from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.response import Response
@@ -47,14 +49,39 @@ def api_exception_handler(exc, context):
         # first, so no address can end up in that traceback.
         return None
 
+    # "Try again in N seconds" (429), how to log in (401), allowed methods (405).
+    headers = {name: response[name] for name in KEPT_HEADERS if name in response}
+
     if isinstance(exc, ValidationError):
         fields = _field_codes(exc.get_codes())
-        return Response({"code": _top_code(fields), "fields": fields}, status=response.status_code)
+        return Response({"code": _top_code(fields), "fields": fields}, status=response.status_code, headers=headers)
 
     # ApiError and DRF's built-in errors (not logged in, throttled, ...).
     codes = exc.get_codes() if hasattr(exc, "get_codes") else "error"
     code = codes if isinstance(codes, str) else "error"
-    return Response({"code": code}, status=response.status_code)
+    return Response({"code": code}, status=response.status_code, headers=headers)
+
+
+KEPT_HEADERS = ("Retry-After", "WWW-Authenticate", "Allow")
+
+
+# Django's own error pages (config/urls.py), for addresses no API view
+# handles and for crashes. The app gets the same {"code": ...} shape as
+# every other error; the admin keeps Django's normal pages.
+def _is_api(request):
+    return request.path.startswith("/api/")
+
+
+def not_found(request, exception=None):
+    if _is_api(request):
+        return JsonResponse({"code": "not_found"}, status=404)
+    return defaults.page_not_found(request, exception)
+
+
+def server_error(request):
+    if _is_api(request):
+        return JsonResponse({"code": "server_error"}, status=500)
+    return defaults.server_error(request)
 
 
 def _field_codes(codes):

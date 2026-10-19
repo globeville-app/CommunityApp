@@ -39,6 +39,10 @@ if settings.DEBUG:
     # DEV ONLY: let Django serve uploaded photos. Real hosting uses file storage.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# Unknown API addresses and crashes answer {"code": ...} like every other error.
+handler404 = "config.errors.not_found"
+handler500 = "config.errors.server_error"
+
 # The admin's page titles read the app name from settings too.
 admin.site.site_header = f"{settings.APP_NAME} admin"
 admin.site.site_title = f"{settings.APP_NAME} admin"

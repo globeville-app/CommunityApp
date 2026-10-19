@@ -254,7 +254,7 @@ References in brackets point to the review files, for example
 
 ## Low: tidy-ups
 
-- [ ] **P17. Error replies keep their headers; JSON for 404/500** [A4, A5]
+- [x] **P17. Error replies keep their headers; JSON for 404/500** [A4, A5]
   - **Files:** `backend/config/errors.py`, `backend/config/urls.py`, tests.
   - **Risk:** very low.
   - **Verify:** tests for `Retry-After` on 429 and JSON on a 500.
