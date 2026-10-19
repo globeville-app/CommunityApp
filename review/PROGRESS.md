@@ -9,8 +9,8 @@ changes until the owner approves `review/PLAN.md`).
 | 1 – Requirements vs code | done | `review/01-acceptance.md` |
 | 2 – Architecture | done | `review/02-architecture.md` |
 | 3 – Security & compliance | done | `review/03-security.md` |
-| 4 – Tests | next | `review/04-tests.md` |
-| 5 – CI/CD & operations | not started | `review/05-ops.md` |
+| 4 – Tests | done | `review/04-tests.md` |
+| 5 – CI/CD & operations | next | `review/05-ops.md` |
 | 6 – Skeptic pass | not started | notes added to each file + `review/06-skeptic.md` |
 | 7 – Refactoring plan | not started | `review/PLAN.md`, then STOP for approval |
 
@@ -31,10 +31,13 @@ changes until the owner approves `review/PLAN.md`).
 - Step 3: the throttle bypass (S1) was proven with a local script, and no
   code was changed. `pip-audit` was installed in a throwaway environment in
   the session's scratch folder, not in the project.
+- Step 4: `coverage` was used from that same throwaway environment. The
+  Postgres run used a temporary local Postgres 16 server
+  (`/var/lib/postgresql/review-test`, port 5499), which disappears with the
+  container.
 
 ## Next action
 
-Step 4: run the backend tests (SQLite, and Postgres if available), measure
-coverage with `coverage` installed outside `requirements.txt`, and map each
-acceptance criterion to the tests that check it. Output:
-`review/04-tests.md`.
+Step 5: CI/CD and operations, written to `review/05-ops.md`. It covers the
+CI pipeline, tests on push, dev/staging/prod separation, secrets, migrations
+in deploy, backups, logging, monitoring and alerts, and the deploy docs.
