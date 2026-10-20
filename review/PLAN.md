@@ -243,7 +243,7 @@ References in brackets point to the review files, for example
   - **Verify:** auth tests for two devices, logout and expiry. Then the
     full suite.
 
-- [ ] **P16. Clean up dead phone tokens using Expo's receipts** [G6]
+- [x] **P16. Clean up dead phone tokens using Expo's receipts** [G6]
   - **What:** a small step in the 15-minute job asks Expo which sends
     failed, and deletes tokens for uninstalled apps.
   - **Files:** `backend/notifications/push.py`, `sending.py`, tests with

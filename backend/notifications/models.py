@@ -50,6 +50,17 @@ class ScheduledNotification(models.Model):
         return f"{self.kind} for event {self.event_id}"
 
 
+class PushReceipt(models.Model):
+    """
+    Expo's ticket id for a message it accepted, kept until we've asked Expo
+    whether it reached the phone (review G6). Only the id: no text.
+    """
+
+    ticket_id = models.CharField(max_length=100, unique=True)
+    token = models.ForeignKey(PushToken, on_delete=models.CASCADE, related_name="receipts")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class JobRun(models.Model):
     """
     When a scheduled job last finished without an error, so the owner stats

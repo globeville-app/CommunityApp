@@ -9,6 +9,7 @@ see README). Running it twice never sends anything twice.
 from django.core.management.base import BaseCommand
 
 from notifications.models import JobRun
+from notifications.push import check_receipts
 from notifications.sending import send_due_notifications
 
 
@@ -17,5 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         sent = send_due_notifications()
+        # Then clean up phones that no longer have the app (Expo's receipts).
+        check_receipts()
         JobRun.record_ok("send_due_notifications")  # the owner stats page watches this
         self.stdout.write(f"Sent {sent} notification(s).")

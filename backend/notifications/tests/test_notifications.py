@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from badges.tests.helpers import BadgeTestCase, denver
 from events.models import Going
-from notifications.models import PushToken, ScheduledNotification
-from notifications.push import PushUnavailable
+from notifications.models import PushReceipt, PushToken, ScheduledNotification
+from notifications.push import PushUnavailable, check_receipts
 from notifications.scheduling import reminder_time
 from notifications.sending import send_due_notifications
 from profiles.models import Profile
@@ -280,3 +280,46 @@ class ReviewFixTests(NotificationTestCase):
         self.expo.side_effect = first_ok_then_down
         self.assertTrue(send_to_user(self.ana, "hi"))
         self.assertEqual(calls, [100, 1])
+
+
+class ReceiptTests(NotificationTestCase):
+    """Phones that no longer have the app are found through Expo's receipts (review G6)."""
+
+    def setUp(self):
+        super().setUp()
+        self.expo.side_effect = lambda messages: [{"status": "ok", "id": f"ticket-{m['to']}"} for m in messages]
+        self.opt_in(self.ana)
+        PushToken.objects.create(user=self.ana, token="ExponentPushToken[gone]")
+        self.going(self.ana)
+        with at(denver(2026, 10, 23, 17, 5)):
+            send_due_notifications()
+
+    def check(self, when, answers):
+        with at(when), mock.patch("notifications.push.get_receipts_from_expo", return_value=answers) as asked:
+            removed = check_receipts()
+        return removed, asked
+
+    def test_tokens_expo_reports_as_gone_are_removed(self):
+        self.assertEqual(PushReceipt.objects.count(), 2)
+        # Too soon: Expo isn't asked yet.
+        _, asked = self.check(denver(2026, 10, 23, 17, 10), {})
+        asked.assert_not_called()
+
+        answers = {
+            "ticket-ExponentPushToken[gone]": {"status": "error", "details": {"error": "DeviceNotRegistered"}},
+            f"ticket-ExponentPushToken[{self.ana.pk}]": {"status": "ok"},
+        }
+        removed, _ = self.check(denver(2026, 10, 23, 17, 25), answers)
+        self.assertEqual(removed, 1)
+        self.assertEqual(list(PushToken.objects.values_list("token", flat=True)), [f"ExponentPushToken[{self.ana.pk}]"])
+        self.assertFalse(PushReceipt.objects.exists())  # each receipt is checked once
+
+    def test_expo_down_or_not_ready_tries_again_later(self):
+        with at(denver(2026, 10, 23, 17, 25)), mock.patch(
+            "notifications.push.get_receipts_from_expo", side_effect=PushUnavailable
+        ):
+            check_receipts()
+        self.check(denver(2026, 10, 23, 17, 40), {})  # not ready yet
+        self.assertEqual(PushReceipt.objects.count(), 2)
+        self.check(denver(2026, 10, 25, 9), {})  # Expo only keeps them a day
+        self.assertFalse(PushReceipt.objects.exists())

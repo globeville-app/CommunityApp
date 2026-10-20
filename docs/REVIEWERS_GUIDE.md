@@ -171,8 +171,8 @@ matters more than we think):
   Docker build on every push.
 - **No Python linter or formatter** is set up for the backend (the app has
   ESLint and TypeScript checks).
-- **Expo push receipts aren't checked.** Invalid tokens are removed when
-  Expo's immediate reply says so, but not from the later receipts.
+- **Expo push receipts** are checked by the 15-minute job, 15 minutes or
+  more after sending; tokens of phones without the app are removed.
 - **The badge engine recomputes a member's counts from all their attendance**
   on every collect. Fine at launch scale; would need work at large scale.
 - **The owner stats page is computed on every load,** with no caching.
