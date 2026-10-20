@@ -147,6 +147,43 @@ jobs:
         type: SECRET
         value: CHANGE_ME
 
+  # Once a day: delete what has done its job (backend/accounts/retention.py
+  # lists every rule, e.g. problem reports after a year).
+  - name: cleanup-old-data
+    kind: SCHEDULED
+    schedule:
+      cron: "17 3 * * *"
+      time_zone: America/Denver
+    dockerfile_path: Dockerfile
+    github:
+      repo: globeville-app/CommunityApp
+      branch: main
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    run_command: python manage.py cleanup_old_data
+    envs:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        type: SECRET
+        value: CHANGE_ME
+      - key: ALLOWED_HOSTS
+        value: api.globeville.app
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        value: ${db.DATABASE_URL}
+      - key: SPACES_BUCKET
+        value: CHANGE_ME
+      - key: SPACES_ENDPOINT
+        value: https://sfo3.digitaloceanspaces.com
+      - key: SPACES_REGION
+        value: sfo3
+      - key: SPACES_KEY
+        type: SECRET
+        value: CHANGE_ME
+      - key: SPACES_SECRET
+        type: SECRET
+        value: CHANGE_ME
+
 databases:
   - name: db
     engine: PG

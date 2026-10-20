@@ -480,6 +480,28 @@ For Milestones 3 and 4:
 
 ---
 
+## How long data is kept
+
+Kept as long as the account exists, because participation history and impact
+are built from them: the account and profile, attendance, badges, follows,
+organization roles, and each event's title, category, neighborhood, time and
+host. A daily job (`python manage.py cleanup_old_data`, `cleanup-old-data` in
+`.do/app.yaml`) deletes the rest once its job is done:
+
+| What | When |
+| --- | --- |
+| Meeting spot and descriptions of past events, and their cached translations | 1 year after the event |
+| "I'm going" taps | 1 year after the event |
+| Reminders that were sent | 30 days after sending |
+| Phone push tokens | not used for 90 days |
+| Celebrations already seen | 90 days after being seen |
+| Event and organization reports, decided organization changes, problem reports (with screenshots) | 1 year |
+| Logins unused for 90 days, expired email codes | as soon as they stop working |
+
+`python manage.py cleanup_old_data --dry-run` shows what it would delete.
+The rules live in `backend/accounts/retention.py`; the privacy policy should
+say the same.
+
 ## Going live (DigitalOcean, docs/GO_LIVE.md)
 
 Everything below is done once, by the owner, in web dashboards. The code is

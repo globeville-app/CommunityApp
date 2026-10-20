@@ -348,7 +348,7 @@ References in brackets point to the review files, for example
   - **Verify:** new tests that no attendance row exists after collecting a
     sensitive event, and that every badge test still passes.
 
-- [ ] **P26. Automatic cleanup of data that's no longer needed** [D3]
+- [x] **P26. Automatic cleanup of data that's no longer needed** [D3]
   - **What:** a daily job deletes what has done its job. Kept for the life
     of the account: the account, profile, attendance, badges, keepsakes,
     follows, organization roles, and each event's title, category,
