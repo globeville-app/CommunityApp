@@ -364,6 +364,13 @@ from the design come in a later milestone.
 
 ### API
 
+**Old app versions stay on phones for months.** So the API only ever *adds*
+fields and endpoints; never rename or remove one that a published app uses.
+When a change can't avoid breaking old apps, ship the new app first, then set
+`MIN_APP_VERSION` (e.g. `1.2.0`) on the server: older apps show "Time to
+update" with a link to the store (`ios_store_url` / `android_store_url` in
+`shared/app_config.json`, filled in once the app is published).
+
 | Method | Path | Purpose |
 | --- | --- | --- |
 | GET | `/api/config` | app name, languages, and the event category groups (also used for interests) |

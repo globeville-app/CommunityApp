@@ -1,5 +1,6 @@
 import * as Application from "expo-application";
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 
 /** The app name, from shared/app_config.json (via app.config.ts). */
 export const APP_NAME: string = Constants.expoConfig?.name ?? "";
@@ -15,6 +16,11 @@ export const TERMS_URL: string = String(Constants.expoConfig?.extra?.termsUrl ??
 
 /** The invite link on share cards, from shared/app_config.json. */
 export const INVITE_URL: string = String(Constants.expoConfig?.extra?.inviteUrl ?? "https://globeville.app");
+
+/** This phone's store page, for "Please update". "" until the app is published. */
+export const STORE_URL: string = String(
+  (Platform.OS === "ios" ? Constants.expoConfig?.extra?.iosStoreUrl : Constants.expoConfig?.extra?.androidStoreUrl) ?? "",
+);
 
 /** "1.0.0 (1)": the version (app.config.ts) and build number. */
 export const APP_VERSION: string = Constants.expoConfig?.version ?? "0.0.0";

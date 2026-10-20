@@ -79,6 +79,7 @@ export async function getConfig(): Promise<AppConfig> {
   return {
     app_name: APP_NAME,
     languages: ["en", "es"],
+    min_app_version: "",
     category_groups: CATEGORY_GROUPS,
     other_category: "other",
     other_max_length: 40,

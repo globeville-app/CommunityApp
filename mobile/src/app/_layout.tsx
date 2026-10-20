@@ -12,11 +12,14 @@ import { Outfit_600SemiBold } from "@expo-google-fonts/outfit/600SemiBold";
 
 import { AuthProvider } from "../auth";
 import { AppWatchers } from "../components/AppWatchers";
-import { CategoriesProvider } from "../categories";
+import { CategoriesProvider, useCategories } from "../categories";
 import { DemoBanner } from "../components/DemoBanner";
 import { GlowBackground } from "../components/GlowBackground";
+import { UpdateRequired } from "../components/UpdateRequired";
+import { APP_VERSION } from "../config";
 import { LanguageProvider, useLanguage } from "../language";
 import { colors } from "../theme";
+import { isOlderThan } from "../version";
 
 // Keep the native splash (the gv mark) up until the fonts and the language
 // are ready.
@@ -60,6 +63,7 @@ export default function RootLayout() {
 /** Everything that shows once fonts and language are ready. */
 function AppShell() {
   const { language } = useLanguage();
+  const { minAppVersion } = useCategories();
 
   useEffect(() => {
     SplashScreen.hideAsync().catch(() => undefined);
@@ -69,6 +73,8 @@ function AppShell() {
   useEffect(() => {
     if (Platform.OS === "web" && typeof document !== "undefined") document.documentElement.lang = language;
   }, [language]);
+
+  if (isOlderThan(APP_VERSION, minAppVersion)) return <UpdateRequired />;
 
   return (
     <View style={{ flex: 1 }} accessibilityLanguage={language}>

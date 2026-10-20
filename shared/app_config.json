@@ -2,5 +2,7 @@
   "app_name": "Globeville",
   "privacy_url": "",
   "terms_url": "",
-  "invite_url": "https://globeville.app"
+  "invite_url": "https://globeville.app",
+  "ios_store_url": "",
+  "android_store_url": ""
 }

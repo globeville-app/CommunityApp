@@ -31,6 +31,8 @@ export type CategoryGroup = { key: string; categories: string[] };
 export type AppConfig = {
   app_name: string;
   languages: string[];
+  /** Older app versions must update first ("" = no minimum). */
+  min_app_version?: string;
   category_groups: CategoryGroup[];
   other_category: string;
   other_max_length: number;

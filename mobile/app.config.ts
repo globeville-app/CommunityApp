@@ -29,6 +29,8 @@ const shared = require("../shared/app_config.json") as {
   privacy_url: string;
   terms_url: string;
   invite_url: string;
+  ios_store_url: string;
+  android_store_url: string;
 };
 
 const appName = shared.app_name;
@@ -117,6 +119,9 @@ const config: ExpoConfig = {
     termsUrl: shared.terms_url,
     // Shown on share cards and in the share message.
     inviteUrl: shared.invite_url,
+    // The store pages, for the "Please update" screen. Empty until published.
+    iosStoreUrl: shared.ios_store_url,
+    androidStoreUrl: shared.android_store_url,
     // The same number for every platform, so Settings can show it anywhere.
     buildNumber: String(BUILD_NUMBER),
     // Push notifications need the Expo project's id.

@@ -259,6 +259,10 @@ REST_FRAMEWORK = {
 }
 
 
+# The oldest app version the server still works with, e.g. "1.2.0". Older
+# apps show "Please update" (GET /api/config). Empty = every version works.
+MIN_APP_VERSION = os.environ.get("MIN_APP_VERSION", "")
+
 # New signups confirm their email with a code before using the app. Only
 # switch this off for a server that can't send email yet.
 REQUIRE_EMAIL_VERIFICATION = os.environ.get("REQUIRE_EMAIL_VERIFICATION", "1") == "1"

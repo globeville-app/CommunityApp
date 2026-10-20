@@ -14,6 +14,9 @@ def app_config(request):
         {
             "app_name": settings.APP_NAME,
             "languages": settings.LANGUAGES_AVAILABLE,
+            # Older app versions are asked to update ("" = no minimum). Set
+            # MIN_APP_VERSION before shipping a server change old apps can't handle.
+            "min_app_version": settings.MIN_APP_VERSION,
             # Event categories, also used for interests.
             **config_json(),
         }

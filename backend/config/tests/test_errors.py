@@ -35,3 +35,10 @@ class ErrorReplyTests(APITestCase):
             response = self.client.get("/api/config")
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json(), {"code": "server_error"})
+
+
+class MinAppVersionTests(APITestCase):
+    def test_config_says_which_app_versions_still_work(self):
+        self.assertEqual(self.client.get("/api/config").data["min_app_version"], "")
+        with self.settings(MIN_APP_VERSION="1.2.0"):
+            self.assertEqual(self.client.get("/api/config").data["min_app_version"], "1.2.0")

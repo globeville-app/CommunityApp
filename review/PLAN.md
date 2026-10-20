@@ -123,7 +123,7 @@ References in brackets point to the review files, for example
   - **Verify:** new tests show blocked members' events vanish for the
     blocker only, and all existing event tests pass.
 
-- [ ] **P7. "Please update the app" switch** [A3]
+- [x] **P7. "Please update the app" switch** [A3]
   - **What:** `/api/config` returns `min_app_version`, set from an
     environment variable. The app shows a "Please update" screen with a
     store link when it's older. Also write the "only add fields, never

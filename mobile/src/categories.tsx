@@ -28,6 +28,8 @@ type CategoriesState = {
   other: string;
   otherMaxLength: number;
   maxInterests: number;
+  /** The oldest app version the server works with ("" = any). */
+  minAppVersion: string;
   ready: boolean;
   failed: boolean;
   reload: () => void;
@@ -55,6 +57,7 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
     other: config?.other_category ?? "other",
     otherMaxLength: config?.other_max_length ?? 40,
     maxInterests: config?.max_interests ?? 8,
+    minAppVersion: config?.min_app_version ?? "",
     ready: !!config,
     failed,
     reload,
