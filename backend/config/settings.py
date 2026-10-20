@@ -163,17 +163,20 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"  # filled by collectstatic when deploying
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Rate limits are counted in the cache. While tests run we use a cache that
-# remembers nothing, so hundreds of quick test requests don't trip the
-# limits; the throttle test switches the real cache back on for itself.
+# Rate limits (and the email-code limit) are counted in the cache.
+#  - Production: a table in the database, so every server process and every
+#    restart shares the same counts (review G1). The migrate job creates it
+#    with "createcachetable".
+#  - Development: in memory, which is enough on one computer.
+#  - Tests: a cache that remembers nothing, so hundreds of quick test
+#    requests don't trip the limits; throttle tests switch a real one on.
 RUNNING_TESTS = len(sys.argv) > 1 and sys.argv[1] == "test"
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.dummy.DummyCache"
-        if RUNNING_TESTS
-        else "django.core.cache.backends.locmem.LocMemCache"
-    }
-}
+if RUNNING_TESTS:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+elif DEBUG:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+else:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "cache_table"}}
 
 # Uploaded files.
 #  - Development: profile photos in backend/media (served by Django while

@@ -30,3 +30,29 @@ class LoginThrottleTests(APITestCase):
         self.assertEqual(self.wrong_login(HTTP_DO_CONNECTING_IP="203.0.113.1"), 429)
         # Someone else behind the same proxy isn't blocked.
         self.assertEqual(self.wrong_login(HTTP_DO_CONNECTING_IP="203.0.113.2"), 400)
+
+
+DATABASE_CACHE = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "cache_table"}}
+
+
+class SharedCountsTests(APITestCase):
+    """Production keeps the counts in the database, shared by every server process (review G1)."""
+
+    def test_limits_work_with_the_database_cache(self):
+        from django.core.management import call_command
+
+        with self.settings(CACHES=DATABASE_CACHE):
+            call_command("createcachetable", verbosity=0)
+            cache.clear()
+            codes = [
+                self.client.post("/api/auth/login", {"email": "x@example.com", "password": "x"}, format="json").status_code
+                for _ in range(LIMIT + 1)
+            ]
+        self.assertEqual(codes[-1], 429)
+
+    def test_production_uses_the_database_cache(self):
+        from config.tests.test_production import PRODUCTION_ENV, run_manage
+
+        code = "from django.conf import settings; print(settings.CACHES['default']['BACKEND'])"
+        result = run_manage("shell", "-c", code, env=PRODUCTION_ENV)
+        self.assertIn("DatabaseCache", result.stdout, result.stderr)

@@ -513,7 +513,8 @@ into the DigitalOcean dashboard, never into this repository.
 | `DATABASE_URL` | Filled in by DigitalOcean from the database (`${db.DATABASE_URL}`). |
 
 3. Deploy. Every push to `main` deploys again; before each deploy the
-   `migrate` job updates the database and the neighborhood map.
+   `migrate` job updates the database, the rate-limit table and the
+   neighborhood map.
 4. Settings → Domains: add `api.globeville.app` and create the DNS record it
    shows. HTTPS certificates are automatic.
 5. Check from a phone's browser: `https://api.globeville.app/api/config`

@@ -75,8 +75,9 @@ services:
         type: PRIMARY
 
 jobs:
-  # Runs before every deploy: database changes, then the neighborhood map
-  # (safe to repeat; it updates the 78 neighborhoods in place).
+  # Runs before every deploy: database changes, the table the rate limits
+  # are counted in, then the neighborhood map (all safe to repeat; the map
+  # updates the 78 neighborhoods in place).
   - name: migrate
     kind: PRE_DEPLOY
     dockerfile_path: Dockerfile
@@ -84,7 +85,7 @@ jobs:
       repo: globeville-app/CommunityApp
       branch: main
     instance_size_slug: apps-s-1vcpu-0.5gb
-    run_command: sh -c "python manage.py migrate --noinput && python manage.py load_neighborhoods"
+    run_command: sh -c "python manage.py migrate --noinput && python manage.py createcachetable && python manage.py load_neighborhoods"
     envs:
       - key: DJANGO_DEBUG
         value: "0"

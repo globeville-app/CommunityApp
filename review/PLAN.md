@@ -207,7 +207,7 @@ References in brackets point to the review files, for example
   - **Risk:** low.
   - **Verify:** admin tests for each rule.
 
-- [ ] **P13. Shared rate-limit counts** [G1]
+- [x] **P13. Shared rate-limit counts** [G1]
   - **What:** store the counts in the database (Django's database cache),
     so both server processes and restarts share them. The migrate job
     creates the cache table.
