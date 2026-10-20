@@ -124,3 +124,9 @@ class HealthCheckTests(TestCase):
     def test_the_rest_of_the_site_keeps_its_checks(self):
         self.assertEqual(self.client.get("/api/config", HTTP_HOST="10.0.0.5:8080").status_code, 400)
         self.assertEqual(self.client.get("/api/config", HTTP_HOST="api.example.org").status_code, 301)
+
+
+class ServerImageTests(TestCase):
+    def test_the_server_image_defaults_to_production(self):
+        dockerfile = (BACKEND.parent / "Dockerfile").read_text()
+        self.assertRegex(dockerfile, r"(?m)^ENV [^\n]*(\\\n[^\n]*)*DJANGO_DEBUG=0")

@@ -259,7 +259,7 @@ References in brackets point to the review files, for example
   - **Risk:** very low.
   - **Verify:** tests for `Retry-After` on 429 and JSON on a 500.
 
-- [ ] **P18. Production is safe if a setting is missing** [N6]
+- [x] **P18. Production is safe if a setting is missing** [N6]
   - **What:** inside the Docker image `DJANGO_DEBUG` defaults to off.
     Development still defaults to on.
   - **Files:** `Dockerfile`, a test.

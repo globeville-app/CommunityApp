@@ -4,8 +4,12 @@
 # event category search hints).
 FROM python:3.13-slim
 
+# DJANGO_DEBUG=0: anything run from this image is production unless told
+# otherwise, so a job or service that forgets the setting can't quietly run
+# in development mode (review N6). Development on a computer defaults to on.
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    DJANGO_DEBUG=0
 
 WORKDIR /app
 COPY backend/requirements.txt backend/requirements.txt
