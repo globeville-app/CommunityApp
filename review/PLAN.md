@@ -333,7 +333,7 @@ References in brackets point to the review files, for example
   the table.
 - D5: **set up the foundation for a staging server** (P27).
 
-- [ ] **P25. Don't record attendance at sensitive events** [D4]
+- [x] **P25. Don't record attendance at sensitive events** [D4]
   - **What:** collect and check-in at resource fairs and donation drives
     are accepted, but nothing is stored; the server answers "ok, nothing
     to collect". Existing rows are removed by a data migration. Hosting

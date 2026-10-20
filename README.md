@@ -359,7 +359,7 @@ from the design come in a later milestone.
 | No analytics libraries on the phone; AsyncStorage only for the language and the maps app choice | `mobile/__tests__/privacy.test.ts` |
 | Auto check-in sends no location: the request has no body, the server refuses one, nothing stores one | `mobile/__tests__/privacy.test.ts`, `backend/badges/tests/test_api.py` |
 | Share counts keep no member; hosts never see who declined | `backend/badges/tests/test_api.py` |
-| Attending a resource fair or donation drive never counts or shows in a hint | `backend/badges/tests/test_engine.py`, `mobile/__tests__/badges.test.tsx` |
+| Attending a resource fair or donation drive never counts, shows in a hint, or is stored (only a count per event) | `backend/badges/tests/test_engine.py`, `mobile/__tests__/badges.test.tsx` |
 | App name only in `shared/app_config.json` | `backend/config/tests/test_app_name.py` |
 
 ### API

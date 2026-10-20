@@ -64,6 +64,10 @@ class Event(models.Model):
     counted_hosted_at = models.DateTimeField(null=True, blank=True)
     # True if this was its organizer's first event to count as hosted (Day One).
     is_hosts_first_counted = models.BooleanField(default=False)
+    # Resource fairs and donation drives: how many neighbors confirmed they
+    # went. Who they were is never stored (review D4), so this count is all
+    # the host's credit is based on.
+    anonymous_attendee_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

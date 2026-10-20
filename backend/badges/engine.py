@@ -20,7 +20,7 @@ side of the badges, and have no unlock moments.
 from datetime import timedelta
 
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Q
+from django.db.models import Count, Exists, F, OuterRef, Q
 from django.utils import timezone
 from rest_framework import status
 
@@ -274,6 +274,9 @@ def record_attendance(user, event, method, now=None):
             if not opens <= now <= end:
                 raise ApiError("checkin_window_closed", status_code=CONFLICT)
 
+        if event.category in config.SENSITIVE_CATEGORIES:
+            return _record_anonymously(user, event, now)
+
         Attendance.objects.create(
             user=user,
             event=event,
@@ -300,6 +303,28 @@ def record_attendance(user, event, method, now=None):
         return celebrations[user.pk]
 
 
+def _record_anonymously(user, event, now):
+    """
+    A resource fair or donation drive: going there can mean someone needed
+    help, so nothing about who went is kept (review D4). The event's count
+    goes up and the member's "I'm going" is removed, so it can't be counted
+    twice. It never grows the member's badges (it never did); the host's
+    event-count badges still grow once 2 neighbors confirmed.
+    """
+    Going.objects.filter(user=user, event=event).delete()
+    Event.objects.filter(pk=event.pk).update(anonymous_attendee_count=F("anonymous_attendee_count") + 1)
+    event.refresh_from_db()
+    _count_as_hosted(event, now)
+    host = host_of(event)
+    if host is not None and event.counted_hosted_at is not None:
+        update_badges(host, now)
+    return []
+
+
+def _attendee_count(event):
+    return Attendance.objects.filter(event=event).count() + event.anonymous_attendee_count
+
+
 def _count_as_hosted(event, now):
     """
     Once an event has ended with at least 2 confirmed neighbors, it counts as
@@ -312,7 +337,7 @@ def _count_as_hosted(event, now):
         return set()
     if not has_ended(event, now):
         return set()  # auto check-ins during the event wait for the end (review G2)
-    if Attendance.objects.filter(event=event).count() < config.HOSTED_MIN_ATTENDEES:
+    if _attendee_count(event) < config.HOSTED_MIN_ATTENDEES:
         return set()
     first = not counted_hosted_events(host).exists()
     event.counted_hosted_at = now
@@ -333,7 +358,7 @@ def count_ended_events(now=None):
     now = now or timezone.now()
     candidates = (
         Event.objects.filter(counted_hosted_at__isnull=True, status=Event.Status.ACTIVE, starts_at__lte=now)
-        .annotate(attendees=Count("attendances"))
+        .annotate(attendees=Count("attendances") + F("anonymous_attendee_count"))
         .filter(attendees__gte=config.HOSTED_MIN_ATTENDEES)
         .values_list("pk", flat=True)
     )

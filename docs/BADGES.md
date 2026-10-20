@@ -139,7 +139,7 @@ Tapping "I'm going" alone never counts. Attendance is recorded in one of two way
 - The event wasn't cancelled, and has ended (or is in progress, for auto check-in).
 - The member had tapped "I'm going," and then either checked in automatically or collected within 7 days.
 - The member isn't the event's host. Hosting counts separately.
-- **Sensitive categories are excluded.** Attending a `resource_fair` or `donation_drive` never counts toward a badge, because attending can mean someone needed help. Hosting them does count.
+- **Sensitive categories are excluded.** Attending a `resource_fair` or `donation_drive` never counts toward a badge, because attending can mean someone needed help. Hosting them does count. **Who attended them is never stored** (owner decision, Oct 2026): confirming attendance only adds 1 to the event's count and removes the member's "I'm going". So these events count toward the host's event-count badges (Helping Hand, for example) once 2 neighbors confirmed, but not toward Host Reach or the impact numbers, which need to know who came.
 
 ### Change needed in events
 Events need a **map pin**, so auto check-in has coordinates to watch:

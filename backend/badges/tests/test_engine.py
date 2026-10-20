@@ -147,6 +147,47 @@ class SensitiveCategoryTests(BadgeTestCase):
         self.assertEqual(self.state(self.host, "helping_hand"), (2, 2))
 
 
+class SensitiveAttendanceTests(BadgeTestCase):
+    """Who went to a resource fair or donation drive is never stored (review D4)."""
+
+    def test_nothing_about_who_went_is_kept(self):
+        fair = self.event(category="resource_fair")
+        self.assertEqual(self.attend(self.ana, fair), [])
+        self.assertFalse(Attendance.objects.exists())
+        self.assertFalse(Going.objects.filter(user=self.ana).exists())  # not even that she was going
+        fair.refresh_from_db()
+        self.assertEqual(fair.anonymous_attendee_count, 1)
+        # Can't be counted twice: there's no "going" left to collect.
+        with self.assertRaises(ApiError) as again:
+            engine.record_attendance(self.ana, fair, "collect", now=event_end(fair) + timedelta(minutes=5))
+        self.assertEqual(again.exception.detail.code, "not_going")
+
+    def test_the_host_still_gets_credit_for_hosting_it(self):
+        drive = self.event(category="donation_drive")
+        self.attend(self.ana, drive)
+        self.assertEqual(self.state(self.host, "helping_hand"), (0, 0))
+        self.attend(self.member("ben"), drive)
+        drive.refresh_from_db()
+        self.assertIsNotNone(drive.counted_hosted_at)
+        self.assertEqual(self.state(self.host, "helping_hand"), (1, 1))
+        self.assertEqual(self.state(self.host, "host"), (0, 0))  # who came isn't known, so no reach
+
+    def test_existing_rows_become_a_count(self):
+        import importlib
+
+        from django.apps import apps
+
+        fair = self.event(category="resource_fair")
+        for person in (self.ana, self.member("ben")):
+            Going.objects.create(user=person, event=fair)
+            Attendance.objects.create(user=person, event=fair, neighborhood_id=fair.neighborhood_id, method="collect")
+        migration = importlib.import_module("badges.migrations.0003_forget_sensitive_attendance")
+        migration.forget(apps, None)
+        fair.refresh_from_db()
+        self.assertEqual(fair.anonymous_attendee_count, 2)
+        self.assertFalse(Attendance.objects.exists())
+
+
 class HostingTests(BadgeTestCase):
     def test_an_event_counts_as_hosted_only_with_two_attendees(self):
         event = self.event(category="cleanup")
