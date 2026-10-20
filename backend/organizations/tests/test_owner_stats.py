@@ -48,5 +48,5 @@ class OrgStatsTests(OrgTestCase):
         self.client.force_login(get_user_model().objects.create_superuser(username="boss", password="x"))
         page = self.client.get(reverse("owner-stats")).content.decode()
         self.assertIn("Organizations by type and status", page)
-        self.assertIn("of active members with notifications on", page)
+        self.assertIn("of active members with reminders on", page)
         self.assertNotIn("Rosa", page)
