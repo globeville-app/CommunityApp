@@ -12,7 +12,8 @@ changes until the owner approves `review/PLAN.md`).
 | 4 – Tests | done | `review/04-tests.md` |
 | 5 – CI/CD & operations | done | `review/05-ops.md` |
 | 6 – Skeptic pass | done | notes added to each file + `review/06-skeptic.md` |
-| 7 – Refactoring plan | done: waiting for approval | `review/PLAN.md`, then STOP for approval |
+| 7 – Refactoring plan | done, approved by the owner (all of P1–P27) |
+| Phase 2 – Fixes | **done**: P1–P27 on branch `review-fixes`, one commit per task | `review/PLAN.md`, then STOP for approval |
 
 ## Key decisions
 
@@ -41,18 +42,39 @@ changes until the owner approves `review/PLAN.md`).
   suggestion conflicts with `docs/STORE_PRIVACY.md`, so that is now an
   owner decision (PLAN P14).
 
-## Next action
+## Phase 2 (done, 2026-10-20)
 
-**Owner decisions recorded in PLAN.md (2026-10-19). Still waiting for: a
-clear go-ahead for the whole plan (P1–P27), and confirmation of the
-P26 retention table.**
+- Branch `review-fixes`, made from `claude/community-social-network-v1-x411pw`
+  and pushed to GitHub. Nothing was merged.
+- Every task in `PLAN.md` is ticked, with one commit each. There is also
+  one follow-up commit: "P22 follow-up" fixed a test that P22 broke, which
+  turned CI red on P22 and P23 for a few minutes.
+- Final state: 383 backend tests pass on SQLite and on Postgres 16, 191 app
+  tests pass, types and lint are clean, there are no missing migrations, and
+  CI is green on the last commit.
+- Deviations from the plan's wording, explained in the commits:
+  - P2 trusts DigitalOcean's `DO-Connecting-IP` header instead of a proxy
+    count.
+  - P6 puts "Block" on the member page; the event's "Posted by" name leads
+    there.
+  - P25 counts sensitive events toward the host's event-count badges but
+    not toward Host Reach.
+- Known open item: during this work the backend suite failed twice in
+  about 30 runs, with a failure I could not reproduce afterwards (16 normal
+  runs and 6 shuffled runs all passed). CI will show the test's name if it
+  happens again; fix it then. Never skip it.
 
-Original note: STOP, waiting for the owner to approve `review/PLAN.md` (all of it, or
-a list of task numbers, plus answers to the "needs you" items).
+## Next action (owner)
 
-After approval (Phase 2):
-1. `git checkout claude/community-social-network-v1-x411pw && git checkout -b review-fixes`
-2. Do the approved tasks in the suggested order. One task = one commit.
-   Run `python manage.py test` (and `npx jest` for app changes) after each.
-3. Tick each task in `PLAN.md` and update this file after every task.
-4. Push `review-fixes`. Don't merge anything.
+1. Decide how to merge `review-fixes`. Merging into `main` deploys, so only
+   merge when you're ready for the first deploy.
+2. At the first deploy, check these (README, "Going live"):
+   - "Your address as the server sees it" on the owner stats page (P2);
+   - the `/healthz` health check (P3);
+   - the alerts under Settings → Alerts (P14);
+   - the `cleanup-old-data` and `send-notifications` jobs.
+3. Set up Postmark. Until then, email codes print in the server log, or set
+   `REQUIRE_EMAIL_VERIFICATION=0` on a server that can't send email.
+4. The "Actions for the owner" in `03-security.md` and `05-ops.md` (privacy
+   policy, terms, minimum age, store forms, branch protection, and the
+   rest).
