@@ -9,6 +9,7 @@ from accounts.models import Account
 from notifications.models import PushToken, ScheduledNotification
 from organizations.models import Follow, OrganizationChangeRequest
 from organizations.tests.helpers import OrgTestCase
+from profiles.models import Profile
 from stats.numbers import organization_numbers
 
 
@@ -26,6 +27,8 @@ class OrgStatsTests(OrgTestCase):
         ScheduledNotification.objects.create(user=self.ana, event=org_event, kind="cancelled", send_at=now, sent_at=now, delivered=True)
         Account.objects.filter(user__in=[self.ana, self.host]).update(last_seen_at=now)
         PushToken.objects.create(user=self.ana, token="ExponentPushToken[a]")
+        PushToken.objects.create(user=self.host, token="ExponentPushToken[h]")  # reminders off: not counted
+        Profile.objects.filter(user=self.ana).update(reminders_enabled=True)
 
         numbers = organization_numbers(now)
         self.assertEqual(numbers["pending_orgs"], 1)

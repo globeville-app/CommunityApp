@@ -116,7 +116,14 @@ def organization_numbers(now):
     sent = ScheduledNotification.objects.filter(sent_at__gte=since, delivered=True)
     active = Account.objects.filter(user__is_staff=False, last_seen_at__gte=since).values("user")
     active_count = active.count()
-    with_notifications = PushToken.objects.filter(user__in=active).values("user").distinct().count()
+    # "On" means reminders switched on in Settings and a phone that accepts
+    # notifications (it has a push token), not just the token (review G8).
+    with_notifications = (
+        PushToken.objects.filter(user__in=active, user__profile__reminders_enabled=True)
+        .values("user")
+        .distinct()
+        .count()
+    )
     return {
         "statuses": statuses,
         "by_type": by_type,

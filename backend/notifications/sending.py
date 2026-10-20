@@ -39,7 +39,7 @@ def send_notification(notification, now=None):
     notification.sent_at = now
     if not should_deliver(notification, now):
         return False
-    body = push_text(notification.kind, notification.event, notification.user)
+    body = push_text(notification.kind, notification.event, notification.user, now)
     try:
         delivered = send_to_user(notification.user, body, {"event_id": notification.event_id})
     except PushUnavailable:

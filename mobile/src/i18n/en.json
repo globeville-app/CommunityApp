@@ -611,6 +611,7 @@
   },
   "push": {
     "reminder": "Tomorrow {time} · {title}",
+    "reminder_today": "Today {time} · {title}",
     "cancelled": "Cancelled: {title} · {day}, {time}",
     "am": "AM",
     "pm": "PM",

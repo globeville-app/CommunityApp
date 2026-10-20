@@ -49,12 +49,15 @@ def title_for(event, language):
     return event.title
 
 
-def push_text(kind, event, user):
+def push_text(kind, event, user, now=None):
     """The notification body: "Tomorrow 10:00 AM · Alley Cleanup"."""
     language = language_of(user)
     words = _strings()[language]
     starts = timezone.localtime(event.starts_at)
     title = title_for(event, language)
     if kind == "reminder":
-        return words["reminder"].format(time=_clock(starts, language), title=title)
+        # Normally sent the evening before; one held up past midnight (Expo
+        # down, a late job) says "Today" instead (review G7).
+        today = starts.date() == timezone.localtime(now or timezone.now()).date()
+        return words["reminder_today" if today else "reminder"].format(time=_clock(starts, language), title=title)
     return words["cancelled"].format(day=_day(starts, language), time=_clock(starts, language), title=title)

@@ -82,6 +82,17 @@ class ReminderTests(NotificationTestCase):
         self.assertEqual(self.sent[0]["body"], "Tomorrow 10:00 AM · Alley Cleanup")
         self.assertTrue(ScheduledNotification.objects.get().delivered)
 
+    def test_a_reminder_held_up_past_midnight_says_today(self):
+        self.opt_in(self.ana)
+        self.going(self.ana)
+        self.expo.side_effect = PushUnavailable
+        with at(denver(2026, 10, 23, 17, 5)):
+            send_due_notifications()  # Expo down all evening
+        self.expo.side_effect = lambda messages: (self.sent.extend(messages), expo_ok(messages))[1]
+        with at(denver(2026, 10, 24, 0, 30)):
+            send_due_notifications()
+        self.assertEqual(self.sent[0]["body"], "Today 10:00 AM · Alley Cleanup")
+
     def test_text_is_title_and_time_only_never_the_meeting_spot(self):
         self.opt_in(self.ana)
         self.going(self.ana)

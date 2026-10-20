@@ -297,7 +297,7 @@ References in brackets point to the review files, for example
   - **Risk:** none. If a test exposes a bug, I'll stop and report it rather
     than fix it silently.
 
-- [ ] **P22. Small notification and stats fixes** [G7, G8]
+- [x] **P22. Small notification and stats fixes** [G7, G8]
   - **What:**
     - a reminder sent after midnight says "Today", not "Tomorrow";
     - "notifications on" counts members with reminders switched on.
