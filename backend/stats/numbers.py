@@ -138,6 +138,19 @@ def support_numbers():
     return {"open_reports": ProblemReport.objects.exclude(status=ProblemReport.Status.RESOLVED).count()}
 
 
+# The 15-minute job is late if it hasn't finished in this long.
+JOB_LATE_AFTER = timedelta(hours=1)
+
+
+def job_numbers(now):
+    """When the reminders job last finished, and whether that's too long ago."""
+    from notifications.models import JobRun
+
+    run = JobRun.objects.filter(name="send_due_notifications").first()
+    last = run.last_ok_at if run else None
+    return {"last_ok_at": timezone.localtime(last) if last else None, "late": last is None or now - last > JOB_LATE_AFTER}
+
+
 def all_numbers(now=None):
     now = now or timezone.now()
     return {
@@ -146,5 +159,6 @@ def all_numbers(now=None):
         "support": support_numbers(),
         "badges": badge_numbers(now),
         "organizations": organization_numbers(now),
+        "jobs": job_numbers(now),
         "generated_at": timezone.localtime(now),
     }

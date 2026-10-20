@@ -510,6 +510,7 @@ into the DigitalOcean dashboard, never into this repository.
 | `SPACES_BUCKET`, `SPACES_KEY`, `SPACES_SECRET` | From step 2 (`SPACES_ENDPOINT` and `SPACES_REGION` match the bucket's region). |
 | `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Postmark → Server → API Tokens: the server token, as both. |
 | `PROBLEM_REPORT_EMAILS` | Who gets problem reports, comma-separated. |
+| `SERVER_ERROR_EMAILS` | Who gets a short email when the server crashes (only the kind of error and the page, never anyone's data). |
 | `DATABASE_URL` | Filled in by DigitalOcean from the database (`${db.DATABASE_URL}`). |
 
 3. Deploy. Every push to `main` deploys again; before each deploy the

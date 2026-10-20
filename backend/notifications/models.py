@@ -48,3 +48,19 @@ class ScheduledNotification(models.Model):
 
     def __str__(self):
         return f"{self.kind} for event {self.event_id}"
+
+
+class JobRun(models.Model):
+    """
+    When a scheduled job last finished without an error, so the owner stats
+    page can warn if reminders quietly stopped going out (review O8).
+    """
+
+    name = models.CharField(max_length=40, primary_key=True)
+    last_ok_at = models.DateTimeField()
+
+    @classmethod
+    def record_ok(cls, name):
+        from django.utils import timezone
+
+        cls.objects.update_or_create(name=name, defaults={"last_ok_at": timezone.now()})

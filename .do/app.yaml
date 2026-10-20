@@ -5,6 +5,12 @@
 name: globeville
 region: sfo
 
+# Emails to the account's team when something goes wrong (review O8). Check
+# them under Settings → Alerts after the first deploy.
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+
 services:
   - name: api
     dockerfile_path: Dockerfile
@@ -17,6 +23,15 @@ services:
     instance_count: 1
     health_check:
       http_path: /healthz
+    alerts:
+      - rule: RESTART_COUNT
+        operator: GREATER_THAN
+        value: 3
+        window: FIVE_MINUTES
+      - rule: MEM_UTILIZATION
+        operator: GREATER_THAN
+        value: 85
+        window: TEN_MINUTES
     envs:
       - key: DJANGO_DEBUG
         value: "0"
@@ -64,6 +79,10 @@ services:
       - key: DEFAULT_FROM_EMAIL
         value: globeville <hello@globeville.app>
       - key: PROBLEM_REPORT_EMAILS
+        type: SECRET
+        value: CHANGE_ME
+      # Who gets a short email when the server crashes (backend/config/alerts.py).
+      - key: SERVER_ERROR_EMAILS
         type: SECRET
         value: CHANGE_ME
       # From the Expo account (Access tokens), for push notifications.

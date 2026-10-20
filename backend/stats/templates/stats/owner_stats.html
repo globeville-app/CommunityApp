@@ -108,6 +108,19 @@
   </section>
 
   <section>
+    <h2>Scheduled job</h2>
+    {% if jobs.late %}
+      <p style="color: var(--error-fg); font-weight: 600;">
+        Reminders may not be going out: the 15-minute job
+        {% if jobs.last_ok_at %}last finished {{ jobs.last_ok_at|date:"M j, g:i A" }}{% else %}has never finished{% endif %}.
+        Check the app's Jobs and Runtime Logs in DigitalOcean.
+      </p>
+    {% else %}
+      <p>The 15-minute reminders job last finished {{ jobs.last_ok_at|date:"M j, g:i A" }}.</p>
+    {% endif %}
+  </section>
+
+  <section>
     <h2>Server check</h2>
     <p>Your address as the server sees it: <b>{{ your_address }}</b>. After a deploy this should be your own internet address, not one of the host's (README, "Going live").</p>
   </section>

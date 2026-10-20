@@ -216,7 +216,7 @@ References in brackets point to the review files, for example
     request.
   - **Verify:** the throttle tests pass with the database cache.
 
-- [ ] **P14. Alerts when something breaks** [O8] — **needs you:** decide
+- [x] **P14. Alerts when something breaks** [O8] — **needs you:** decide
   whether the privacy promise "no third-party crash reporting"
   (`docs/STORE_PRIVACY.md:26`) stays.
   - **What:**

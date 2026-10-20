@@ -314,6 +314,12 @@ PROBLEM_REPORT_EMAILS = [
     address.strip() for address in os.environ.get("PROBLEM_REPORT_EMAILS", "").split(",") if address.strip()
 ]
 
+# Who gets the short "the server crashed" email (config/alerts.py), e.g.
+# SERVER_ERROR_EMAILS="ana@example.org". Empty = no emails.
+SERVER_ERROR_EMAILS = [
+    address.strip() for address in os.environ.get("SERVER_ERROR_EMAILS", "").split(",") if address.strip()
+]
+
 
 # --- Logging ----------------------------------------------------------------
 # PRIVACY: httpx logs every request URL at INFO level, and the geocoder URL
@@ -322,7 +328,11 @@ PROBLEM_REPORT_EMAILS = [
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        # A short email to SERVER_ERROR_EMAILS when the server crashes (config/alerts.py).
+        "error_email": {"class": "config.alerts.ServerErrorEmailHandler", "level": "ERROR"},
+    },
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
         "httpx": {"level": "WARNING"},
@@ -331,6 +341,7 @@ LOGGING = {
         # Send Django's messages through the root handler only (so they print
         # once, and the privacy tests, which watch the root logger, see them).
         "django": {"handlers": [], "level": "INFO"},
+        "django.request": {"handlers": ["error_email"], "level": "INFO"},
     },
 }
 
