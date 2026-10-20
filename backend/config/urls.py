@@ -44,5 +44,7 @@ handler404 = "config.errors.not_found"
 handler500 = "config.errors.server_error"
 
 # The admin's page titles read the app name from settings too.
-admin.site.site_header = f"{settings.APP_NAME} admin"
+admin.site.site_header = f"{settings.APP_NAME} admin" + (
+    "" if settings.APP_ENVIRONMENT == "production" else f" ({settings.APP_ENVIRONMENT.upper()})"
+)
 admin.site.site_title = f"{settings.APP_NAME} admin"

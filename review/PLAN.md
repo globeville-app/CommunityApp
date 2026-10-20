@@ -375,7 +375,7 @@ References in brackets point to the review files, for example
   - **Verify:** tests per rule. Then run the command with `--dry-run` on a
     copy of the data.
 
-- [ ] **P27. Foundation for a staging server** [D5]
+- [x] **P27. Foundation for a staging server** [D5]
   - **What:**
     - a second DigitalOcean spec, `.do/staging.yaml`, that deploys a
       `staging` branch to its own small app, database and Spaces folder,

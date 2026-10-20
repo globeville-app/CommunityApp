@@ -580,6 +580,25 @@ The managed database takes a daily backup automatically. Once, before Phase A:
 Photos in Spaces aren't backed up separately yet; the Phase B checklist
 revisits that.
 
+### Staging server (optional, recommended for the beta)
+A second, private copy of the server to try a release on your own phone
+before members get it: the first deploy, push notifications, the health
+check and the rate-limit check above. It has its own small database, so
+nothing there touches real members.
+1. Push the branch you want to try to a branch called `staging` (GitHub →
+   branches, or ask your developer).
+2. DigitalOcean → Apps → Create App → "Import from app spec" →
+   `.do/staging.yaml`. Fill in every `CHANGE_ME` with **new** values (never
+   production's), and a separate Spaces bucket, e.g. `globeville-staging`.
+3. Add the DNS record for `api-staging.globeville.app`.
+4. Build the app for it: `npx eas build --profile staging`. That build talks
+   to staging only.
+
+The admin there says **(STAGING)** in its header. It sends no real push
+notifications (`PUSH_ENABLED=0`); set it to `1` in the dashboard when you
+want to try push on your own phone. Switch the staging app off when you
+don't need it, to save money.
+
 ### 6. App builds (EAS)
 From `mobile/`, after `npx eas login`:
 

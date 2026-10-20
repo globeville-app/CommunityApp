@@ -43,6 +43,14 @@ LANGUAGE_FILES = [
 # Expo push (docs/MILESTONE_4.md). Optional: with "enhanced push security"
 # on in the Expo account, only requests carrying this token can send pushes.
 EXPO_ACCESS_TOKEN = os.environ.get("EXPO_ACCESS_TOKEN", "")
+# Which server this is: "production", "staging" or "development". Staging is
+# a second, private copy for trying a release on real phones first (review
+# D5); its admin says STAGING in the header so nobody mixes them up.
+APP_ENVIRONMENT = os.environ.get(
+    "APP_ENVIRONMENT", "development" if os.environ.get("DJANGO_DEBUG", "1") == "1" else "production"
+)
+# Off on staging: notifications are worked out and logged, never sent to phones.
+PUSH_ENABLED = os.environ.get("PUSH_ENABLED", "1") == "1"
 
 # Languages the app is available in (docs/LANGUAGE.md). New members default
 # to English until they pick.

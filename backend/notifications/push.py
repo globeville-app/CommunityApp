@@ -53,6 +53,10 @@ def send_to_user(user, body, data=None):
     tokens = list(PushToken.objects.filter(user=user))
     if not tokens:
         return False
+    if not settings.PUSH_ENABLED:
+        # A staging server: everything up to here ran, but no phone is buzzed.
+        logger.info("Push skipped on this server (PUSH_ENABLED=0)")
+        return True
     messages = [{"to": t.token, "body": body, "sound": "default", "data": data or {}} for t in tokens]
     accepted = False
     for start in range(0, len(messages), config.EXPO_BATCH_SIZE):

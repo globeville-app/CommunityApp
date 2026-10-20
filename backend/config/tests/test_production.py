@@ -10,6 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -137,3 +138,29 @@ class ServerImageUserTests(TestCase):
         dockerfile = (BACKEND.parent / "Dockerfile").read_text()
         self.assertRegex(dockerfile, r"(?m)^USER app$")
         self.assertLess(dockerfile.index("USER app"), dockerfile.index("CMD "))
+
+
+class StagingTests(TestCase):
+    """The staging server says so, and never buzzes phones (review D5, PLAN P27)."""
+
+    def test_the_admin_header_names_a_staging_server(self):
+        code = "from django.contrib import admin; import config.urls; print(admin.site.site_header)"
+        staging = run_manage("shell", "-c", code, env={**PRODUCTION_ENV, "APP_ENVIRONMENT": "staging"})
+        self.assertIn("(STAGING)", staging.stdout, staging.stderr)
+        production = run_manage("shell", "-c", code, env=PRODUCTION_ENV)
+        self.assertIn(f"{settings.APP_NAME} admin\n", production.stdout, production.stderr)
+        self.assertNotIn("STAGING", production.stdout)
+
+    def test_push_can_be_switched_off(self):
+        from unittest import mock
+
+        from accounts.models import Account
+        from notifications.models import PushToken
+        from notifications.push import send_to_user
+
+        user = get_user_model().objects.create_user(username="ana@example.com", password="x")
+        Account.objects.create(user=user)
+        PushToken.objects.create(user=user, token="ExponentPushToken[a]")
+        with override_settings(PUSH_ENABLED=False), mock.patch("notifications.push.post_to_expo") as expo:
+            self.assertTrue(send_to_user(user, "Tomorrow 10:00 AM · Cleanup"))
+        expo.assert_not_called()

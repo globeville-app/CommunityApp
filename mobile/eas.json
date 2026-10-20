@@ -11,6 +11,14 @@
         "APP_ENV": "development"
       }
     },
+    "staging": {
+      "distribution": "internal",
+      "autoIncrement": true,
+      "env": {
+        "APP_ENV": "staging",
+        "API_BASE_URL": "https://api-staging.globeville.app"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "autoIncrement": true,
