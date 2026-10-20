@@ -48,6 +48,7 @@ class CreateEventTests(EventTestCase):
             ({"title": "x" * 81}, "title_too_long"),
             ({"description": "x" * 2001}, "description_too_long"),
             ({"title_alt": "x" * 81}, "title_alt_too_long"),
+            ({"description_alt": "x" * 2001}, "description_alt_too_long"),
             ({"location_text": ""}, "location_required"),
             ({"location_text": "x" * 121}, "location_too_long"),
             ({"partiful_url": "https://evil.example.com/e/1"}, "invalid_partiful_url"),

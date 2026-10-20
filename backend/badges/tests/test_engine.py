@@ -187,6 +187,28 @@ class HostingTests(BadgeTestCase):
         self.assertEqual(engine.count_ended_events(now=event_end(event) + timedelta(minutes=10)), 0)
         self.assertEqual(self.state(self.host, "host"), (0, 0))
 
+    def test_host_reach_and_hosted_group_badges_grow_past_seed(self):
+        # Host Reach: 2, 10, 30 neighbors; Clean Sweeper (hosting): 1, 2, 5 events.
+        crowd = self.members(30, "c")
+        for i in range(5):
+            event = self.event(category="cleanup")
+            for person in crowd[i * 6 : i * 6 + 6]:
+                self.attend(person, event)
+        self.assertEqual(self.state(self.host, "host"), (3, 30))  # Bloom
+        self.assertEqual(self.state(self.host, "clean_sweeper"), (3, 5))  # Bloom
+        self.assertEqual(self.state(self.host, "helping_hand"), (3, 5))  # the group badge too
+
+    def test_day_one_grows_with_each_hosts_first_event(self):
+        # Day One counts first counted events of different hosts: 1, 2, 5.
+        for i in range(5):
+            host = self.member(f"newhost{i}")
+            first = self.event(host=host)
+            self.attend(self.ana, first)
+            self.attend(self.member(f"friend{i}"), first)
+            if i == 1:
+                self.assertEqual(self.state(self.ana, "day_one"), (2, 2))  # Sprout
+        self.assertEqual(self.state(self.ana, "day_one"), (3, 5))  # Bloom
+
     def test_host_reach_counts_distinct_neighbors(self):
         regulars = self.members(3)
         for _ in range(4):

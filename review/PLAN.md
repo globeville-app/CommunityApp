@@ -284,7 +284,7 @@ References in brackets point to the review files, for example
     `docs/REVIEWERS_GUIDE.md`, and possibly `backend/notifications/admin.py`.
   - **Risk:** very low.
 
-- [ ] **P21. Add the missing tests** [04-tests.md]
+- [x] **P21. Add the missing tests** [04-tests.md]
   - **What:** tests for:
     - higher Host Reach and Day One stages;
     - the community group rules;

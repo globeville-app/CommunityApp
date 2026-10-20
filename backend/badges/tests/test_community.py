@@ -19,6 +19,26 @@ class CommunityBadgeTests(BadgeTestCase):
                 self.attend(person, event)
         self.assertEqual(known_for(IN_2025), [("Highland", ["Known for cleanups"])])
 
+    def test_a_group_needs_6_events_and_20_neighbors(self):
+        people = self.members(20)
+        for i in range(5):
+            event = self.event(category="potluck")
+            for person in people[i * 4 : i * 4 + 4]:
+                self.attend(person, event)
+        self.assertEqual(known_for(IN_2025), [])  # 5 events: not yet
+        sixth = self.event(category="potluck")
+        for person in people[:2]:
+            self.attend(person, sixth)
+        self.assertEqual(known_for(IN_2025), [("Highland", ["Known for celebrations"])])
+
+    def test_community_meetings_signature_is_known_for_showing_up(self):
+        people = self.members(15)
+        for i in range(4):
+            event = self.event(category="community_meeting")
+            for person in people[i * 4 : i * 4 + 4] if i < 3 else people[12:]:
+                self.attend(person, event)
+        self.assertEqual(known_for(IN_2025), [("Highland", ["Known for showing up"])])
+
     def test_quiet_neighborhoods_have_none(self):
         event = self.event(category="cleanup")
         for person in self.members(3):
