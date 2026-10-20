@@ -161,6 +161,32 @@ class HostingTests(BadgeTestCase):
         self.assertEqual(self.state(self.host, "host"), (1, 2))  # Host reach: 2 neighbors = Seed
         self.assertEqual(self.state(self.host, "local"), (0, 0))  # hosting isn't attending
 
+    def test_check_ins_during_the_event_count_for_the_host_only_after_it_ends(self):
+        # BADGES.md: a hosted event counts once it "has ended" (review G2).
+        event = self.event(category="cleanup")
+        self.attend(self.ana, event, method="auto")
+        self.attend(self.member("ben"), event, method="auto")
+        event.refresh_from_db()
+        self.assertIsNone(event.counted_hosted_at)
+        self.assertEqual(self.state(self.host, "clean_sweeper"), (0, 0))
+        self.assertEqual(self.state(self.ana, "day_one"), (0, 0))
+
+        # Still going on: the job leaves it alone.
+        self.assertEqual(engine.count_ended_events(now=event.starts_at + timedelta(minutes=30)), 0)
+        # After the end, the 15-minute job credits the host, and Day One goes out.
+        self.assertEqual(engine.count_ended_events(now=event_end(event) + timedelta(minutes=10)), 1)
+        self.assertEqual(self.state(self.host, "clean_sweeper"), (1, 1))
+        self.assertEqual(self.state(self.ana, "day_one"), (1, 1))
+        self.assertEqual(engine.count_ended_events(now=event_end(event) + timedelta(minutes=25)), 0)  # once only
+
+    def test_a_cancelled_event_never_counts(self):
+        event = self.event()
+        self.attend(self.ana, event, method="auto")
+        self.attend(self.member("ben"), event, method="auto")
+        Event.objects.filter(pk=event.pk).update(status="cancelled")
+        self.assertEqual(engine.count_ended_events(now=event_end(event) + timedelta(minutes=10)), 0)
+        self.assertEqual(self.state(self.host, "host"), (0, 0))
+
     def test_host_reach_counts_distinct_neighbors(self):
         regulars = self.members(3)
         for _ in range(4):

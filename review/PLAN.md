@@ -165,7 +165,7 @@ References in brackets point to the review files, for example
   - **Verify:** the new test passes, and the existing cancel tests still
     pass.
 
-- [ ] **P10. Count a hosted event only after it ends** [G2]
+- [x] **P10. Count a hosted event only after it ends** [G2]
   - **What:** the "counted as hosted" step, and Day One, happen only after
     the end time. The 15-minute job picks up events that ended with 2+
     attendees.

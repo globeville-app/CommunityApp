@@ -285,19 +285,8 @@ def record_attendance(user, event, method, now=None):
             user_language_at_time=language_of(user),
         )
 
-        affected = {user}
+        affected = {user} | _count_as_hosted(event, now)
         host = host_of(event)
-        if host is not None:
-            attendees = Attendance.objects.filter(event=event).count()
-            if event.counted_hosted_at is None and attendees >= config.HOSTED_MIN_ATTENDEES:
-                # It counts as hosted from now on. Is it the host's first?
-                first = not counted_hosted_events(host).exists()
-                event.counted_hosted_at = now
-                event.is_hosts_first_counted = first
-                event.save(update_fields=["counted_hosted_at", "is_hosts_first_counted"])
-                if first:
-                    # Day One goes to everyone who came, including earlier collectors.
-                    affected.update(a.user for a in Attendance.objects.filter(event=event).select_related("user"))
 
         owners = set(affected)
         if host is not None and event.counted_hosted_at is not None:
@@ -309,6 +298,56 @@ def record_attendance(user, event, method, now=None):
             if not is_org(owner):
                 celebrations[owner.pk] = result
         return celebrations[user.pk]
+
+
+def _count_as_hosted(event, now):
+    """
+    Once an event has ended with at least 2 confirmed neighbors, it counts as
+    hosted (docs/BADGES.md, "What counts as hosting"). Call with the event
+    row locked. Returns the members whose badges change because of it: on
+    the host's first counted event, everyone who came gets Day One.
+    """
+    host = host_of(event)
+    if host is None or event.counted_hosted_at is not None or event.status == Event.Status.CANCELLED:
+        return set()
+    if not has_ended(event, now):
+        return set()  # auto check-ins during the event wait for the end (review G2)
+    if Attendance.objects.filter(event=event).count() < config.HOSTED_MIN_ATTENDEES:
+        return set()
+    first = not counted_hosted_events(host).exists()
+    event.counted_hosted_at = now
+    event.is_hosts_first_counted = first
+    event.save(update_fields=["counted_hosted_at", "is_hosts_first_counted"])
+    if not first:
+        return set()
+    # Day One goes to everyone who came, including earlier collectors.
+    return {a.user for a in Attendance.objects.filter(event=event).select_related("user")}
+
+
+def count_ended_events(now=None):
+    """
+    The 15-minute job's part: events that ended with 2+ neighbors checked in
+    during the event (nobody collected afterwards, which would have counted
+    them). Returns how many now count as hosted.
+    """
+    now = now or timezone.now()
+    candidates = (
+        Event.objects.filter(counted_hosted_at__isnull=True, status=Event.Status.ACTIVE, starts_at__lte=now)
+        .annotate(attendees=Count("attendances"))
+        .filter(attendees__gte=config.HOSTED_MIN_ATTENDEES)
+        .values_list("pk", flat=True)
+    )
+    counted = 0
+    for pk in candidates:
+        with transaction.atomic():
+            event = Event.objects.select_for_update().get(pk=pk)
+            affected = _count_as_hosted(event, now)
+            if event.counted_hosted_at is None:
+                continue
+            counted += 1
+            for owner in sorted(affected | {host_of(event)}, key=lock_order):
+                update_badges(owner, now)
+    return counted
 
 
 def decline(user, event, now=None):

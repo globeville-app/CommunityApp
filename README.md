@@ -583,7 +583,10 @@ through Expo's push service:
   reminder that's due. On DigitalOcean it runs every 15 minutes as a
   scheduled job (`send-notifications` in `.do/app.yaml`); confirm it shows
   under the app's Jobs after the first deploy. It's safe to run twice. On
-  your computer, run it by hand when you want to test.
+  your computer, run it by hand when you want to test. The same job then runs
+  `python manage.py count_hosted_events`: a hosted event only counts once it
+  has ended (docs/BADGES.md), so when neighbors checked in during an event
+  and nobody collects it afterwards, this is what credits the host.
 - **Expo project.** In `mobile/`, run `npx eas init` once; put the project id
   it prints in `mobile/.env` as `EAS_PROJECT_ID=...` (and in the EAS build
   profiles). Push tokens need it.

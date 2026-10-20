@@ -98,7 +98,8 @@ jobs:
         value: ${db.DATABASE_URL}
 
   # Every 15 minutes: send event reminders and any cancellation notices
-  # that couldn't go out right away (docs/MILESTONE_4.md). Safe to run twice.
+  # that couldn't go out right away (docs/MILESTONE_4.md), and credit hosts
+  # for events that have ended. Safe to run twice.
   - name: send-notifications
     kind: SCHEDULED
     schedule:
@@ -109,7 +110,8 @@ jobs:
       repo: globeville-app/CommunityApp
       branch: main
     instance_size_slug: apps-s-1vcpu-0.5gb
-    run_command: python manage.py send_due_notifications
+    # Then credit hosts for events that ended with 2+ neighbors checked in.
+    run_command: sh -c "python manage.py send_due_notifications; python manage.py count_hosted_events"
     envs:
       - key: DJANGO_DEBUG
         value: "0"
