@@ -87,3 +87,17 @@ class ConfigTests(APITestCase):
         # Interests now come from the event categories (events/tests).
         self.assertNotIn("interests", response.data)
         self.assertEqual(response.data["languages"], ["en", "es"])
+
+
+class SignupRaceTests(APITestCase):
+    def test_two_quick_signups_with_one_email_answer_email_taken(self):
+        # The second request passed the "is this email free?" check just
+        # before the first one saved (review N7).
+        from unittest import mock
+
+        from accounts.serializers import SignupSerializer
+
+        User.objects.create_user(username="ana@example.com", password=PASSWORD)
+        with mock.patch.object(SignupSerializer, "validate_email", lambda self, value: value.strip().lower()):
+            response = self.client.post("/api/auth/signup", {"email": "ana@example.com", "password": PASSWORD}, format="json")
+        self.assertEqual((response.status_code, response.data["code"]), (400, "email_taken"))

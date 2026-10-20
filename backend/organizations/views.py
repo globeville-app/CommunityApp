@@ -197,11 +197,6 @@ class OrganizationListView(APIView):
     def post(self, request):
         """Ask for a new organization. It starts as pending, visible only to the asker."""
         profile = member_profile(request)
-        recent = OrganizationAdmin.objects.filter(
-            user=request.user, organization__created_at__gte=timezone.now() - timedelta(days=1)
-        ).count()
-        if recent >= DAILY_REQUEST_LIMIT:
-            raise ApiError("daily_limit", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
         data = request.data
         fields = {
             "name": clean_name(data.get("name")),
@@ -213,6 +208,13 @@ class OrganizationListView(APIView):
         }
         neighborhood_ids = clean_neighborhoods(data.get("neighborhoods"))
         with transaction.atomic():
+            # One request at a time per member, so the daily limit holds (review N7).
+            get_user_model().objects.select_for_update().filter(pk=request.user.pk).first()
+            recent = OrganizationAdmin.objects.filter(
+                user=request.user, organization__created_at__gte=timezone.now() - timedelta(days=1)
+            ).count()
+            if recent >= DAILY_REQUEST_LIMIT:
+                raise ApiError("daily_limit", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
             organization = Organization.objects.create(**fields)
             organization.neighborhoods.set(neighborhood_ids)
             # The member who asks becomes its first admin.
@@ -327,12 +329,15 @@ class OrganizationAdminsView(APIView):
         organization = admin_org(request, profile, org_id)
         if organization.status != Organization.Status.APPROVED:
             raise ApiError("org_not_approved")
-        if organization.admins.count() + organization.invites.count() >= MAX_ADMINS:
-            raise ApiError("too_many_admins")
         email = str(request.data.get("email") or "").strip().lower()
         user = get_user_model().objects.filter(username__iexact=email).first() if email else None
-        if user is not None and Profile.objects.filter(user=user).exists() and not organization.is_admin(user):
-            OrganizationInvite.objects.get_or_create(organization=organization, user=user)
+        with transaction.atomic():
+            # Locked, so two admins inviting at once can't pass 5 (review N7).
+            Organization.objects.select_for_update().filter(pk=organization.pk).first()
+            if organization.admins.count() + organization.invites.count() >= MAX_ADMINS:
+                raise ApiError("too_many_admins")
+            if user is not None and Profile.objects.filter(user=user).exists() and not organization.is_admin(user):
+                OrganizationInvite.objects.get_or_create(organization=organization, user=user)
         return Response(org_json(organization, request, profile), status=status.HTTP_202_ACCEPTED)
 
     def delete(self, request, org_id):

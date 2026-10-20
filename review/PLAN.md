@@ -266,7 +266,7 @@ References in brackets point to the review files, for example
   - **Risk:** very low.
   - **Verify:** the production-settings test.
 
-- [ ] **P19. Fix the small race conditions** [N7]
+- [x] **P19. Fix the small race conditions** [N7]
   - **What:** a duplicate email at signup returns `email_taken`, not a
     500. Admin limits are checked inside a lock.
   - **Files:** `backend/accounts/serializers.py`,

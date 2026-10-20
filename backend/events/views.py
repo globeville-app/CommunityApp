@@ -7,6 +7,7 @@ For anyone else it simply doesn't exist (404), so the API never reveals it.
 
 from datetime import timedelta
 
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Q
 from django.utils import timezone
@@ -207,13 +208,15 @@ class EventListView(APIView):
     def post(self, request):
         profile = member_profile(request)
         now = timezone.now()
-        recent = Event.objects.filter(organizer=request.user, created_at__gte=now - timedelta(days=1)).count()
-        if recent >= DAILY_EVENT_LIMIT:
-            raise ApiError("daily_limit", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
-
         fields = clean_event(request.data, default_language=language_of(request.user), now=now)
         organization, neighborhood_id = posting_as(request, profile)
         with transaction.atomic():
+            # One post at a time per member, so two quick taps can't both
+            # slip under the daily limit (review N7).
+            get_user_model().objects.select_for_update().filter(pk=request.user.pk).first()
+            recent = Event.objects.filter(organizer=request.user, created_at__gte=now - timedelta(days=1)).count()
+            if recent >= DAILY_EVENT_LIMIT:
+                raise ApiError("daily_limit", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
             event = Event.objects.create(
                 neighborhood_id=neighborhood_id, organizer=request.user, organization=organization, **fields
             )

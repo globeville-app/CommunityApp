@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from rest_framework import status
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.permissions import AllowAny
@@ -31,7 +31,12 @@ class SignupView(APIView):
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        try:
+            with transaction.atomic():
+                user = serializer.save()
+        except IntegrityError:
+            # Someone signed up with this email a moment ago (two quick taps).
+            raise ValidationError({"email": [ErrorDetail("email_taken", code="email_taken")]}) from None
         if settings.REQUIRE_EMAIL_VERIFICATION:
             Account.objects.filter(user=user).update(email_verified=False)
             codes.send_code(user, EmailCode.Purpose.VERIFY)
