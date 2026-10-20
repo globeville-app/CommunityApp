@@ -129,6 +129,8 @@ export type DemoOrg = {
   status: "pending" | "approved" | "rejected" | "hidden";
   neighborhoodIds: number[];
   adminEmails: string[];
+  /** Invitations sent and not yet answered (a count, like the real server). */
+  pendingInvites?: number;
   followerEmails: string[];
   extraFollowers: number;
 };

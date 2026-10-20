@@ -1,17 +1,18 @@
 /**
- * An organization's admins (1-5): add one by an existing member's email,
- * remove one, or leave. The last admin can't leave.
+ * An organization's admins (1-5): invite one by an existing member's email
+ * (they become an admin once they accept), remove one, or leave. The last
+ * admin can't leave. Who was invited stays private: only a count shows.
  */
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 
-import { addOrganizationAdmin, ApiError, getOrganization, OrgPage, removeOrganizationAdmin } from "../api";
+import { addOrganizationAdmin, ApiError, cancelOrganizationInvites, getOrganization, OrgPage, removeOrganizationAdmin } from "../api";
 import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
 import { colors, type } from "../theme";
-import { BackButton, Button, Caption, Divider, ErrorMessage, Field, GlassCard, ListRow, Loading, Screen, TextLink, Title } from "../ui";
+import { BackButton, Button, Caption, Divider, ErrorMessage, Field, GlassCard, ListRow, Loading, Notice, Screen, TextLink, Title } from "../ui";
 
 const MAX_ADMINS = 5;
 
@@ -23,6 +24,7 @@ export default function OrganizationAdmins() {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const [invited, setInvited] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -33,18 +35,32 @@ export default function OrganizationAdmins() {
 
   if (!org) return error ? <Screen><BackButton /><ErrorMessage message={errorMessage(t, error)} /></Screen> : <Loading />;
   const admins = org.admins ?? [];
+  const pending = org.pending_invites ?? 0;
 
   async function onAdd() {
     if (!token || !org) return;
     setBusy(true);
     setError(null);
+    setInvited(false);
     try {
       setOrg(await addOrganizationAdmin(token, org.id, email.trim()));
       setEmail("");
+      setInvited(true);
     } catch (e) {
       setError(e as ApiError);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function onCancelInvites() {
+    if (!token || !org) return;
+    setError(null);
+    try {
+      setOrg(await cancelOrganizationInvites(token, org.id));
+      setInvited(false);
+    } catch (e) {
+      setError(e as ApiError);
     }
   }
 
@@ -80,7 +96,14 @@ export default function OrganizationAdmins() {
           </View>
         ))}
       </GlassCard>
-      {admins.length < MAX_ADMINS ? (
+      {invited ? <Notice message={t("organizations.invite_sent")} /> : null}
+      {pending > 0 ? (
+        <>
+          <Caption>{t("organizations.pending_invites", { count: pending })}</Caption>
+          <TextLink label={t("organizations.cancel_invites")} onPress={onCancelInvites} />
+        </>
+      ) : null}
+      {admins.length + pending < MAX_ADMINS ? (
         <GlassCard>
           <Text style={[type.section, { color: colors.textPrimary }]}>{t("organizations.add_admin")}</Text>
           <Field

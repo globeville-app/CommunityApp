@@ -124,6 +124,21 @@ class OrganizationChangeRequest(models.Model):
         return f"change to {self.organization}"
 
 
+class OrganizationInvite(models.Model):
+    """
+    An admin invited a member to help run the organization (review P8). The
+    member becomes an admin only by accepting it in the app; until then the
+    inviting admins see a count, never who.
+    """
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="invites")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="organization_invites")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["organization", "user"], name="one_invite_per_member")]
+
+
 class Follow(models.Model):
     """Private: nobody sees who follows; admins see only the count."""
 

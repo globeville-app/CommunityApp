@@ -139,7 +139,7 @@ References in brackets point to the review files, for example
 
 ## Medium: soon after launch
 
-- [ ] **P8. Organization admins: invite instead of add** [S2]
+- [x] **P8. Organization admins: invite instead of add** [S2]
   - **What:** adding an admin sends the member an invitation they accept in
     the app. The reply no longer shows whether the email exists or the
     person's name. It's only allowed for approved organizations.

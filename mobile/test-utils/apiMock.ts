@@ -62,6 +62,9 @@ const SERVER_CALLS = [
   "updateOrganization",
   "uploadOrganizationPhoto",
   "addOrganizationAdmin",
+  "cancelOrganizationInvites",
+  "getOrganizationInvites",
+  "answerOrganizationInvite",
   "removeOrganizationAdmin",
   "setFollowing",
   "reportOrganization",
@@ -95,6 +98,7 @@ export function useDefaultReplies(mocked: jest.Mocked<typeof Api>) {
   mocked.registerPushToken.mockResolvedValue(undefined);
   mocked.markNotifOfferSeen.mockResolvedValue(undefined);
   mocked.getMyOrganizations.mockResolvedValue({ organizations: [] });
+  mocked.getOrganizationInvites.mockResolvedValue({ invites: [] });
   mocked.listOrganizations.mockResolvedValue({ organizations: [] });
   mocked.listNeighborhoods.mockResolvedValue({
     neighborhoods: [

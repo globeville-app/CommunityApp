@@ -413,7 +413,10 @@ update" with a link to the store (`ios_store_url` / `android_store_url` in
 | GET / POST | `/api/organizations` | approved organizations serving your neighborhood, A–Z / request a new one |
 | GET / PATCH | `/api/organizations/{id}` | an organization's page / edit (admins; name, type and neighborhoods wait for approval) |
 | POST | `/api/organizations/{id}/photo` | its photo (admins) |
-| POST / DELETE | `/api/organizations/{id}/admins` | add (by email) / remove an admin; 1–5 |
+| POST / DELETE | `/api/organizations/{id}/admins` | invite a member by email (approved organizations; same reply for any email) / remove an admin; 1–5, counting open invitations |
+| DELETE | `/api/organizations/{id}/invites` | cancel the open invitations (admins see only how many) |
+| GET | `/api/me/organization-invites` | invitations waiting for this member's answer |
+| PUT / DELETE | `/api/me/organization-invites/{id}` | accept (become an admin) / decline |
 | PUT / DELETE | `/api/organizations/{id}/follow` | follow / unfollow |
 | POST | `/api/organizations/{id}/report` · `/translate` | report it · its description in another language |
 | GET | `/api/organizations/{id}/impact` | admins: impact numbers and badge progress |
@@ -470,6 +473,7 @@ For Milestones 3 and 4:
 - events they posted for an organization stay (they belong to the
   organization); if they were its last admin, the organization is hidden
 - blocks they made, and blocks of them, are removed
+- organization invitations to them are removed
   until the team assigns a new admin
 
 ---

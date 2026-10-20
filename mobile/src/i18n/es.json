@@ -176,7 +176,8 @@
     "org_not_found": "No encontramos esa organización.",
     "invalid_push_token": "No se pudieron activar las notificaciones en este teléfono.",
     "invalid_code": "Ese código no es correcto o ya venció. Revisa el correo o pide un código nuevo.",
-    "email_not_verified": "Primero confirma tu correo."
+    "email_not_verified": "Primero confirma tu correo.",
+    "invite_not_found": "Esa invitación ya no está abierta."
   },
   "demo": {
     "banner_label": "Demo",
@@ -689,20 +690,28 @@
     "photo_label": "Foto (opcional)",
     "photo_pick": "Elegir una foto",
     "submit": "Enviar solicitud",
-    "admins_intro": "Los administradores publican eventos y manejan esta página. Una organización tiene de 1 a 5 administradores.",
+    "admins_intro": "Los administradores publican eventos y manejan esta página. Una organización tiene de 1 a 5 administradores. Las personas que invites serán administradoras cuando acepten.",
     "you": "{{name}} (tú)",
     "leave": "Salir",
     "remove": "Quitar",
-    "add_admin": "Agregar un administrador",
-    "admin_email": "Su correo (tiene que haberse unido)",
-    "add": "Agregar",
+    "add_admin": "Invitar a un administrador",
+    "admin_email": "Su correo (debe haberse unido)",
+    "add": "Enviar invitación",
     "admins_full": "Esta organización tiene 5 administradores, el máximo permitido.",
     "impact_private": "Solo los administradores de esta organización pueden ver esto.",
     "impact_empty": "Tus números aparecen cuando un evento tenga 2 vecinos que confirmaron que fueron.",
     "brought_together_one": "Tus eventos reunieron a {{count}} vecino.",
     "brought_together_other": "Tus eventos reunieron a {{count}} vecinos.",
     "most_popular_one": "El más popular: {{title}}, {{date}}, con {{count}} vecino.",
-    "most_popular_other": "El más popular: {{title}}, {{date}}, con {{count}} vecinos."
+    "most_popular_other": "El más popular: {{title}}, {{date}}, con {{count}} vecinos.",
+    "invite_sent": "Invitación enviada. Si ese correo es de un miembro, la verá en Tus organizaciones.",
+    "pending_invites_one": "{{count}} invitación esperando respuesta.",
+    "pending_invites_other": "{{count}} invitaciones esperando respuesta.",
+    "cancel_invites": "Cancelar invitaciones abiertas",
+    "invites_title": "Invitaciones",
+    "invite_text": "Te invitaron a ayudar a manejar {{name}}.",
+    "accept": "Aceptar",
+    "decline": "Rechazar"
   },
   "email": {
     "verify": {

@@ -298,6 +298,36 @@ describe("Following", () => {
   });
 });
 
+// ---- Inviting admins (review P8) -------------------------------------------------
+
+describe("inviting admins", () => {
+  it("sends an invitation and shows only a count of open ones", async () => {
+    mocked.getOrganization.mockResolvedValue(ADMIN_VIEW);
+    mocked.addOrganizationAdmin.mockResolvedValue({ ...ADMIN_VIEW, pending_invites: 1 });
+    mocked.cancelOrganizationInvites.mockResolvedValue({ ...ADMIN_VIEW, pending_invites: 0 });
+    renderApp("/organization-admins?id=5");
+
+    fireEvent.changeText(await screen.findByLabelText("Their email (they need to have joined)"), "ben@example.com");
+    await pressAndSettle(screen.getByRole("button", { name: "Send invitation" }));
+    expect(mocked.addOrganizationAdmin).toHaveBeenCalledWith("tok-123", 5, "ben@example.com");
+    expect(await screen.findByText(/Invitation sent/)).toBeTruthy();
+    expect(screen.getByText("1 invitation waiting for an answer.")).toBeTruthy();
+
+    await pressAndSettle(screen.getByRole("link", { name: "Cancel open invitations" }));
+    expect(mocked.cancelOrganizationInvites).toHaveBeenCalledWith("tok-123", 5);
+    expect(screen.queryByText("1 invitation waiting for an answer.")).toBeNull();
+  });
+
+  it("lets the invited member accept under Your organizations", async () => {
+    mocked.getOrganizationInvites.mockResolvedValueOnce({ invites: [{ id: 9, organization: { id: 5, name: "Our Lady Church" } }] });
+    mocked.answerOrganizationInvite.mockResolvedValue(undefined);
+    renderApp("/my-organizations");
+    expect(await screen.findByText("You're invited to help run Our Lady Church.")).toBeTruthy();
+    await pressAndSettle(screen.getByRole("button", { name: "Accept" }));
+    expect(mocked.answerOrganizationInvite).toHaveBeenCalledWith("tok-123", 9, true);
+  });
+});
+
 // ---- Spanish --------------------------------------------------------------------
 
 describe("in Spanish", () => {

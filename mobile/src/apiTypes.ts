@@ -222,6 +222,9 @@ export type MemberPage = {
   is_blocked?: boolean;
 };
 
+/** An invitation to help run an organization, waiting for this member's answer. */
+export type OrgInvite = { id: number; organization: { id: number; name: string } };
+
 export type BlockedMember = { id: number; display_name: string };
 
 /** One event for the phone to watch (auto check-in). Only the event's pin. */
@@ -267,6 +270,8 @@ export type OrgPage = OrgSummary & {
   follower_count?: number;
   change_pending?: boolean;
   admins?: { member_id: number | null; display_name: string | null; is_you: boolean }[];
+  /** Invitations not yet accepted: a count, never who. */
+  pending_invites?: number;
 };
 
 export type MyOrg = OrgSummary & { status: OrgStatus; neighborhoods: NeighborhoodRef[] };

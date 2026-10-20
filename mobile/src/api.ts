@@ -22,6 +22,7 @@ import {
   MyOrg,
   NeighborhoodRef,
   OrgInput,
+  OrgInvite,
   OrgPage,
   OrgSummary,
   ProfileSettings,
@@ -359,6 +360,20 @@ export function uploadOrganizationPhoto(token: string, id: number, photo: { uri:
 
 export function addOrganizationAdmin(token: string, id: number, email: string) {
   return request<OrgPage>(`/api/organizations/${id}/admins`, { method: "POST", token, json: { email } });
+}
+
+/** Admins: cancel every invitation nobody has answered yet. */
+export function cancelOrganizationInvites(token: string, id: number) {
+  return request<OrgPage>(`/api/organizations/${id}/invites`, { method: "DELETE", token });
+}
+
+export function getOrganizationInvites(token: string) {
+  return request<{ invites: OrgInvite[] }>("/api/me/organization-invites", { token });
+}
+
+/** Accept (become an admin) or decline an invitation. */
+export function answerOrganizationInvite(token: string, inviteId: number, accept: boolean) {
+  return request<void>(`/api/me/organization-invites/${inviteId}`, { method: accept ? "PUT" : "DELETE", token });
 }
 
 export function removeOrganizationAdmin(token: string, id: number, memberId: number) {

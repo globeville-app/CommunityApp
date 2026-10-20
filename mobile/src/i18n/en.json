@@ -176,7 +176,8 @@
     "org_not_found": "We couldn't find that organization.",
     "invalid_push_token": "Notifications couldn't be set up on this phone.",
     "invalid_code": "That code isn't right or has expired. Check the email, or ask for a new code.",
-    "email_not_verified": "Please confirm your email first."
+    "email_not_verified": "Please confirm your email first.",
+    "invite_not_found": "That invitation isn't open anymore."
   },
   "demo": {
     "banner_label": "Demo",
@@ -689,20 +690,28 @@
     "photo_label": "Photo (optional)",
     "photo_pick": "Choose a photo",
     "submit": "Send request",
-    "admins_intro": "Admins post events and manage this page. An organization has 1 to 5 admins.",
+    "admins_intro": "Admins post events and manage this page. An organization has 1 to 5 admins. People you invite become admins once they accept.",
     "you": "{{name}} (you)",
     "leave": "Leave",
     "remove": "Remove",
-    "add_admin": "Add an admin",
+    "add_admin": "Invite an admin",
     "admin_email": "Their email (they need to have joined)",
-    "add": "Add",
+    "add": "Send invitation",
     "admins_full": "This organization has 5 admins, the most allowed.",
     "impact_private": "Only this organization's admins can see this.",
     "impact_empty": "Your numbers appear once an event has 2 neighbors who confirmed they went.",
     "brought_together_one": "Your events brought together {{count}} neighbor.",
     "brought_together_other": "Your events brought together {{count}} neighbors.",
     "most_popular_one": "Most popular: {{title}}, {{date}}, with {{count}} neighbor.",
-    "most_popular_other": "Most popular: {{title}}, {{date}}, with {{count}} neighbors."
+    "most_popular_other": "Most popular: {{title}}, {{date}}, with {{count}} neighbors.",
+    "invite_sent": "Invitation sent. If that email belongs to a member, they'll see it under Your organizations.",
+    "pending_invites_one": "{{count}} invitation waiting for an answer.",
+    "pending_invites_other": "{{count}} invitations waiting for an answer.",
+    "cancel_invites": "Cancel open invitations",
+    "invites_title": "Invitations",
+    "invite_text": "You're invited to help run {{name}}.",
+    "accept": "Accept",
+    "decline": "Decline"
   },
   "email": {
     "verify": {

@@ -96,15 +96,43 @@ class RequestAndApprovalTests(OrgTestCase):
 
 
 class AdminTests(OrgTestCase):
-    def test_one_to_five_admins(self):
+    def test_one_to_five_admins_by_invitation(self):
         organization = self.org()
         client = self.api(self.admin_user)
-        self.assertEqual(client.post(f"/api/organizations/{organization.pk}/admins", {"email": "nobody@example.com"}, format="json").data["code"], "not_a_member")
-        for i in range(4):
-            self.member(f"helper{i}")
-            self.assertEqual(client.post(f"/api/organizations/{organization.pk}/admins", {"email": f"helper{i}@example.com"}, format="json").status_code, 201)
+        url = f"/api/organizations/{organization.pk}/admins"
+        # Unknown emails get the same answer, and nothing is created.
+        unknown = client.post(url, {"email": "nobody@example.com"}, format="json")
+        self.assertEqual(unknown.status_code, 202)
+        self.assertEqual(unknown.data["pending_invites"], 0)
+        helpers = [self.member(f"helper{i}") for i in range(4)]
+        for helper in helpers:
+            response = client.post(url, {"email": helper.username}, format="json")
+            self.assertEqual(response.status_code, 202)
+            self.assertNotIn("Helper", str(response.data))  # who was invited stays private
+        self.assertEqual(organization.admins.count(), 1)
         self.member("sixth")
-        self.assertEqual(client.post(f"/api/organizations/{organization.pk}/admins", {"email": "sixth@example.com"}, format="json").data["code"], "too_many_admins")
+        self.assertEqual(client.post(url, {"email": "sixth@example.com"}, format="json").data["code"], "too_many_admins")
+
+        # The invited member accepts or declines.
+        helper = self.api(helpers[0])
+        invites = helper.get("/api/me/organization-invites").data["invites"]
+        self.assertEqual(invites[0]["organization"]["name"], "Our Lady Church")
+        self.assertEqual(helper.put(f"/api/me/organization-invites/{invites[0]['id']}").status_code, 204)
+        self.assertTrue(organization.is_admin(helpers[0]))
+        declined = self.api(helpers[1]).get("/api/me/organization-invites").data["invites"][0]["id"]
+        self.assertEqual(self.api(helpers[1]).delete(f"/api/me/organization-invites/{declined}").status_code, 204)
+        self.assertEqual(self.api(helpers[2]).delete(f"/api/me/organization-invites/{declined}").status_code, 404)
+
+        # Admins can cancel the rest.
+        self.assertEqual(client.delete(f"/api/organizations/{organization.pk}/invites").data["pending_invites"], 0)
+
+    def test_only_approved_organizations_invite(self):
+        organization = self.org(status="pending")
+        self.member("helper")
+        response = self.api(self.admin_user).post(
+            f"/api/organizations/{organization.pk}/admins", {"email": "helper@example.com"}, format="json"
+        )
+        self.assertEqual(response.data["code"], "org_not_approved")
 
     def test_the_last_admin_cant_leave(self):
         organization = self.org()

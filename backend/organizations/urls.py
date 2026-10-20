@@ -11,5 +11,8 @@ urlpatterns = [
     path("organizations/<int:org_id>/report", views.OrganizationReportView.as_view(), name="organization-report"),
     path("organizations/<int:org_id>/translate", views.OrganizationTranslateView.as_view(), name="organization-translate"),
     path("me/organizations", views.MyOrganizationsView.as_view(), name="my-organizations"),
+    path("organizations/<int:org_id>/invites", views.OrganizationInvitesView.as_view(), name="organization-invites"),
+    path("me/organization-invites", views.MyInvitesView.as_view(), name="my-organization-invites"),
+    path("me/organization-invites/<int:invite_id>", views.MyInviteView.as_view(), name="my-organization-invite"),
     path("neighborhoods", views.NeighborhoodListView.as_view(), name="neighborhoods"),
 ]

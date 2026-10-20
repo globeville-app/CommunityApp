@@ -122,6 +122,7 @@ function page(db: Db, org: DemoOrg, email: string, neighborhoodId: number): OrgP
       status: org.status,
       follower_count: org.followerEmails.length + org.extraFollowers,
       change_pending: false,
+      pending_invites: org.pendingInvites ?? 0,
       admins: org.adminEmails.map((adminEmail) => {
         const profile = db.profiles[adminEmail];
         return { member_id: profile?.id ?? null, display_name: profile?.display_name ?? null, is_you: adminEmail === email };
@@ -235,18 +236,35 @@ export async function uploadOrganizationPhoto(token: string, id: number, photo: 
   return page(db, org, email, profile.neighborhoodId);
 }
 
-export async function addOrganizationAdmin(token: string, id: number, adminEmail: string) {
+export async function addOrganizationAdmin(token: string, id: number, _adminEmail: string) {
   await pause();
   const { email, db, profile } = demoMember(token);
   const org = visibleOrg(db, email, profile.neighborhoodId, id);
   if (!org.adminEmails.includes(email)) throw new ApiError("not_org_admin", 403);
-  const who = adminEmail.trim().toLowerCase();
-  if (!db.profiles[who]) throw new ApiError("not_a_member", 400);
-  if (org.adminEmails.includes(who)) throw new ApiError("already_admin", 400);
-  if (org.adminEmails.length >= 5) throw new ApiError("too_many_admins", 400);
-  org.adminEmails.push(who);
+  // Like the real server: an invitation, the same answer for any email. The
+  // demo's pretend neighbors never answer, so it only counts them.
+  if (org.adminEmails.length + (org.pendingInvites ?? 0) >= 5) throw new ApiError("too_many_admins", 400);
+  org.pendingInvites = (org.pendingInvites ?? 0) + 1;
   save(db);
   return page(db, org, email, profile.neighborhoodId);
+}
+
+export async function cancelOrganizationInvites(token: string, id: number) {
+  await pause(200);
+  const { email, db, profile } = demoMember(token);
+  const org = visibleOrg(db, email, profile.neighborhoodId, id);
+  org.pendingInvites = 0;
+  save(db);
+  return page(db, org, email, profile.neighborhoodId);
+}
+
+export async function getOrganizationInvites(_token: string) {
+  await pause(200);
+  return { invites: [] };
+}
+
+export async function answerOrganizationInvite(_token: string, _inviteId: number, _accept: boolean) {
+  await pause(200);
 }
 
 export async function removeOrganizationAdmin(token: string, id: number, memberId: number) {
