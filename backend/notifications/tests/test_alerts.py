@@ -58,3 +58,11 @@ class ServerErrorEmailTests(TestCase):
         self.crash()
         self.crash()
         self.assertEqual(len(mail.outbox), 1)
+
+
+class AllNowTests(TestCase):
+    def test_all_now_is_refused_outside_development(self):
+        from django.core.management.base import CommandError
+
+        with self.assertRaises(CommandError):
+            call_command("send_due_notifications", "--all-now", stdout=mock.MagicMock())

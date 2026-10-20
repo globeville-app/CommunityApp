@@ -83,14 +83,3 @@ def event_cancelled(event, now=None):
     for notice in notices:
         send_notification(notice, now)
 
-
-def schedule_upcoming_reminders(now=None):
-    """Reminder rows for every upcoming "I'm going" that has none (used once, when this ships)."""
-    from events.models import Event, Going
-
-    now = now or timezone.now()
-    made = 0
-    for going in Going.objects.filter(event__status=Event.Status.ACTIVE, event__starts_at__gt=now).select_related("event"):
-        if schedule_reminder(going.user, going.event, now):
-            made += 1
-    return made

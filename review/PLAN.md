@@ -273,7 +273,7 @@ References in brackets point to the review files, for example
     `backend/organizations/views.py`, tests.
   - **Risk:** low.
 
-- [ ] **P20. Remove dead code and fix the docs**
+- [x] **P20. Remove dead code and fix the docs**
   - **What:**
     - delete the unused `schedule_upcoming_reminders`;
     - fix `README.md:241`, either with a read-only "Scheduled notifications"

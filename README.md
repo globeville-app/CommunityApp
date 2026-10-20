@@ -237,8 +237,8 @@ notifications need a development build too (see "Push notifications" below).
 1. Profile → gear → turn on **Event reminders** (allow notifications).
 2. Tap **I'm going** on an event for tomorrow. At 5:00 PM Denver time today a
    push arrives: "Tomorrow 10:00 AM · [title]", with no meeting spot. (To try
-   it sooner, run `python manage.py send_due_notifications` after changing the
-   reminder's "send at" time in admin, under Scheduled notifications.)
+   it sooner, run `python manage.py send_due_notifications --all-now` on your
+   computer: it sends every waiting reminder straight away.)
 3. With another account, post an event; tap **I'm going** from the first
    account, then cancel the event. The cancellation notice arrives right away.
 4. Settings → **Your organizations** → **Request an organization**. Approve it
@@ -410,9 +410,9 @@ update" with a link to the store (`ios_store_url` / `android_store_url` in
 | POST / DELETE | `/api/me/push-tokens` | register / forget this phone's Expo push token |
 | POST | `/api/me/notif-offer/seen` | the one-time notification ask was shown |
 | PATCH | `/api/profile/me` | also `reminders_enabled`, `cancellation_alerts_enabled` |
-| GET / POST | `/api/organizations` | approved organizations serving your neighborhood, A–Z / request a new one |
+| GET / POST | `/api/organizations` | approved organizations serving your neighborhood, A–Z / request a new one (always the caller's own neighborhood: a `?neighborhood=` parameter, which MILESTONE_4.md lists, is ignored on purpose) |
 | GET / PATCH | `/api/organizations/{id}` | an organization's page / edit (admins; name, type and neighborhoods wait for approval) |
-| POST | `/api/organizations/{id}/photo` | its photo (admins) |
+| POST | `/api/organizations/{id}/photo` | its photo (admins). MILESTONE_4.md puts the photo in `PATCH /api/organizations/{id}`; a separate upload works better for large files on a slow connection |
 | POST / DELETE | `/api/organizations/{id}/admins` | invite a member by email (approved organizations; same reply for any email) / remove an admin; 1–5, counting open invitations |
 | DELETE | `/api/organizations/{id}/invites` | cancel the open invitations (admins see only how many) |
 | GET | `/api/me/organization-invites` | invitations waiting for this member's answer |
