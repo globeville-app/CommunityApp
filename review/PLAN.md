@@ -178,7 +178,7 @@ References in brackets point to the review files, for example
   - **Verify:** new tests that credit appears only after the end, and every
     badge test still passes, on SQLite and Postgres.
 
-- [ ] **P11. One deletion routine for the app and the admin** [N4, N8]
+- [x] **P11. One deletion routine for the app and the admin** [N4, N8]
   - **What:**
     - move the "Delete account" cleanup into one function, and make the
       admin's delete use it too;

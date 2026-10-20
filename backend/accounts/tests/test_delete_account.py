@@ -98,3 +98,20 @@ class DeleteAccountTests(FixtureNeighborhoodsMixin, APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {again.data['token']}")
         confirm_email(self.client)
         self.assertEqual(self.client.get("/api/profile/me").data, {"code": "profile_not_found"})
+
+
+class AdminDeleteTests(DeleteAccountTests):
+    """The team deleting a member in Django admin cleans up the same way (review N4)."""
+
+    def test_deleting_in_admin_cleans_up_like_the_app(self):
+        staff = get_user_model().objects.create_superuser(username="team@example.com", password="x")
+        member = get_user_model().objects.get(username="ana@example.com")
+        self.client.credentials()
+        self.client.force_login(staff)
+        response = self.client.post(f"/admin/auth/user/{member.pk}/delete/", {"post": "yes"})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(get_user_model().objects.filter(username="ana@example.com").exists())
+        self.assertFalse(Profile.objects.exists())
+        self.assertFalse(os.path.exists(self.photo_path))  # the photo file goes too
+        self.assertFalse(ProblemReport.objects.filter(contact_email="ana@example.com").exists())
+        self.assertEqual(ProblemReport.objects.count(), 2)  # kept, without the person

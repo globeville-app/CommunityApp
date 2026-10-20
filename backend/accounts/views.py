@@ -20,6 +20,7 @@ from rest_framework.views import APIView
 from config.errors import ApiError
 
 from . import codes
+from .deletion import delete_member
 from .models import Account, EmailCode, language_of
 from .serializers import DeleteAccountSerializer, LoginSerializer, SignupSerializer, normalize_email
 
@@ -164,92 +165,20 @@ class LogoutView(APIView):
 
 
 class DeleteAccountView(APIView):
-    allow_unverified = True
     """
     POST /api/account/delete {"password": "..."}
 
-    Deletes the member's login, profile, photo file, tokens and everything
-    else tied to them. Their problem reports are kept so the team can still
-    fix the bug, but with the user removed and any contact email cleared.
-
-    RULE FOR EVERY FUTURE FEATURE (see README): content tied to a deleted
-    member is either removed or shown as "Former neighbor", never with their
-    name. When a feature adds data that points at a user, update this view.
+    Deletes the member and everything tied to them (accounts/deletion.py,
+    which the admin's delete uses too).
     """
 
+    allow_unverified = True
     throttle_scope = "auth"
 
     def post(self, request):
         serializer = DeleteAccountSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = request.user
-        if not user.check_password(serializer.validated_data["password"]):
+        if not request.user.check_password(serializer.validated_data["password"]):
             raise ApiError("wrong_password")
-
-        # Imported here to keep the accounts app free of a hard dependency
-        # on the apps that store member data.
-        from django.utils import timezone
-
-        from events.models import Event
-        from profiles.models import Profile
-        from support.models import ProblemReport
-
-        from badges.engine import update_badges
-
-        from organizations.models import Organization
-
-        # Hosts whose numbers include this member, to refresh afterwards.
-        hosts = list(
-            # Only members' own events: an organization event's host is the organization.
-            get_user_model()
-            .objects.filter(organized_events__organization__isnull=True, organized_events__attendances__user=user)
-            .exclude(pk=user.pk)
-            .distinct()
-        )
-        hosts += list(Organization.objects.filter(events__attendances__user=user).distinct())
-        # Organizations they run: if they're the last admin, it's hidden
-        # until the team assigns a new one (MILESTONE_4.md changes SETTINGS.md).
-        their_orgs = list(Organization.objects.filter(admins__user=user))
-
-        photo = None
-        profile = Profile.objects.filter(user=user).first()
-        if profile and profile.photo:
-            photo = (profile.photo.storage, profile.photo.name)
-
-        with transaction.atomic():
-            ProblemReport.objects.filter(user=user).update(user=None, contact_email="")
-            # Their upcoming events are cancelled. Past ones stay, and once
-            # the user is gone they show "Former neighbor" as the organizer.
-            # Organization events aren't theirs to cancel: they belong to the organization.
-            cancelled = list(
-                Event.objects.filter(
-                    organizer=user, organization__isnull=True, starts_at__gt=timezone.now(), status=Event.Status.ACTIVE
-                )
-            )
-            Event.objects.filter(pk__in=[e.pk for e in cancelled]).update(status=Event.Status.CANCELLED)
-            # Deleting the user also deletes, through the database: the
-            # profile (and its interests), the account settings, the
-            # neighborhood match, every login token and their "I'm going"
-            # records, attendance, badges and unlock moments. Events they
-            # organized keep existing with no organizer.
-            user.delete()
-            # Their attendance drops out of these hosts' counts. Stages are
-            # never lowered (badges/engine.py), only the counts change.
-            for host in hosts:
-                update_badges(host)
-            for organization in their_orgs:
-                if not organization.admins.exists():
-                    organization.status = Organization.Status.HIDDEN
-                    organization.save(update_fields=["status", "updated_at"])
-
-        # Neighbors going to their cancelled events get a notice.
-        from notifications.scheduling import event_cancelled
-
-        for event in cancelled:
-            event_cancelled(event)
-
-        # Remove the photo file only once the database change has stuck.
-        if photo:
-            storage, name = photo
-            storage.delete(name)
+        delete_member(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

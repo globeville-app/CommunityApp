@@ -156,6 +156,17 @@ class AdminTests(OrgTestCase):
         self.assertEqual(detail["organization"]["name"], "Our Lady Church")
         self.assertFalse(detail["organization"]["has_page"])
 
+    def test_a_request_still_waiting_for_review_keeps_waiting(self):
+        # Hidden means "approved, but nobody runs it": Approve then shows it
+        # again. A pending request must not skip review that way (review G4).
+        from django.contrib.auth.hashers import make_password
+
+        organization = self.org(status="pending")
+        type(self.admin_user).objects.filter(pk=self.admin_user.pk).update(password=make_password("pw"))
+        self.api(self.admin_user).post("/api/account/delete", {"password": "pw"}, format="json")
+        organization.refresh_from_db()
+        self.assertEqual(organization.status, "pending")
+
     def test_another_admin_keeps_it_live(self):
         from django.contrib.auth.hashers import make_password
 

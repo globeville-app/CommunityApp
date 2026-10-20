@@ -450,14 +450,15 @@ in the person's language (`mobile/src/i18n/*.json`, under `errors`).
 
 ## Deleting members: the rule every feature follows
 
-When a member deletes their account (`POST /api/account/delete`, in
-`backend/accounts/views.py`), everything tied to them goes: login, profile,
+When a member deletes their account (`POST /api/account/delete`), or the team
+deletes them in Django admin, the same routine runs
+(`backend/accounts/deletion.py`) and everything tied to them goes: login, profile,
 photo file, tokens, interests and their neighborhood match. Their problem
 reports stay, with the person removed, so the team can still fix bugs.
 
 **Rule for every future feature: content tied to a deleted member is either
 removed or shown as "Former neighbor / Exvecino," never with their name.**
-When a feature adds data that points at a member, update the delete view and
+When a feature adds data that points at a member, update `delete_member` and
 its tests (`backend/accounts/tests/test_delete_account.py`). For Milestone 2:
 
 - upcoming events they organized are cancelled
@@ -471,7 +472,8 @@ For Milestones 3 and 4:
 - their push tokens and scheduled notifications are removed; neighbors going
   to their cancelled events get a cancellation notice
 - events they posted for an organization stay (they belong to the
-  organization); if they were its last admin, the organization is hidden
+  organization); if they were its last admin, a live organization is hidden
+  (one still waiting for review keeps waiting)
 - blocks they made, and blocks of them, are removed
 - organization invitations to them are removed
   until the team assigns a new admin
