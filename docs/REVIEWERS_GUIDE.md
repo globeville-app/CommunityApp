@@ -128,8 +128,9 @@ something you shouldn't: `get_event`, `events_for`, `can_manage` in
 
 ### 3. Security basics
 
-- Token login (`rest_framework.authtoken`); tokens are kept in the phone's
-  secure storage (`mobile/src/tokenStorage.ts`).
+- Token login, one token per phone, stored hashed and expiring after 90
+  days unused (`backend/accounts/authentication.py`); tokens are kept in the
+  phone's secure storage (`mobile/src/tokenStorage.ts`).
 - Rate limits: `DEFAULT_THROTTLE_RATES` in `backend/config/settings.py`.
 - Django admin: moved to a secret path, with a required two-step code in
   production (`django-otp`).

@@ -376,7 +376,7 @@ update" with a link to the store (`ios_store_url` / `android_store_url` in
 | GET | `/api/config` | app name, languages, and the event category groups (also used for interests) |
 | POST | `/api/auth/signup` | email + password (+ `language`) → token and language |
 | POST | `/api/auth/login` | email + password → token and the account's language |
-| POST | `/api/auth/logout` | deletes the token |
+| POST | `/api/auth/logout` | ends this phone's login (each phone has its own; unused ones expire after 90 days) |
 | POST | `/api/auth/password-reset` | email → emails a 6-digit code (same reply for unknown emails) |
 | POST | `/api/auth/password-reset/confirm` | email + code + new password → logs out every device, returns a fresh token |
 | POST | `/api/account/verify-email` | the code from the welcome email; until then other endpoints answer `email_not_verified` |

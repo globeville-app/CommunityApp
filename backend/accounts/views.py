@@ -11,7 +11,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -21,7 +20,7 @@ from config.errors import ApiError
 
 from . import codes
 from .deletion import delete_member
-from .models import Account, EmailCode, language_of
+from .models import Account, DeviceToken, EmailCode, language_of
 from .serializers import DeleteAccountSerializer, LoginSerializer, SignupSerializer, normalize_email
 
 
@@ -36,8 +35,7 @@ class SignupView(APIView):
         if settings.REQUIRE_EMAIL_VERIFICATION:
             Account.objects.filter(user=user).update(email_verified=False)
             codes.send_code(user, EmailCode.Purpose.VERIFY)
-        token = Token.objects.create(user=user)
-        return Response(auth_reply(user, token), status=status.HTTP_201_CREATED)
+        return Response(auth_reply(user, DeviceToken.issue(user)), status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -55,18 +53,18 @@ class LoginView(APIView):
         if user is None:
             # Same message whether the email or the password was wrong.
             raise ApiError("invalid_credentials")
-        token, _ = Token.objects.get_or_create(user=user)
-        return Response(auth_reply(user, token))
+        # Every login is a new phone's login; the others stay logged in.
+        return Response(auth_reply(user, DeviceToken.issue(user)))
 
 
-def auth_reply(user, token):
+def auth_reply(user, key):
     """
     What signup, login and password reset answer. The saved language lets a
     phone with no choice of its own start in the member's language
     (docs/LANGUAGE.md); email_verified says whether to ask for the code first.
     """
     verified = not Account.objects.filter(user=user, email_verified=False).exists()
-    return {"token": token.key, "language": language_of(user), "email_verified": verified}
+    return {"token": key, "language": language_of(user), "email_verified": verified}
 
 
 class PasswordResetView(APIView):
@@ -117,10 +115,10 @@ class PasswordResetConfirmView(APIView):
             user.save(update_fields=["password"])
             # Reading the code proves the email is theirs.
             Account.objects.filter(user=user).update(email_verified=True)
-            Token.objects.filter(user=user).delete()
+            DeviceToken.objects.filter(user=user).delete()
             PushToken.objects.filter(user=user).delete()
-            token = Token.objects.create(user=user)
-        return Response(auth_reply(user, token))
+            key = DeviceToken.issue(user)
+        return Response(auth_reply(user, key))
 
 
 class VerifyEmailView(APIView):
@@ -158,8 +156,8 @@ class LogoutView(APIView):
         push_token = request.data.get("push_token") if hasattr(request.data, "get") else None
         if push_token:
             PushToken.objects.filter(user=request.user, token=str(push_token)).delete()
-        # Deleting the token means it can never be used again, even if it
-        # was copied off the phone.
+        # Deleting this phone's token means it can never be used again, even
+        # if it was copied off the phone. Other phones stay logged in.
         request.auth.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

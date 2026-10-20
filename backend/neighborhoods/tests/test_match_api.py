@@ -5,7 +5,7 @@ import httpx
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import override_settings
-from rest_framework.authtoken.models import Token
+from accounts.models import DeviceToken
 from rest_framework.test import APITestCase
 
 from geocoding.testing import NO_MATCH_REPLY, census_reply, fake_geocoder
@@ -19,8 +19,7 @@ class MatchApiTests(FixtureNeighborhoodsMixin, APITestCase):
     def setUp(self):
         super().setUp()
         self.user = get_user_model().objects.create_user(username="ana@example.com", password="x")
-        token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {DeviceToken.issue(self.user)}")
 
     def match(self, address=ADDRESS):
         return self.client.post("/api/join/match", {"address": address}, format="json")

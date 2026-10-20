@@ -230,7 +230,7 @@ References in brackets point to the review files, for example
   - **Risk:** low.
   - **Verify:** a stats test shows the warning when the job is stale.
 
-- [ ] **P15. A login per device, expiring after 90 days unused** [A2, N5]
+- [x] **P15. A login per device, expiring after 90 days unused** [A2, N5]
   - **What:** replace the single shared token with one token per device,
     stored hashed. Logout ends only that device and removes its push token.
     A password reset ends all of them.

@@ -62,3 +62,30 @@ class EmailCode(models.Model):
     @staticmethod
     def hash(code):
         return hmac.new(settings.SECRET_KEY.encode(), code.encode(), hashlib.sha256).hexdigest()
+
+
+class DeviceToken(models.Model):
+    """
+    One login per phone (review P15). The app sends "Authorization: Token
+    <key>"; only a hash of the key is stored, so a copy of the database
+    can't be used to sign in. Logging out ends this phone's login only; a
+    password reset ends them all. A login unused for 90 days stops working.
+    """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="device_tokens")
+    key_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def hash(key):
+        return hashlib.sha256(key.encode()).hexdigest()
+
+    @classmethod
+    def issue(cls, user):
+        """A new login for a phone. Returns the key, which is never stored."""
+        import secrets
+
+        key = secrets.token_hex(20)
+        cls.objects.create(user=user, key_hash=cls.hash(key))
+        return key

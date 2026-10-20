@@ -234,8 +234,8 @@ OTP_TOTP_ISSUER = APP_NAME
 REST_FRAMEWORK = {
     # The phone sends "Authorization: Token <token>" on every request.
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # Token login, plus a once-an-hour "last seen" stamp (owner stats).
-        "accounts.authentication.SeenTokenAuthentication",
+        # One login token per phone, plus a once-an-hour "last seen" stamp (owner stats).
+        "accounts.authentication.DeviceTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",

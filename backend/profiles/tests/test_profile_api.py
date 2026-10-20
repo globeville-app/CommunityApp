@@ -7,7 +7,7 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from PIL import ExifTags, Image
-from rest_framework.authtoken.models import Token
+from accounts.models import DeviceToken
 from rest_framework.test import APITestCase
 
 from geocoding.testing import census_reply, fake_geocoder
@@ -28,8 +28,7 @@ class ProfileTestCase(FixtureNeighborhoodsMixin, APITestCase):
     def setUp(self):
         super().setUp()
         self.user = get_user_model().objects.create_user(username="ana@example.com", password="x")
-        token = Token.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {DeviceToken.issue(self.user)}")
 
     def match(self, point):
         with fake_geocoder(census_reply(*point)):

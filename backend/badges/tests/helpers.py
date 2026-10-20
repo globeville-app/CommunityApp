@@ -5,10 +5,9 @@ from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from accounts.models import Account
+from accounts.models import Account, DeviceToken
 from badges import engine
 from events.models import Event, Going
 from events.timing import event_end
@@ -36,7 +35,8 @@ class BadgeTestCase(TestCase):
         Account.objects.create(user=user, language=language)
         NeighborhoodMatch.objects.create(user=user, neighborhood=neighborhood)
         Profile.objects.create(user=user, first_name=name.title(), last_initial="R", neighborhood=neighborhood)
-        Token.objects.create(user=user)
+        self.keys = getattr(self, "keys", {})
+        self.keys[user.pk] = DeviceToken.issue(user)
         return user
 
     def members(self, n, prefix="n", neighborhood=None):
@@ -80,5 +80,5 @@ class BadgeTestCase(TestCase):
 
     def api(self, user):
         client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION=f"Token {Token.objects.get(user=user).key}")
+        client.credentials(HTTP_AUTHORIZATION=f"Token {self.keys[user.pk]}")
         return client

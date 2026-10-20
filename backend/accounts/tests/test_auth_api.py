@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from rest_framework.authtoken.models import Token
+from accounts.models import DeviceToken
 from rest_framework.test import APITestCase
 
 User = get_user_model()
@@ -16,7 +16,7 @@ class SignupTests(APITestCase):
         user = User.objects.get()
         self.assertEqual(user.username, "ana@example.com")
         self.assertEqual(user.email, "ana@example.com")
-        self.assertEqual(response.data["token"], Token.objects.get(user=user).key)
+        self.assertEqual(DeviceToken.objects.get(user=user).key_hash, DeviceToken.hash(response.data["token"]))
         # The password is stored hashed, never as typed.
         self.assertNotEqual(user.password, PASSWORD)
 
@@ -69,7 +69,7 @@ class LoginLogoutTests(APITestCase):
         ).data["token"]
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
         self.assertEqual(self.client.post("/api/auth/logout").status_code, 204)
-        self.assertFalse(Token.objects.filter(key=token).exists())
+        self.assertFalse(DeviceToken.objects.filter(key_hash=DeviceToken.hash(token)).exists())
         # The old token no longer works.
         self.assertEqual(self.client.post("/api/auth/logout").status_code, 401)
 

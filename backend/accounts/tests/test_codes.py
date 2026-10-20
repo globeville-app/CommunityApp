@@ -7,10 +7,9 @@ from django.core import mail
 from django.core.cache import cache
 from django.test import override_settings
 from django.utils import timezone
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from accounts.models import Account, EmailCode
+from accounts.models import Account, DeviceToken, EmailCode
 from accounts.testing import latest_code
 from notifications.models import PushToken
 
@@ -88,7 +87,7 @@ class PasswordResetTests(APITestCase):
             username="ana@example.com", email="ana@example.com", password=PASSWORD
         )
         Account.objects.create(user=self.user, language="en")
-        self.old_token = Token.objects.create(user=self.user)
+        self.old_key = DeviceToken.issue(self.user)
         PushToken.objects.create(user=self.user, token="ExponentPushToken[old-phone]")
 
     def ask(self, email="ana@example.com"):
@@ -110,8 +109,8 @@ class PasswordResetTests(APITestCase):
         self.ask()
         response = self.confirm(latest_code())
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.data["token"], self.old_token.key)
-        self.assertFalse(Token.objects.filter(key=self.old_token.key).exists())
+        self.assertNotEqual(response.data["token"], self.old_key)
+        self.assertEqual(DeviceToken.objects.filter(user=self.user).count(), 1)  # only this phone's new one
         self.assertFalse(PushToken.objects.exists())  # old phones stop getting notifications
         login = self.client.post(
             "/api/auth/login", {"email": "ana@example.com", "password": NEW_PASSWORD}, format="json"

@@ -6,10 +6,9 @@ import tempfile
 
 from django.contrib.auth import get_user_model
 from django.test import override_settings
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from accounts.models import Account
+from accounts.models import Account, DeviceToken
 from geocoding.testing import census_reply, fake_geocoder
 from neighborhoods.models import NeighborhoodMatch
 from neighborhoods.testing import FixtureNeighborhoodsMixin
@@ -74,7 +73,7 @@ class DeleteAccountTests(FixtureNeighborhoodsMixin, APITestCase):
         self.assertFalse(Profile.objects.exists())
         self.assertFalse(Account.objects.exists())
         self.assertFalse(NeighborhoodMatch.objects.exists())
-        self.assertFalse(Token.objects.exists())
+        self.assertFalse(DeviceToken.objects.exists())
         self.assertFalse(os.path.exists(self.photo_path))
         # The old token is dead.
         self.assertEqual(self.client.get("/api/profile/me").status_code, 401)

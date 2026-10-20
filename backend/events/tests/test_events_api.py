@@ -96,10 +96,10 @@ class CreateEventTests(EventTestCase):
 
     def test_needs_a_profile(self):
         from django.contrib.auth import get_user_model
-        from rest_framework.authtoken.models import Token
+        from accounts.models import DeviceToken
 
         newbie = get_user_model().objects.create_user(username="new@example.com", password="x")
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {Token.objects.create(user=newbie).key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {DeviceToken.issue(newbie)}")
         self.assertEqual(self.post_event().data, {"code": "profile_not_found"})
         self.assertEqual(self.client.get("/api/events").status_code, 404)
 

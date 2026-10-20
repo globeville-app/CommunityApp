@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from rest_framework.authtoken.models import Token
+from accounts.models import DeviceToken
 from rest_framework.test import APIClient
 
 from accounts.models import Account
@@ -110,7 +110,7 @@ class LastSeenTests(Fixtures):
     def test_updates_on_a_signed_in_request_at_most_hourly(self):
         user = self.member("ana@example.com", neighborhood=self.highland)
         client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION=f"Token {Token.objects.create(user=user).key}")
+        client.credentials(HTTP_AUTHORIZATION=f"Token {DeviceToken.issue(user)}")
 
         client.get("/api/profile/me")
         first = Account.objects.get(user=user).last_seen_at

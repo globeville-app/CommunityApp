@@ -5,6 +5,7 @@ from unittest import mock
 
 from django.utils import timezone
 
+from accounts.models import DeviceToken
 from events.models import Event
 from events.tests.helpers import EventTestCase
 from events.timing import event_end
@@ -72,6 +73,8 @@ class MidnightRuleTests(EventTestCase):
     def test_an_open_ended_event_stays_listed_and_joinable_until_midnight(self):
         evening = self.denver(2030, 6, 1, 18, 0)
         event = self.make_event(self.ben, starts_at=evening)
+        # Logins unused for 90 days expire; keep this one fresh in 2030.
+        DeviceToken.objects.update(last_used_at=evening)
         with mock.patch("django.utils.timezone.now", return_value=self.denver(2030, 6, 1, 23, 30)):
             titles = [e["title"] for e in self.client.get("/api/events").data["events"]]
             self.assertIn(event.title, titles)

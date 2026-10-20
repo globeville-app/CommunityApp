@@ -4,10 +4,9 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from accounts.models import Account
+from accounts.models import Account, DeviceToken
 from neighborhoods.models import NeighborhoodMatch
 from neighborhoods.testing import FixtureNeighborhoodsMixin
 from profiles.models import Profile
@@ -35,11 +34,12 @@ class EventTestCase(FixtureNeighborhoodsMixin, APITestCase):
             neighborhood_id=neighborhood_id,
             interests=list(interests),
         )
-        Token.objects.create(user=user)
+        self.keys = getattr(self, "keys", {})
+        self.keys[user.pk] = DeviceToken.issue(user)
         return user
 
     def as_user(self, user):
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {Token.objects.get(user=user).key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.keys[user.pk]}")
 
     def later(self, **kwargs):
         """A time in the future, in Denver time without a zone, as the app sends it."""

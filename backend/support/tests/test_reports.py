@@ -9,7 +9,7 @@ from django.core import mail
 from django.core.cache import cache
 from django.test import override_settings
 from PIL import Image
-from rest_framework.authtoken.models import Token
+from accounts.models import DeviceToken
 from rest_framework.test import APITestCase
 
 from profiles.testing import exif_with_gps, image_bytes, upload
@@ -39,7 +39,7 @@ class ProblemReportTests(APITestCase):
 
     def sign_in(self):
         user = get_user_model().objects.create_user(username="ana@example.com", email="ana@example.com", password="x")
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {Token.objects.create(user=user).key}")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {DeviceToken.issue(user)}")
         return user
 
     def test_signed_in_report_is_saved_with_the_user(self):
