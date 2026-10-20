@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from config.errors import ApiError
 from events.timing import event_end
 from events.views import get_event, member_profile
-from profiles.models import Profile
+from profiles.models import Block, Profile
 
 from . import config, engine
 from .models import Attendance, BadgeState, Celebration, Keepsake, ShareLog
@@ -131,6 +131,8 @@ class MemberView(APIView):
                 "alias": member.alias or None,
                 "member_since": timezone.localtime(member.joined_at).date().isoformat(),
                 "badges": badges,
+                "is_own": member.user_id == request.user.id,
+                "is_blocked": Block.objects.filter(blocker=request.user, blocked=member.user).exists(),
             }
         )
 
@@ -138,6 +140,36 @@ class MemberView(APIView):
 class MemberBadgesView(MemberView):
     def get(self, request, member_id):
         return super().get(request, member_id, badges_only=True)
+
+
+class BlockView(APIView):
+    """PUT = block this neighbor, DELETE = unblock. Silent: they're never told."""
+
+    def put(self, request, member_id):
+        me = member_profile(request)
+        member = Profile.objects.filter(pk=member_id, neighborhood_id=me.neighborhood_id).first()
+        if member is None:
+            raise ApiError("member_not_found", status_code=status.HTTP_404_NOT_FOUND)
+        if member.user_id == request.user.id:
+            raise ApiError("cant_block_yourself")
+        Block.objects.get_or_create(blocker=request.user, blocked=member.user)
+        return Response({"is_blocked": True})
+
+    def delete(self, request, member_id):
+        # Works even if they've since moved neighborhoods.
+        Block.objects.filter(blocker=request.user, blocked__profile__pk=member_id).delete()
+        return Response({"is_blocked": False})
+
+
+class MyBlocksView(APIView):
+    """Settings → Blocked members: who this member blocked, to unblock them."""
+
+    def get(self, request):
+        blocks = Block.objects.filter(blocker=request.user, blocked__profile__isnull=False).select_related(
+            "blocked__profile"
+        )
+        members = [{"id": b.blocked.profile.pk, "display_name": b.blocked.profile.display_name} for b in blocks]
+        return Response({"members": sorted(members, key=lambda m: m["display_name"])})
 
 
 class CollectCardsView(APIView):

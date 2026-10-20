@@ -6,6 +6,7 @@ import { renderRouter } from "expo-router/testing-library";
 
 import Address from "../src/app/address";
 import BadgeDetail from "../src/app/badges/[key]";
+import BlockedMembers from "../src/app/blocked-members";
 import AllBadges from "../src/app/badges/index";
 import Celebrate from "../src/app/celebrate";
 import CheckinOffer from "../src/app/checkin-offer";
@@ -73,6 +74,7 @@ export function renderApp(initialUrl = "/") {
       "badges/index": AllBadges,
       "badges/[key]": BadgeDetail,
       "member/[id]": Member,
+      "blocked-members": BlockedMembers,
       "checkin-offer": CheckinOffer,
       celebrate: Celebrate,
       "share/[key]": SharePreview,

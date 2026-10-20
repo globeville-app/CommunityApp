@@ -105,7 +105,7 @@ References in brackets point to the review files, for example
     no email leak, other devices logged out) and app tests. Then a manual
     run with the console email.
 
-- [ ] **P6. "Block this member"** [S3] — **needs you:** confirm you want
+- [x] **P6. "Block this member"** [S3] — **needs you:** confirm you want
   it now. It's mainly to pass Apple's review.
   - **What:**
     - backend: a block list; a blocked member's events and member page are

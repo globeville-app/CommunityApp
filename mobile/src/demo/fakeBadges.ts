@@ -262,6 +262,21 @@ const SAMPLE_MEMBERS: Record<number, { name: string; badges: [string, number, nu
   9004: { name: "Ann P.", badges: [["local", 1, 2], ["treasure_hunter", 1, 1]] },
 };
 
+// Blocking in the demo: remembered for this page only.
+const demoBlocked = new Map<number, string>();
+
+export async function setBlocked(_token: string, id: number, blocked: boolean) {
+  await pause(200);
+  if (blocked) demoBlocked.set(id, SAMPLE_MEMBERS[id]?.name ?? "");
+  else demoBlocked.delete(id);
+  return { is_blocked: blocked };
+}
+
+export async function getBlockedMembers(_token: string) {
+  await pause(200);
+  return { members: [...demoBlocked].map(([id, display_name]) => ({ id, display_name })) };
+}
+
 export async function getMember(token: string, id: number): Promise<MemberPage> {
   await pause(250);
   const { email, db, profile } = demoMember(token);
@@ -275,6 +290,7 @@ export async function getMember(token: string, id: number): Promise<MemberPage> 
       neighborhood: { id: neighborhood.id, name: neighborhood.name },
       alias: null,
       member_since: "2026-03-14",
+      is_blocked: demoBlocked.has(id),
       badges: sample.badges.map(([key, stage, count]) => ({
         key,
         kind: BADGE_RULES.keepsakes.includes(key) ? "keepsake" : "growth",

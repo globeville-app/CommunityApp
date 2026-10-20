@@ -43,6 +43,7 @@ export {
   collectEvent,
   declineEvent,
   getBadgeCatalog,
+  getBlockedMembers,
   getCelebrations,
   getCollectCards,
   getGeofences,
@@ -52,6 +53,7 @@ export {
   logShare,
   markCelebrationsSeen,
   markCheckinOfferSeen,
+  setBlocked,
   updateProfileSettings,
 } from "./demo/fakeBadges";
 export {

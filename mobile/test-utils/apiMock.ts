@@ -39,6 +39,8 @@ const SERVER_CALLS = [
   "getBadgeCatalog",
   "getMyBadges",
   "getMember",
+  "setBlocked",
+  "getBlockedMembers",
   "getCollectCards",
   "collectEvent",
   "declineEvent",

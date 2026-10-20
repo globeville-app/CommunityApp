@@ -2,19 +2,34 @@
  * A neighbor's small member page, opened from an event's "Posted by": name,
  * neighborhood, member since, and their badges unless they chose Only me.
  * Never their My Impact numbers. Other neighborhoods get "not found".
+ * Also "Block": their events disappear for this member, silently.
  */
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { ApiError, getMember, MemberPage } from "../../api";
+import { ApiError, getMember, MemberPage, setBlocked } from "../../api";
 import { useAuth } from "../../auth";
 import { Badge } from "../../components/badges/Badge";
 import { shortDate } from "../../i18n/dates";
 import { errorMessage } from "../../i18n/errors";
 import { useLanguage } from "../../language";
-import { Avatar, BackButton, Caption, ErrorMessage, GlassCard, Loading, Screen, Section, Tag, Title, styles } from "../../ui";
+import {
+  Avatar,
+  BackButton,
+  Caption,
+  ConfirmDialog,
+  ErrorMessage,
+  GlassCard,
+  Loading,
+  Screen,
+  Section,
+  Tag,
+  TextLink,
+  Title,
+  styles,
+} from "../../ui";
 
 export default function Member() {
   const { t } = useTranslation();
@@ -23,6 +38,7 @@ export default function Member() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [member, setMember] = useState<MemberPage | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
+  const [confirmingBlock, setConfirmingBlock] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -42,6 +58,17 @@ export default function Member() {
     );
   }
   if (!member) return <Loading />;
+
+  async function changeBlocked(blocked: boolean) {
+    setConfirmingBlock(false);
+    if (!token || !member) return;
+    try {
+      const { is_blocked } = await setBlocked(token, member.id, blocked);
+      setMember({ ...member, is_blocked });
+    } catch (e) {
+      setError(e as ApiError);
+    }
+  }
 
   const neighborhood = member.alias ? `${member.alias} (${member.neighborhood.name})` : member.neighborhood.name;
   return (
@@ -63,6 +90,22 @@ export default function Member() {
           </View>
         </GlassCard>
       ) : null}
+      {member.is_own ? null : member.is_blocked ? (
+        <>
+          <Caption>{t("member.blocked_note", { name: member.display_name })}</Caption>
+          <TextLink label={t("member.unblock", { name: member.display_name })} onPress={() => changeBlocked(false)} />
+        </>
+      ) : (
+        <TextLink label={t("member.block", { name: member.display_name })} onPress={() => setConfirmingBlock(true)} />
+      )}
+      <ConfirmDialog
+        visible={confirmingBlock}
+        title={t("member.block_confirm", { name: member.display_name })}
+        confirmLabel={t("member.block", { name: member.display_name })}
+        cancelLabel={t("settings.cancel")}
+        onConfirm={() => changeBlocked(true)}
+        onCancel={() => setConfirmingBlock(false)}
+      />
     </Screen>
   );
 }

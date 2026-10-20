@@ -53,15 +53,20 @@ def events_for(profile, user, own_neighborhood_only=False):
     """
     Events the member can see, with the counts the app shows: their own
     neighborhood's, plus (for organization admins) their organizations'
-    events in any neighborhood, so they can manage them.
+    events in any neighborhood, so they can manage them. Never the events of
+    members they blocked.
     """
     from organizations.models import Follow
+    from profiles.models import Block
 
     visible = Q(neighborhood_id=profile.neighborhood_id)
     if not own_neighborhood_only:
         visible |= Q(organization_id__in=admin_org_ids(user))
+    # Members they blocked: their own events disappear (not organization events).
+    blocked = Q(organization__isnull=True, organizer_id__in=Block.objects.filter(blocker=user).values("blocked"))
     return (
         Event.objects.filter(visible)
+        .exclude(blocked)
         .select_related("organizer__profile", "organization")
         .annotate(
             going_count=Count("goings", distinct=True),

@@ -13,6 +13,7 @@ import {
   AuthResult,
   BadgeCatalog,
   BadgeData,
+  BlockedMember,
   Celebration,
   CollectCard,
   Geofence,
@@ -251,6 +252,15 @@ export function getMyBadges(token: string) {
 
 export function getMember(token: string, id: number) {
   return request<MemberPage>(`/api/members/${id}`, { token });
+}
+
+/** Block (or unblock) a neighbor: their events disappear for this member only. */
+export function setBlocked(token: string, id: number, blocked: boolean) {
+  return request<{ is_blocked: boolean }>(`/api/members/${id}/block`, { method: blocked ? "PUT" : "DELETE", token });
+}
+
+export function getBlockedMembers(token: string) {
+  return request<{ members: BlockedMember[] }>("/api/me/blocks", { token });
 }
 
 export function getCollectCards(token: string) {

@@ -390,6 +390,8 @@ from the design come in a later milestone.
 | GET | `/api/badges/catalog` | every badge's rules (thresholds from `backend/badges/config.py`) |
 | GET | `/api/me/badges` | your 15 badges: stage, count, next threshold |
 | GET | `/api/members/{id}` (`/badges`) | a neighbor's member page; badges empty if they chose Only me |
+| PUT/DELETE | `/api/members/{id}/block` | block or unblock a neighbor: their own events disappear for this member only; they're never told |
+| GET | `/api/me/blocks` | the members this member blocked (Settings → Blocked members) |
 | GET | `/api/me/collect` | Ready to collect cards, plus `show_checkin_reoffer` |
 | POST | `/api/events/{id}/collect` · `/decline` | collect attendance · "I didn't make it" |
 | POST | `/api/events/{id}/checkin` | auto check-in; **the body must be empty** |
@@ -460,6 +462,7 @@ For Milestones 3 and 4:
   to their cancelled events get a cancellation notice
 - events they posted for an organization stay (they belong to the
   organization); if they were its last admin, the organization is hidden
+- blocks they made, and blocks of them, are removed
   until the team assigns a new admin
 
 ---

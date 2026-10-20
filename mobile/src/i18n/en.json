@@ -206,7 +206,10 @@
     "badges_neighborhood": "My neighborhood",
     "badges_only_me": "Only me",
     "maps_app": "Maps app",
-    "credits": "Open-source credits"
+    "credits": "Open-source credits",
+    "blocked_members": "Blocked members",
+    "blocked_none": "You haven't blocked anyone.",
+    "unblock": "Unblock"
   },
   "coming_soon": {
     "title": "Coming soon",
@@ -545,7 +548,11 @@
     "settings_note": "Saved on this phone only. Only maps apps on this phone are listed."
   },
   "member": {
-    "since": "Member since {{date}}"
+    "since": "Member since {{date}}",
+    "block": "Block {{name}}",
+    "unblock": "Unblock {{name}}",
+    "block_confirm": "Block {{name}}? You won't see their events. They won't be told.",
+    "blocked_note": "You've blocked {{name}} and don't see their events."
   },
   "impact": {
     "button": "My Impact",

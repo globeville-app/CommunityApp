@@ -72,3 +72,18 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.display_name
+
+
+class Block(models.Model):
+    """
+    "Block this member" (Apple's rule for apps where people post; review P6).
+    The blocker stops seeing the blocked member's own events. It's one-way and
+    silent: the blocked member is never told, and nothing else changes for them.
+    """
+
+    blocker = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocks")
+    blocked = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="blocked_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["blocker", "blocked"], name="one_block_per_pair")]

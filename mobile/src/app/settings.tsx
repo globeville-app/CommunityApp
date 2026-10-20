@@ -185,6 +185,8 @@ export default function Settings() {
 
       <GlassCard style={{ gap: 0, paddingVertical: 6, marginTop: 16 }}>
         <ListRow label={t("organizations.yours")} chevron onPress={() => router.push("/my-organizations")} />
+        <Divider />
+        <ListRow label={t("settings.blocked_members")} chevron onPress={() => router.push("/blocked-members")} />
       </GlassCard>
 
       {/* Set apart from the rest, and the only row in color. */}

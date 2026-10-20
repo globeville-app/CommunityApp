@@ -214,7 +214,13 @@ export type MemberPage = {
   alias: string | null;
   member_since: string;
   badges: BadgeData[];
+  /** Their own page (no Block link). */
+  is_own?: boolean;
+  /** This member blocked them (their events are hidden). */
+  is_blocked?: boolean;
 };
+
+export type BlockedMember = { id: number; display_name: string };
 
 /** One event for the phone to watch (auto check-in). Only the event's pin. */
 export type Geofence = {

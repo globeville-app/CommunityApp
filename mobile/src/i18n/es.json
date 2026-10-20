@@ -206,7 +206,10 @@
     "badges_neighborhood": "Mi barrio",
     "badges_only_me": "Solo yo",
     "maps_app": "App de mapas",
-    "credits": "Créditos de código abierto"
+    "credits": "Créditos de código abierto",
+    "blocked_members": "Personas bloqueadas",
+    "blocked_none": "No has bloqueado a nadie.",
+    "unblock": "Desbloquear"
   },
   "coming_soon": {
     "title": "Muy pronto",
@@ -545,7 +548,11 @@
     "settings_note": "Se guarda solo en este teléfono. Solo aparecen las apps de mapas de este teléfono."
   },
   "member": {
-    "since": "Miembro desde {{date}}"
+    "since": "Miembro desde {{date}}",
+    "block": "Bloquear a {{name}}",
+    "unblock": "Desbloquear a {{name}}",
+    "block_confirm": "¿Bloquear a {{name}}? No verás sus eventos. No se le avisará.",
+    "blocked_note": "Bloqueaste a {{name}} y no ves sus eventos."
   },
   "impact": {
     "button": "Mi impacto",
