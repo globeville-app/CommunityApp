@@ -130,3 +130,10 @@ class ServerImageTests(TestCase):
     def test_the_server_image_defaults_to_production(self):
         dockerfile = (BACKEND.parent / "Dockerfile").read_text()
         self.assertRegex(dockerfile, r"(?m)^ENV [^\n]*(\\\n[^\n]*)*DJANGO_DEBUG=0")
+
+
+class ServerImageUserTests(TestCase):
+    def test_the_server_runs_as_an_ordinary_user(self):
+        dockerfile = (BACKEND.parent / "Dockerfile").read_text()
+        self.assertRegex(dockerfile, r"(?m)^USER app$")
+        self.assertLess(dockerfile.index("USER app"), dockerfile.index("CMD "))

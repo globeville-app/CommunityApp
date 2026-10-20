@@ -310,7 +310,7 @@ References in brackets point to the review files, for example
     problem reports, with a matching change in the app.
   - **Risk:** low.
 
-- [ ] **P24. Dockerfile runs as a non-root user** [O5]
+- [x] **P24. Dockerfile runs as a non-root user** [O5]
   - **Risk:** low.
   - **Verify:** a CI `docker build` (P4).
 

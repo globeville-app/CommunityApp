@@ -24,5 +24,10 @@ WORKDIR /app/backend
 RUN DJANGO_DEBUG=0 DJANGO_SECRET_KEY=build-only ALLOWED_HOSTS=build \
     python manage.py collectstatic --noinput
 
+# Run as an ordinary user, not root: if someone ever broke in through the
+# app, they couldn't change the image's own files (review O5).
+RUN useradd --no-create-home --shell /usr/sbin/nologin app
+USER app
+
 # App Platform sets PORT. Two workers is plenty at launch scale.
 CMD ["sh", "-c", "gunicorn config.wsgi --bind 0.0.0.0:${PORT:-8080} --workers 2 --timeout 60 --access-logfile -"]
