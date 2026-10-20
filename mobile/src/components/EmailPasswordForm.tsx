@@ -1,5 +1,5 @@
 /** The shared form behind the Sign up and Log in screens. */
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ApiError, AuthResult } from "../api";
@@ -16,9 +16,11 @@ type Props = {
   /** This screen's route name, sent with a problem report, e.g. "join/login". */
   screen: string;
   submit: (email: string, password: string) => Promise<AuthResult>;
+  /** Extra links under the button, e.g. "Forgot password?" on Log in. */
+  links?: ReactNode;
 };
 
-export function EmailPasswordForm({ title, buttonTitle, hint, screen, submit }: Props) {
+export function EmailPasswordForm({ title, buttonTitle, hint, screen, submit, links }: Props) {
   const { t } = useTranslation();
   const { signIn } = useAuth();
   const { syncAfterLogin } = useLanguage();
@@ -71,6 +73,7 @@ export function EmailPasswordForm({ title, buttonTitle, hint, screen, submit }: 
       {hint ? <Caption>{hint}</Caption> : null}
       <ErrorMessage message={errorMessage(t, error)} />
       <Button title={buttonTitle} onPress={onSubmit} busy={busy} disabled={!email || !password} />
+      {links}
       <TroubleLink from={screen} />
     </Screen>
   );

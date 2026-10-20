@@ -63,6 +63,10 @@ class ProfileView(APIView):
 
 
 class MyProfileView(APIView):
+    # An unconfirmed member can still save their language (the app does that
+    # right after login); reading the profile waits for the email code.
+    allow_unverified = {"PATCH"}
+
     def get(self, request):
         return Response(profile_json(get_profile_or_404(request.user), request))
 

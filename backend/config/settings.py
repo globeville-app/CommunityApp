@@ -236,6 +236,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
+        # New members confirm their email first (accounts/permissions.py).
+        "accounts.permissions.EmailVerified",
     ],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     # Every error response has the same shape: {"code": ..., "detail": ...}
@@ -256,6 +258,10 @@ REST_FRAMEWORK = {
     },
 }
 
+
+# New signups confirm their email with a code before using the app. Only
+# switch this off for a server that can't send email yet.
+REQUIRE_EMAIL_VERIFICATION = os.environ.get("REQUIRE_EMAIL_VERIFICATION", "1") == "1"
 
 # The header our host's proxy fills in with the caller's real address; empty
 # means "use the connecting address". DigitalOcean: DO-Connecting-IP.

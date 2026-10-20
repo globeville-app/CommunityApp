@@ -17,6 +17,7 @@ from rest_framework.test import APITestCase
 from geocoding.testing import census_reply, fake_geocoder
 from neighborhoods.testing import FixtureNeighborhoodsMixin
 from profiles.testing import exif_with_gps, image_bytes, upload
+from accounts.testing import confirm_email
 
 # Unusual values so a hit can only come from this test.
 ADDRESS = "4242 Zzyzx Privacy Ln Apt 9, Denver, CO 80211"
@@ -53,6 +54,7 @@ class AddressIsNeverStoredTests(FixtureNeighborhoodsMixin, APITestCase):
         r = [c.post("/api/auth/signup", {"email": "zed@example.com", "password": "a long pass phrase 9"}, format="json")]
         r.append(c.post("/api/auth/login", {"email": "zed@example.com", "password": "a long pass phrase 9"}, format="json"))
         c.credentials(HTTP_AUTHORIZATION=f"Token {r[-1].data['token']}")
+        confirm_email(c)
 
         with fake_geocoder(census_reply(LAT, LON)):
             r.append(c.post("/api/join/match", {"address": ADDRESS}, format="json"))

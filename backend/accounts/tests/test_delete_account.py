@@ -16,6 +16,7 @@ from neighborhoods.testing import FixtureNeighborhoodsMixin
 from profiles.models import Profile
 from profiles.testing import image_bytes, upload
 from support.models import ProblemReport
+from accounts.testing import confirm_email
 
 MEDIA = tempfile.mkdtemp(prefix="test-media-")
 PRIVATE = tempfile.mkdtemp(prefix="test-private-")
@@ -35,6 +36,7 @@ class DeleteAccountTests(FixtureNeighborhoodsMixin, APITestCase):
         signup = {"email": "ana@example.com", "password": PASSWORD, "language": "es"}
         self.token = self.client.post("/api/auth/signup", signup, format="json").data["token"]
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
+        confirm_email(self.client)
         with fake_geocoder(census_reply(*self.HIGHLAND)):
             self.client.post("/api/join/match", {"address": "1 Main St"}, format="json")
         profile = {"first_name": "Ana", "last_name": "R", "interests": ["gardening"]}
@@ -94,4 +96,5 @@ class DeleteAccountTests(FixtureNeighborhoodsMixin, APITestCase):
         # A brand-new account: nothing carried over.
         self.assertEqual(again.data["language"], "en")
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {again.data['token']}")
+        confirm_email(self.client)
         self.assertEqual(self.client.get("/api/profile/me").data, {"code": "profile_not_found"})

@@ -96,7 +96,8 @@ export type EventInput = {
 export type Translation = { title: string; description: string; target: Language; machine: boolean };
 
 /** Signup and login both return the token and the account's language. */
-export type AuthResult = { token: string; language: Language };
+/** email_verified: false means "ask for the code from the welcome email first". */
+export type AuthResult = { token: string; language: Language; email_verified?: boolean };
 
 export type MatchResult = { neighborhood_id: number; name: string; aliases: string[] };
 

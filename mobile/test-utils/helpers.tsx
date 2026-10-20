@@ -25,7 +25,10 @@ import ComingSoon from "../src/app/coming-soon";
 import DeleteAccount from "../src/app/delete-account";
 import Start from "../src/app/index";
 import RootLayout from "../src/app/_layout";
+import ForgotPassword from "../src/app/forgot-password";
 import Login from "../src/app/login";
+import ResetPassword from "../src/app/reset-password";
+import VerifyEmail from "../src/app/verify-email";
 import TabLayout from "../src/app/(tabs)/_layout";
 import Events from "../src/app/(tabs)/events";
 import Profile from "../src/app/(tabs)/profile";
@@ -51,6 +54,9 @@ export function renderApp(initialUrl = "/") {
       welcome: Welcome,
       signup: Signup,
       login: Login,
+      "forgot-password": ForgotPassword,
+      "reset-password": ResetPassword,
+      "verify-email": VerifyEmail,
       address: Address,
       "profile-setup": ProfileSetup,
       "(tabs)/_layout": TabLayout,

@@ -21,7 +21,22 @@
     "signup_button": "Sign up",
     "password_hint": "At least 8 characters. Avoid common passwords.",
     "login_title": "Welcome back",
-    "login_button": "Log in"
+    "login_button": "Log in",
+    "forgot_link": "Forgot password?",
+    "forgot_title": "Reset your password",
+    "forgot_intro": "Type your email and we'll send you a 6-digit code.",
+    "forgot_button": "Send code",
+    "reset_title": "Check your email",
+    "reset_intro": "If {{email}} has an account, we just sent it a code. Type it here with a new password.",
+    "code_label": "6-digit code",
+    "new_password_label": "New password",
+    "reset_button": "Save new password",
+    "verify_title": "Confirm your email",
+    "verify_intro": "We sent a 6-digit code to your email. Type it here to finish signing up.",
+    "verify_button": "Confirm",
+    "verify_resend": "Send a new code",
+    "verify_resent": "We sent a new code.",
+    "verify_other_email": "Use a different email"
   },
   "start": {
     "error_title": "Hmm.",
@@ -159,7 +174,9 @@
     "invalid_neighborhood": "That neighborhood isn't in Denver's list.",
     "org_description_too_long": "Keep the description to 500 characters.",
     "org_not_found": "We couldn't find that organization.",
-    "invalid_push_token": "Notifications couldn't be set up on this phone."
+    "invalid_push_token": "Notifications couldn't be set up on this phone.",
+    "invalid_code": "That code isn't right or has expired. Check the email, or ask for a new code.",
+    "email_not_verified": "Please confirm your email first."
   },
   "demo": {
     "banner_label": "Demo",
@@ -679,5 +696,15 @@
     "brought_together_other": "Your events brought together {{count}} neighbors.",
     "most_popular_one": "Most popular: {{title}}, {{date}}, with {{count}} neighbor.",
     "most_popular_other": "Most popular: {{title}}, {{date}}, with {{count}} neighbors."
+  },
+  "email": {
+    "verify": {
+      "subject": "Your {app} code",
+      "body": "Welcome to {app}!\n\nYour code is {code}. Type it in the app to confirm your email. It works for {minutes} minutes.\n\nIf you didn't sign up, you can ignore this email."
+    },
+    "reset": {
+      "subject": "Reset your {app} password",
+      "body": "Someone asked to reset the password for your {app} account.\n\nYour code is {code}. Type it in the app with your new password. It works for {minutes} minutes.\n\nIf it wasn't you, you can ignore this email: your password hasn't changed."
+    }
   }
 }

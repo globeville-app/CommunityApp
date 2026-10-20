@@ -85,7 +85,7 @@ References in brackets point to the review files, for example
   - **Then you:** turn on branch protection for `main` (05-ops.md, owner
     actions).
 
-- [ ] **P5. Password reset ("Forgot password?")** [A1] — **needs you:**
+- [x] **P5. Password reset ("Forgot password?")** [A1] — **needs you:**
   Postmark set up for real emails (development prints them).
   - **What:**
     - backend: "email me a reset link", then "set a new password with this

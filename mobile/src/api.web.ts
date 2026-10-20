@@ -11,17 +11,21 @@ import { CATEGORY_GROUPS } from "./demo/fakeBackend";
 
 export * from "./apiTypes";
 export {
+  confirmPasswordReset,
   deleteAccount,
   getMyProfile,
   login,
   logout,
   matchAddress,
+  requestPasswordReset,
+  resendVerification,
   saveProfile,
   sendProblemReport,
   signup,
   updateInterests,
   updateLanguage,
   uploadPhoto,
+  verifyEmail,
 } from "./demo/fakeBackend";
 export {
   cancelEvent,

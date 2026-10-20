@@ -108,6 +108,28 @@ export function login(email: string, password: string) {
 }
 
 /** Save the member's language on the server (works before the profile exists). */
+/** "Forgot password?": the server emails a 6-digit code (the reply is the same for unknown emails). */
+export function requestPasswordReset(email: string) {
+  return request<void>("/api/auth/password-reset", { method: "POST", json: { email } });
+}
+
+/** The code plus a new password. Logs out every other device; this one gets a fresh login. */
+export function confirmPasswordReset(email: string, code: string, password: string) {
+  return request<AuthResult>("/api/auth/password-reset/confirm", {
+    method: "POST",
+    json: { email, code, password },
+  });
+}
+
+/** The code from the welcome email. */
+export function verifyEmail(token: string, code: string) {
+  return request<void>("/api/account/verify-email", { method: "POST", token, json: { code } });
+}
+
+export function resendVerification(token: string) {
+  return request<void>("/api/account/verify-email/resend", { method: "POST", token });
+}
+
 export function updateLanguage(token: string, language: Language) {
   return request<{ language: Language }>("/api/profile/me", { method: "PATCH", token, json: { language } });
 }

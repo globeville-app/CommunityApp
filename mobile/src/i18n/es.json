@@ -21,7 +21,22 @@
     "signup_button": "Crear cuenta",
     "password_hint": "Al menos 8 caracteres. Evita contraseñas comunes.",
     "login_title": "¡Qué gusto verte otra vez!",
-    "login_button": "Iniciar sesión"
+    "login_button": "Iniciar sesión",
+    "forgot_link": "¿Olvidaste tu contraseña?",
+    "forgot_title": "Restablece tu contraseña",
+    "forgot_intro": "Escribe tu correo y te enviaremos un código de 6 dígitos.",
+    "forgot_button": "Enviar código",
+    "reset_title": "Revisa tu correo",
+    "reset_intro": "Si {{email}} tiene una cuenta, le acabamos de enviar un código. Escríbelo aquí con una nueva contraseña.",
+    "code_label": "Código de 6 dígitos",
+    "new_password_label": "Nueva contraseña",
+    "reset_button": "Guardar nueva contraseña",
+    "verify_title": "Confirma tu correo",
+    "verify_intro": "Te enviamos un código de 6 dígitos a tu correo. Escríbelo aquí para terminar de registrarte.",
+    "verify_button": "Confirmar",
+    "verify_resend": "Enviar un código nuevo",
+    "verify_resent": "Te enviamos un código nuevo.",
+    "verify_other_email": "Usar otro correo"
   },
   "start": {
     "error_title": "Mmm.",
@@ -159,7 +174,9 @@
     "invalid_neighborhood": "Ese barrio no está en la lista de Denver.",
     "org_description_too_long": "Usa una descripción de 500 caracteres o menos.",
     "org_not_found": "No encontramos esa organización.",
-    "invalid_push_token": "No se pudieron activar las notificaciones en este teléfono."
+    "invalid_push_token": "No se pudieron activar las notificaciones en este teléfono.",
+    "invalid_code": "Ese código no es correcto o ya venció. Revisa el correo o pide un código nuevo.",
+    "email_not_verified": "Primero confirma tu correo."
   },
   "demo": {
     "banner_label": "Demo",
@@ -679,5 +696,15 @@
     "brought_together_other": "Tus eventos reunieron a {{count}} vecinos.",
     "most_popular_one": "El más popular: {{title}}, {{date}}, con {{count}} vecino.",
     "most_popular_other": "El más popular: {{title}}, {{date}}, con {{count}} vecinos."
+  },
+  "email": {
+    "verify": {
+      "subject": "Tu código de {app}",
+      "body": "¡Te damos la bienvenida a {app}!\n\nTu código es {code}. Escríbelo en la app para confirmar tu correo. Sirve durante {minutes} minutos.\n\nSi no te registraste, puedes ignorar este correo."
+    },
+    "reset": {
+      "subject": "Restablece tu contraseña de {app}",
+      "body": "Alguien pidió restablecer la contraseña de tu cuenta de {app}.\n\nTu código es {code}. Escríbelo en la app con tu nueva contraseña. Sirve durante {minutes} minutos.\n\nSi no fuiste tú, puedes ignorar este correo: tu contraseña no cambió."
+    }
   }
 }

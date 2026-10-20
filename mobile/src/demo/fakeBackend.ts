@@ -315,6 +315,33 @@ export async function login(emailInput: string, password: string): Promise<AuthR
   return { token, language: languageOf(db, email) };
 }
 
+// The demo can't send email: every account counts as confirmed, and any
+// 6-digit code works for a password reset.
+export async function requestPasswordReset(_email: string) {
+  await pause();
+}
+
+export async function confirmPasswordReset(emailInput: string, code: string, password: string): Promise<AuthResult> {
+  await pause();
+  const email = emailInput.trim().toLowerCase();
+  const db = load();
+  if (password.length < 8) invalid("password", "password_too_short");
+  if (!db.users[email] || !/^\d{6}$/.test(code.trim())) throw new ApiError("invalid_code", 400);
+  db.users[email] = { ...db.users[email], password };
+  const token = newToken();
+  db.tokens[token] = email;
+  save(db);
+  return { token, language: languageOf(db, email), email_verified: true };
+}
+
+export async function verifyEmail(_token: string, _code: string) {
+  await pause(200);
+}
+
+export async function resendVerification(_token: string) {
+  await pause(200);
+}
+
 export async function updateLanguage(token: string, language: Language) {
   await pause(200);
   const email = userFor(token);

@@ -250,9 +250,11 @@ notifications need a development build too (see "Push notifications" below).
 
 ### Test accounts
 
-Each account needs its own email, but it doesn't have to be real: nothing
-is emailed at sign-up. Use made-up ones like `ana.test1@example.com`,
-`ana.test2@example.com`. To switch accounts on one phone: Profile → gear →
+Each account needs its own email, but it doesn't have to be real. On your
+computer nothing is really emailed: the 6-digit code that confirms a new
+account (and the "Forgot password?" code) is printed in the terminal where
+`runserver` is running. Look for "Your code is". Use made-up emails like
+`ana.test1@example.com`, `ana.test2@example.com`. To switch accounts on one phone: Profile → gear →
 **Log out**, then **Sign up** (or **Log in**) as the other one.
 
 To put accounts in the same or different neighborhoods, use public places
@@ -368,6 +370,10 @@ from the design come in a later milestone.
 | POST | `/api/auth/signup` | email + password (+ `language`) → token and language |
 | POST | `/api/auth/login` | email + password → token and the account's language |
 | POST | `/api/auth/logout` | deletes the token |
+| POST | `/api/auth/password-reset` | email → emails a 6-digit code (same reply for unknown emails) |
+| POST | `/api/auth/password-reset/confirm` | email + code + new password → logs out every device, returns a fresh token |
+| POST | `/api/account/verify-email` | the code from the welcome email; until then other endpoints answer `email_not_verified` |
+| POST | `/api/account/verify-email/resend` | a new code (the old one stops working) |
 | POST | `/api/join/match` | address → neighborhood (rate-limited: 10/min per user) |
 | PUT | `/api/profile` | first name, last name, alias, interest keys (+ `language`) |
 | POST | `/api/profile/photo` | photo upload (multipart, field `photo`) |
@@ -639,7 +645,9 @@ Known limits:
 
 ## Not in this milestone (and still needed before real users)
 
-- Email verification and password reset
+- A real email service (Postmark) so the email codes and problem reports are
+  actually sent; until then a server can run with
+  `REQUIRE_EMAIL_VERIFICATION=0`
 - A decision on minimum age (COPPA). See "Open items" in the spec.
 - Real hosting (the backend currently runs on your computer only), HTTPS,
   and a production database

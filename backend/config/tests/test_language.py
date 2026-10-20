@@ -12,6 +12,7 @@ from rest_framework.test import APITestCase
 from accounts.models import Account
 from geocoding.testing import NO_MATCH_REPLY, census_reply, fake_geocoder
 from neighborhoods.testing import FixtureNeighborhoodsMixin
+from accounts.testing import confirm_email
 
 PASSWORD = "a long pass phrase"
 
@@ -25,6 +26,7 @@ class LanguageTests(FixtureNeighborhoodsMixin, APITestCase):
 
     def log_in_with(self, token):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+        confirm_email(self.client)
 
     def test_language_is_saved_at_signup(self):
         response = self.signup(language="es")
@@ -105,6 +107,8 @@ class ErrorsAreCodesTests(FixtureNeighborhoodsMixin, APITestCase):
             self.client.get("/api/profile/me"),  # not logged in
         ]
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+        responses.append(self.client.get("/api/profile/me"))  # email not confirmed yet
+        confirm_email(self.client)
         responses.append(self.client.get("/api/profile/me"))  # no profile yet
         responses.append(self.client.put("/api/profile", {"first_name": "Ana", "last_name": "R"}, format="json"))
         with fake_geocoder(NO_MATCH_REPLY):
@@ -132,6 +136,7 @@ class ErrorsAreCodesTests(FixtureNeighborhoodsMixin, APITestCase):
                 "invalid_email",
                 "invalid_credentials",
                 "not_authenticated",
+                "email_not_verified",
                 "profile_not_found",
                 "match_required",
                 "no_match",
