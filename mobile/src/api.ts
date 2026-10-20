@@ -45,11 +45,14 @@ type RequestOptions = {
   json?: unknown;
   form?: FormData;
   timeoutMs?: number;
+  /** One random id per form: sending the same form twice creates it once. */
+  idempotencyKey?: string;
 };
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = { Accept: "application/json" };
   if (options.token) headers.Authorization = `Token ${options.token}`;
+  if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
 
   let body: string | FormData | undefined;
   if (options.json !== undefined) {
@@ -150,7 +153,7 @@ export function saveProfile(token: string, profile: ProfileInput) {
 }
 
 /** Works signed in or not (token may be null). Returns a reference number. */
-export function sendProblemReport(token: string | null, report: ProblemReportInput) {
+export function sendProblemReport(token: string | null, report: ProblemReportInput, formKey?: string) {
   const form = new FormData();
   const { screenshot, ...fields } = report;
   for (const [key, value] of Object.entries(fields)) {
@@ -160,7 +163,13 @@ export function sendProblemReport(token: string | null, report: ProblemReportInp
     const extension = screenshot.mimeType === "image/png" ? "png" : "jpg";
     form.append("screenshot", { uri: screenshot.uri, name: `screenshot.${extension}`, type: screenshot.mimeType } as any);
   }
-  return request<{ id: number }>("/api/support/report", { method: "POST", token, form, timeoutMs: UPLOAD_TIMEOUT_MS });
+  return request<{ id: number }>("/api/support/report", {
+    method: "POST",
+    token,
+    form,
+    timeoutMs: UPLOAD_TIMEOUT_MS,
+    idempotencyKey: formKey,
+  });
 }
 
 /** Permanently deletes the account. The password confirms it's really them. */
@@ -200,8 +209,8 @@ export function getEvent(token: string, id: number) {
   return request<EventData>(`/api/events/${id}`, { token });
 }
 
-export function createEvent(token: string, event: EventInput) {
-  return request<EventData>("/api/events", { method: "POST", token, json: event });
+export function createEvent(token: string, event: EventInput, formKey?: string) {
+  return request<EventData>("/api/events", { method: "POST", token, json: event, idempotencyKey: formKey });
 }
 
 export function updateEvent(token: string, id: number, changes: Partial<EventInput>) {

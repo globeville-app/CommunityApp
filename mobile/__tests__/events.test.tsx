@@ -217,7 +217,7 @@ describe("posting an event", () => {
       latitude: 39.7621,
       longitude: -105.0098,
       partiful_url: "",
-    });
+    }, expect.any(String)); // the form's key: a double tap posts it once
     expect(await screen.findByRole("header", { name: "River cleanup" })).toBeTruthy();
   });
 

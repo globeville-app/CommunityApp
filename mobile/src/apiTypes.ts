@@ -286,3 +286,8 @@ export type OrgInput = {
   link?: string;
   business_rule_accepted?: boolean;
 };
+
+/** A fresh id for one form, so a double tap or a retry can't create it twice. */
+export function newFormKey() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}

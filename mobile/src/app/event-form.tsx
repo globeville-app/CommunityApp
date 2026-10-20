@@ -19,6 +19,7 @@ import {
   ApiError,
   createEvent,
   EventInput,
+  newFormKey,
   getEvent,
   getMyOrganizations,
   getMyProfile,
@@ -82,6 +83,8 @@ export default function EventForm() {
 
   const [step, setStep] = useState<Step>(editingId ? (startStep === "pin" ? "pin" : "details") : "category");
   const [loaded, setLoaded] = useState(!editingId);
+  // Sent with the new event: tapping Post twice, or a retry, makes one event.
+  const [formKey] = useState(newFormKey);
   // Posting as an organization (new events only): which one, and where.
   const [orgs, setOrgs] = useState<MyOrg[] | null>(editingId ? [] : null);
   const [asOrg, setAsOrg] = useState<MyOrg | null>(null);
@@ -239,7 +242,7 @@ export default function EventForm() {
         await updateEvent(token, editingId, body);
         router.back();
       } else {
-        const created = await createEvent(token, body);
+        const created = await createEvent(token, body, formKey);
         // Land on the new event.
         router.replace({ pathname: "/event/[id]", params: { id: String(created.id) } });
       }

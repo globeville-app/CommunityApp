@@ -171,7 +171,7 @@ describe("report a problem", () => {
       device_model: "iPhone 16",
       language: "en",
       screen: "settings",
-    });
+    }, expect.any(String)); // the form's key: a retry sends it once
     expect(await screen.findByText("Thanks! We got it.")).toBeTruthy();
     // ...and goes back to where they were.
     await waitFor(() => expect(app.getPathname()).toBe("/settings"), { timeout: 4000 });
@@ -204,6 +204,7 @@ describe("report a problem", () => {
     expect(mocked.sendProblemReport).toHaveBeenCalledWith(
       null,
       expect.objectContaining({ contact_email: "vecina@example.com", language: "es", screen: "join/welcome" }),
+      expect.any(String),
     );
     expect(await screen.findByText("¡Gracias! Lo recibimos.")).toBeTruthy();
   });

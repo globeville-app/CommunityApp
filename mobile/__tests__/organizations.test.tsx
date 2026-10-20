@@ -277,7 +277,11 @@ describe("Post as", () => {
       fireEvent(screen.getByTestId("pin-map"), "press", { nativeEvent: { coordinate: { latitude: 39.78, longitude: -104.96 } } });
     });
     await pressAndSettle(screen.getByRole("button", { name: "Post" }));
-    expect(mocked.createEvent).toHaveBeenCalledWith("tok-123", expect.objectContaining({ organization: 5, neighborhood: 7 }));
+    expect(mocked.createEvent).toHaveBeenCalledWith(
+      "tok-123",
+      expect.objectContaining({ organization: 5, neighborhood: 7 }),
+      expect.any(String),
+    );
   });
 });
 

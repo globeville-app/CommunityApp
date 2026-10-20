@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, View } from "react-native";
 
-import { ApiError, sendProblemReport } from "../api";
+import { ApiError, newFormKey, sendProblemReport } from "../api";
 import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
 import { useLanguage } from "../language";
@@ -34,6 +34,8 @@ export default function Report() {
   const { from = "unknown" } = useLocalSearchParams<{ from?: string }>();
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
+  // Sent with the report: a retry after a lost reply doesn't send it twice.
+  const [formKey] = useState(newFormKey);
   const [screenshot, setScreenshot] = useState<Screenshot | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -78,7 +80,7 @@ export default function Report() {
         ...deviceDetails(),
         language,
         screen: from,
-      });
+      }, formKey);
       setSent(true);
       timer.current = setTimeout(() => router.back(), THANKS_MS);
     } catch (e) {

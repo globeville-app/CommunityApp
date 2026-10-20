@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.errors import ApiError
+from config.idempotency import once_per_key
 from profiles.photos import PhotoError, clean_photo
 
 from .models import ProblemReport
@@ -42,6 +43,7 @@ class ProblemReportView(APIView):
         # The app shows this code as "You've sent a lot of reports today".
         raise ApiError("daily_limit", status_code=status.HTTP_429_TOO_MANY_REQUESTS)
 
+    @once_per_key
     def post(self, request):
         message = str(request.data.get("message", "")).strip()
         if not message:

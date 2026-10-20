@@ -305,7 +305,7 @@ References in brackets point to the review files, for example
     `backend/stats/numbers.py`, tests.
   - **Risk:** low.
 
-- [ ] **P23. Protect against a double tap creating two events** [A7]
+- [x] **P23. Protect against a double tap creating two events** [A7]
   - **What:** an optional `Idempotency-Key` header on event create and
     problem reports, with a matching change in the app.
   - **Risk:** low.

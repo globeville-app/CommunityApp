@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 
 from accounts.models import language_of
 from config.errors import ApiError
+from config.idempotency import once_per_key
 from profiles.models import Profile
 
 from notifications import scheduling
@@ -205,6 +206,7 @@ class EventListView(APIView):
         events = [e for e in events.order_by("starts_at", "pk") if not has_ended(e, now)]
         return Response({"events": [event_json(e, request, profile, now) for e in events]})
 
+    @once_per_key
     def post(self, request):
         profile = member_profile(request)
         now = timezone.now()
