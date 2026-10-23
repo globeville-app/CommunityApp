@@ -23,7 +23,7 @@ from profiles.models import Profile
 from notifications import scheduling
 
 from .categories import GROUP_KEYS, GROUPS, group_of, suggest_category
-from .models import Event, EventReport, Going, TranslationCache
+from .models import Event, EventAccess, EventReport, Going, InviteLink, TranslationCache
 from .partiful import fetch_og_title
 from .timing import has_ended
 from .translation import TranslationUnavailable, get_translator
@@ -54,16 +54,23 @@ def admin_org_ids(user):
 def events_for(profile, user, own_neighborhood_only=False):
     """
     Events the member can see, with the counts the app shows: their own
-    neighborhood's, plus (for organization admins) their organizations'
-    events in any neighborhood, so they can manage them. Never the events of
-    members they blocked.
+    neighborhood's (not link-only ones), plus the events they host or their
+    organizations host in any neighborhood, plus events whose invite link
+    they opened. Never the events of members they blocked.
+    own_neighborhood_only is the calendar: their neighborhood only.
     """
     from organizations.models import Follow
     from profiles.models import Block
 
-    visible = Q(neighborhood_id=profile.neighborhood_id)
-    if not own_neighborhood_only:
-        visible |= Q(organization_id__in=admin_org_ids(user))
+    # Events they post or run: always, so hosts can find their link-only events.
+    theirs = Q(organizer=user, organization__isnull=True) | Q(organization_id__in=admin_org_ids(user))
+    # Link-only events are never on anyone else's calendar (Milestone 5).
+    on_calendar = Q(neighborhood_id=profile.neighborhood_id) & ~Q(visibility=Event.Visibility.LINK_ONLY)
+    if own_neighborhood_only:
+        visible = Q(neighborhood_id=profile.neighborhood_id) & (on_calendar | theirs)
+    else:
+        # Plus any event whose invite link they opened, in any neighborhood (Changes Milestone 2).
+        visible = on_calendar | theirs | Q(pk__in=EventAccess.objects.filter(user=user).values("event"))
     # Members they blocked: their own events disappear (not organization events).
     blocked = Q(organization__isnull=True, organizer_id__in=Block.objects.filter(blocker=user).values("blocked"))
     return (
@@ -131,6 +138,7 @@ def event_json(event, request, profile, now):
         "needs_pin": event.latitude is None and can_manage(event, request.user) and not has_ended(event, now),
         "partiful_url": event.partiful_url or None,
         "status": event.status,
+        "visibility": event.visibility,
         "is_past": has_ended(event, now),
         "organizer_name": organizer_name(event),
         # Opens the organizer's member page (null for a former neighbor or an organization event).
@@ -222,6 +230,8 @@ class EventListView(APIView):
             event = Event.objects.create(
                 neighborhood_id=neighborhood_id, organizer=request.user, organization=organization, **fields
             )
+            # Every event has an invite link from the start (Milestone 5).
+            InviteLink.current(event)
             if organization is None and profile.role != Profile.Role.ORGANIZER:
                 profile.role = Profile.Role.ORGANIZER
                 profile.save(update_fields=["role"])

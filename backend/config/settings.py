@@ -270,6 +270,10 @@ REST_FRAMEWORK = {
 }
 
 
+# Where invite links and the guest web pages live (Milestone 5), e.g.
+# https://globeville.app/e/Ab3dEf7hJk. No trailing slash.
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
+
 # The oldest app version the server still works with, e.g. "1.2.0". Older
 # apps show "Please update" (GET /api/config). Empty = every version works.
 MIN_APP_VERSION = os.environ.get("MIN_APP_VERSION", "")

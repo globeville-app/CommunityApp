@@ -728,5 +728,8 @@
     "title": "Time to update",
     "intro": "This version of {{app}} is too old to keep working. Please update it from the App Store or Google Play.",
     "button": "Update"
+  },
+  "invite": {
+    "message": "Come to {title} on {date}! RSVP here: {link}"
   }
 }

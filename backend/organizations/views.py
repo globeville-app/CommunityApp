@@ -143,8 +143,9 @@ def org_json(organization, request, profile):
     now = timezone.now()
     events = events_for(profile, user).filter(organization=organization, status=Event.Status.ACTIVE)
     if not is_admin:
-        # Members see only their own neighborhood's events (no exploring yet).
-        events = events.filter(neighborhood_id=profile.neighborhood_id)
+        # Members see only their own neighborhood's events (no exploring yet),
+        # and never link-only ones (Milestone 5).
+        events = events.filter(neighborhood_id=profile.neighborhood_id).exclude(visibility=Event.Visibility.LINK_ONLY)
     events = list(events.order_by("starts_at", "pk"))
     upcoming = [e for e in events if not has_ended(e, now)]
     data = {

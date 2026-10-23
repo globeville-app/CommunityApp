@@ -12,7 +12,7 @@ from rest_framework import serializers, status
 from config.errors import ApiError
 
 from .categories import ALL_CATEGORY_KEYS, OTHER, OTHER_MAX_LENGTH
-from .models import DESCRIPTION_MAX, LOCATION_MAX, TITLE_MAX
+from .models import DESCRIPTION_MAX, LOCATION_MAX, TITLE_MAX, Event
 from .timing import has_ended
 
 # Pins must be in and around Denver (a generous box around the city).
@@ -36,6 +36,7 @@ EDITABLE_FIELDS = [
     "partiful_url",
     "latitude",
     "longitude",
+    "visibility",
 ]
 
 
@@ -139,4 +140,10 @@ def clean_event(data, *, event=None, default_language="en", now):
     if partiful_url and not is_partiful_url(partiful_url):
         raise ApiError("invalid_partiful_url")
     cleaned["partiful_url"] = partiful_url
+
+    # Who can see it (Milestone 5): the neighborhood calendar plus the link, or the link only.
+    visibility = merged.get("visibility") or Event.Visibility.NEIGHBORHOOD
+    if visibility not in Event.Visibility.values:
+        raise ApiError("invalid_visibility")
+    cleaned["visibility"] = visibility
     return cleaned

@@ -59,6 +59,14 @@ class Event(models.Model):
     sponsor_name = models.CharField(max_length=100, blank=True)
 
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+
+    class Visibility(models.TextChoices):
+        # On the neighborhood calendar, and open to anyone with the invite link.
+        NEIGHBORHOOD = "neighborhood", "Neighborhood + link"
+        # Never on any calendar or list; only people with the link (Milestone 5).
+        LINK_ONLY = "link_only", "Link only"
+
+    visibility = models.CharField(max_length=12, choices=Visibility.choices, default=Visibility.NEIGHBORHOOD)
     # When the event first had 2 counted attendees, so it counts as hosted
     # (docs/BADGES.md). Kept even if attendees later delete their accounts.
     counted_hosted_at = models.DateTimeField(null=True, blank=True)
@@ -118,3 +126,51 @@ class TranslationCache(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["event", "field", "target_language"], name="one_translation_per_field")
         ]
+
+
+# ---- Invite links (docs/MILESTONE_5.md) ------------------------------------------
+
+# No 0/O/o or 1/l/I, so a code read aloud or typed from a text is never ambiguous.
+INVITE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
+INVITE_CODE_LENGTH = 10
+
+
+def new_invite_code():
+    import secrets
+
+    return "".join(secrets.choice(INVITE_ALPHABET) for _ in range(INVITE_CODE_LENGTH))
+
+
+class InviteLink(models.Model):
+    """
+    https://globeville.app/e/{code}: anyone holding it can see the event
+    (Changes Milestone 2). Resetting the link revokes this one and makes a
+    new one; the old code then shows "This invite link has expired".
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="invite_links")
+    code = models.CharField(max_length=INVITE_CODE_LENGTH, unique=True, default=new_invite_code)
+    created_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    @classmethod
+    def current(cls, event):
+        """The event's working link, made if it has none (every event has one)."""
+        link = cls.objects.filter(event=event, revoked_at__isnull=True).order_by("-created_at").first()
+        return link or cls.objects.create(event=event)
+
+
+class EventAccess(models.Model):
+    """
+    A member opened the event's invite link, so they can see it and use it
+    like a neighbor (detail, I'm going, collect, check-in), whatever their
+    neighborhood. Resetting the link doesn't take this away.
+    """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="event_access")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="access")
+    via_invite = models.ForeignKey(InviteLink, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "event"], name="one_access_per_member")]

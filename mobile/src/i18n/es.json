@@ -728,5 +728,8 @@
     "title": "Hay que actualizar",
     "intro": "Esta versión de {{app}} ya es muy antigua para seguir funcionando. Actualízala desde App Store o Google Play.",
     "button": "Actualizar"
+  },
+  "invite": {
+    "message": "¡Ven a {title} el {date}! Confirma aquí: {link}"
   }
 }
