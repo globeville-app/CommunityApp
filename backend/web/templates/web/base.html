@@ -1,0 +1,23 @@
+{% load static i18n %}<!doctype html>
+<html lang="{{ language }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  {% block meta %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'web/style.css' %}">
+</head>
+<body>
+  <header class="top">
+    <img class="wordmark" src="{% static 'web/wordmark-white.svg' %}" alt="{{ app_name }}">
+    <nav class="lang" aria-label="{% translate 'Language' %}">
+      <a href="?lang=en" {% if language == "en" %}aria-current="true"{% endif %}>English</a>
+      <span aria-hidden="true">|</span>
+      <a href="?lang=es" {% if language == "es" %}aria-current="true"{% endif %}>Español</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

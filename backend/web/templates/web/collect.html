@@ -1,0 +1,34 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+{% block content %}
+<article class="card">
+  {% if claimed %}
+    <h1>{% translate "Badge collected" %}</h1>
+    <p>{% translate "This one is already on your profile." %}</p>
+  {% elif expired %}
+    <h1>{% translate "This badge can't be collected anymore" %}</h1>
+    <p>{% translate "Badges can be collected for 7 days after an event." %}</p>
+  {% else %}
+    <h1>{% blocktranslate %}Collect your badge on {{ app_name }}{% endblocktranslate %}</h1>
+    <p>{% blocktranslate %}You went to {{ title }}. Join to collect your badge and see what's happening near you.{% endblocktranslate %}</p>
+    <ol class="steps">
+      <li>{% translate "Install the app" %}
+        {% if ios_store_url %}<a class="button secondary" href="{{ ios_store_url }}">App Store</a>{% endif %}
+        {% if android_store_url %}<a class="button secondary" href="{{ android_store_url }}">Google Play</a>{% endif %}
+      </li>
+      <li>{% translate "Sign up, then enter this code:" %}
+        <p class="claim-code" id="claim-code">{{ claim_code }}</p>
+        <button class="button secondary" type="button" id="copy">{% translate "Copy code" %}</button>
+      </li>
+    </ol>
+    <p class="small">{% blocktranslate with day=expires|date:"M j" %}Collect it by {{ day }}.{% endblocktranslate %}</p>
+    <a class="button" href="{{ app_link }}">{% translate "Open in app" %}</a>
+    <script>
+      document.getElementById("copy").addEventListener("click", function () {
+        navigator.clipboard && navigator.clipboard.writeText("{{ claim_code }}");
+        this.textContent = "{% translate 'Copied' %}";
+      });
+    </script>
+  {% endif %}
+</article>
+{% endblock %}

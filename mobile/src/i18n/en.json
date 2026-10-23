@@ -731,5 +731,12 @@
   },
   "invite": {
     "message": "Come to {title} on {date}! RSVP here: {link}"
+  },
+  "texts": {
+    "code": "{app}: your code is {code}. It expires in 10 minutes.",
+    "cancelled": "{app}: {title} on {date} was cancelled by the host.",
+    "reminder": "{app}: reminder, {title} is tomorrow at {time}. Can't make it? {link}",
+    "collect": "{app}: you went to {title}! Collect your badge: {link}. Reply STOP to opt out.",
+    "help": "{app}: event texts for RSVPs. Reply STOP to opt out. Help: {email}"
   }
 }

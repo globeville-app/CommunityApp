@@ -1,0 +1,11 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+{% block content %}
+<article class="card">
+  <h1>{% translate "Your neighborhood, in one place" %}</h1>
+  <p>{% translate "Find events in your Denver neighborhood, meet your neighbors, and collect badges for showing up." %}</p>
+  {% if ios_store_url %}<a class="button" href="{{ ios_store_url }}">App Store</a>{% endif %}
+  {% if android_store_url %}<a class="button" href="{{ android_store_url }}">Google Play</a>{% endif %}
+  {% if not ios_store_url and not android_store_url %}<p class="note">{% translate "Coming soon to the App Store and Google Play." %}</p>{% endif %}
+</article>
+{% endblock %}

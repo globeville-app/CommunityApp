@@ -1,0 +1,15 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+{% block content %}
+<article class="card">
+  <h1>{{ title }}</h1>
+  {% if done %}
+    <p>{% translate "Got it. You're no longer going, and we won't text you about this event." %}</p>
+  {% else %}
+    <p>{% translate "Can't make it? Tap below to cancel your RSVP." %}</p>
+    <form method="post">{% csrf_token %}
+      <button class="button" type="submit">{% translate "I can't make it" %}</button>
+    </form>
+  {% endif %}
+</article>
+{% endblock %}

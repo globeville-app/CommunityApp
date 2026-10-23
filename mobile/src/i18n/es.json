@@ -731,5 +731,12 @@
   },
   "invite": {
     "message": "¡Ven a {title} el {date}! Confirma aquí: {link}"
+  },
+  "texts": {
+    "code": "{app}: tu código es {code}. Vence en 10 minutos.",
+    "cancelled": "{app}: el anfitrión canceló {title} del {date}.",
+    "reminder": "{app}: recordatorio, {title} es mañana a las {time}. ¿No puedes ir? {link}",
+    "collect": "{app}: ¡fuiste a {title}! Recoge tu insignia: {link}. Responde STOP para no recibir más.",
+    "help": "{app}: mensajes de eventos para quienes confirmaron. Responde STOP para no recibir más. Ayuda: {email}"
   }
 }

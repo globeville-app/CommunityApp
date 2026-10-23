@@ -38,10 +38,13 @@ services:
       - key: DJANGO_SECRET_KEY
         type: SECRET
         value: CHANGE_ME
+      # globeville.app serves the invite-link pages (Milestone 5).
       - key: ALLOWED_HOSTS
-        value: api.globeville.app
+        value: api.globeville.app,globeville.app
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://api.globeville.app
+        value: https://api.globeville.app,https://globeville.app
+      - key: PUBLIC_BASE_URL
+        value: https://globeville.app
       - key: ADMIN_URL
         type: SECRET
         value: CHANGE_ME/
@@ -81,6 +84,33 @@ services:
       - key: PROBLEM_REPORT_EMAILS
         type: SECRET
         value: CHANGE_ME
+      # Texting guests (Milestone 5). SMS_LIVE stays "0" until the carrier
+      # registration and the legal review are done (docs/MILESTONE_5.md).
+      - key: SMS_LIVE
+        value: "0"
+      - key: TWILIO_ACCOUNT_SID
+        type: SECRET
+        value: CHANGE_ME
+      - key: TWILIO_AUTH_TOKEN
+        type: SECRET
+        value: CHANGE_ME
+      - key: SMS_MESSAGING_SERVICE_ID
+        type: SECRET
+        value: CHANGE_ME
+      - key: SMS_MONTHLY_BUDGET_USD
+        value: "50"
+      - key: SMS_COST_PER_TEXT_USD
+        value: "0.01"
+      - key: OWNER_ALERT_EMAILS
+        type: SECRET
+        value: CHANGE_ME
+      - key: SUPPORT_EMAIL
+        value: CHANGE_ME
+      # Deep links: the Apple Team ID and the Android signing fingerprint (eas credentials).
+      - key: APPLE_TEAM_ID
+        value: CHANGE_ME
+      - key: ANDROID_CERT_SHA256
+        value: CHANGE_ME
       # Who gets a short email when the server crashes (backend/config/alerts.py).
       - key: SERVER_ERROR_EMAILS
         type: SECRET
@@ -92,6 +122,9 @@ services:
     domains:
       - domain: api.globeville.app
         type: PRIMARY
+      # The invite-link pages and the deep-link files (Milestone 5).
+      - domain: globeville.app
+        type: ALIAS
 
 jobs:
   # Runs before every deploy: database changes, the table the rate limits
@@ -146,6 +179,40 @@ jobs:
       - key: EXPO_ACCESS_TOKEN
         type: SECRET
         value: CHANGE_ME
+      # It also sends guest texts (Milestone 5), so it needs the same
+      # texting and email settings as the web service.
+      - key: PUBLIC_BASE_URL
+        value: https://globeville.app
+      - key: SMS_LIVE
+        value: "0"
+      - key: TWILIO_ACCOUNT_SID
+        type: SECRET
+        value: CHANGE_ME
+      - key: TWILIO_AUTH_TOKEN
+        type: SECRET
+        value: CHANGE_ME
+      - key: SMS_MESSAGING_SERVICE_ID
+        type: SECRET
+        value: CHANGE_ME
+      - key: SMS_MONTHLY_BUDGET_USD
+        value: "50"
+      - key: SMS_COST_PER_TEXT_USD
+        value: "0.01"
+      - key: OWNER_ALERT_EMAILS
+        type: SECRET
+        value: CHANGE_ME
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        value: smtp.postmarkapp.com
+      - key: EMAIL_HOST_USER
+        type: SECRET
+        value: CHANGE_ME
+      - key: EMAIL_HOST_PASSWORD
+        type: SECRET
+        value: CHANGE_ME
+      - key: DEFAULT_FROM_EMAIL
+        value: globeville <hello@globeville.app>
 
   # Once a day: delete what has done its job (backend/accounts/retention.py
   # lists every rule, e.g. problem reports after a year).

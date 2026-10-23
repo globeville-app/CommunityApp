@@ -20,7 +20,7 @@ def delete_member(user):
     # Imported here to keep the accounts app free of a hard dependency on
     # the apps that store member data.
     from badges.engine import update_badges
-    from events.models import Event
+    from events.models import Event, InviteLink
     from notifications.scheduling import event_cancelled
     from organizations.models import Organization
     from profiles.models import Profile
@@ -56,6 +56,8 @@ def delete_member(user):
             )
         )
         Event.objects.filter(pk__in=[e.pk for e in cancelled]).update(status=Event.Status.CANCELLED)
+        # Their invite links stop working too (Milestone 5).
+        InviteLink.objects.filter(event__in=cancelled, revoked_at__isnull=True).update(revoked_at=timezone.now())
         # Deleting the user also deletes, through the database: the profile
         # (and its interests), the account settings, the neighborhood match,
         # every login token and email code, their "I'm going" records,
@@ -71,7 +73,7 @@ def delete_member(user):
                 organization.status = Organization.Status.HIDDEN
                 organization.save(update_fields=["status", "updated_at"])
 
-    # Neighbors going to their cancelled events get a notice.
+    # Neighbors going to their cancelled events get a notice, and web guests a text.
     for event in cancelled:
         event_cancelled(event)
 

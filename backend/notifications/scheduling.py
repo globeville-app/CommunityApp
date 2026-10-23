@@ -49,7 +49,10 @@ def event_time_changed(event, now=None):
     """
     from events.models import Going
 
+    from guests.rsvp import event_time_changed as guests_event_time_changed
+
     now = now or timezone.now()
+    guests_event_time_changed(event, now)  # their texts move too (Milestone 5)
     pending = ScheduledNotification.objects.filter(event=event, kind=REMINDER, sent_at__isnull=True)
     send_at = reminder_time(event)
     if send_at <= now:
@@ -82,4 +85,8 @@ def event_cancelled(event, now=None):
                 notices.append(notice)
     for notice in notices:
         send_notification(notice, now)
+    # Guests who RSVP'd on the web get a cancellation text (Milestone 5).
+    from guests.rsvp import event_cancelled as guests_event_cancelled
+
+    guests_event_cancelled(event, now)
 

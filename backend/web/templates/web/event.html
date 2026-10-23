@@ -1,0 +1,68 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+{% block title %}{{ title }} · {{ app_name }}{% endblock %}
+{% block meta %}
+  {# Link previews (iMessage, WhatsApp): never the meeting spot. #}
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ starts|date:'D, M j, g:i A' }}{% if host_name %} · {% blocktranslate %}Hosted by {{ host_name }} on {{ app_name }}{% endblocktranslate %}{% endif %}">
+  <meta property="og:image" content="{{ og_image }}">
+  <meta property="og:url" content="{{ page_url }}">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+{% block content %}
+<article class="card">
+  <h1>{{ title }}</h1>
+  <p class="when">{{ starts|date:"l, F j · g:i A" }}{% if ends %} – {{ ends|date:"g:i A" }}{% endif %}</p>
+  {% if host_name %}<p class="host">{% blocktranslate %}Hosted by {{ host_name }}{% endblocktranslate %}</p>{% endif %}
+  {% if description %}<p class="description">{{ description|linebreaksbr }}</p>{% endif %}
+  <p class="count">{% blocktranslate count counter=going_count %}{{ counter }} person going{% plural %}{{ counter }} people going{% endblocktranslate %}</p>
+</article>
+
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+{% if is_past %}
+  <p class="note">{% translate "This event has already happened." %}</p>
+{% elif step == "going" %}
+  <section class="card going">
+    <h2>{% translate "You're going!" %}</h2>
+    <p class="label">{% translate "Where" %}</p>
+    <p class="spot">{{ event.location_text }}</p>
+    <a class="button" href="/e/{{ code }}/calendar.ics">{% translate "Add to calendar" %}</a>
+    <form method="post" action="/e/{{ code }}/cancel-rsvp">{% csrf_token %}
+      <button class="button secondary" type="submit">{% translate "Can't make it" %}</button>
+    </form>
+  </section>
+{% elif step == "verify" %}
+  <section class="card">
+    <h2>{% translate "Enter the code we texted you" %}</h2>
+    <form method="post" action="/e/{{ code }}/verify">{% csrf_token %}
+      <input type="hidden" name="pending" value="{{ pending }}">
+      <label for="code">{% translate "6-digit code" %}</label>
+      <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required autofocus>
+      <button class="button" type="submit">{% translate "Confirm" %}</button>
+    </form>
+    <p class="small"><a href="/e/{{ code }}">{% translate "Didn't get it? Start again" %}</a></p>
+  </section>
+{% else %}
+  <section class="card">
+    <h2>{% translate "I'm going" %}</h2>
+    <form method="post" action="/e/{{ code }}/rsvp">{% csrf_token %}
+      <label for="first_name">{% translate "First name" %}</label>
+      <input id="first_name" name="first_name" maxlength="30" autocomplete="given-name" value="{{ form.first_name }}" required>
+      <label for="phone">{% translate "Mobile number (US)" %}</label>
+      <input id="phone" name="phone" type="tel" autocomplete="tel" value="{{ form.phone }}" required>
+      <label class="check"><input type="checkbox" name="consent_event_texts" {% if form.consent_event_texts %}checked{% endif %} required>
+        <span>{% translate "Text me a code and updates about this event (like a cancellation or a reminder I ask for). Msg & data rates may apply. Reply STOP to opt out." %}</span></label>
+      <label class="check"><input type="checkbox" name="wants_reminder" {% if form.wants_reminder %}checked{% endif %}>
+        <span>{% translate "Remind me the day before." %}</span></label>
+      <label class="check"><input type="checkbox" name="consent_collect" {% if form.consent_collect %}checked{% endif %}>
+        <span>{% blocktranslate %}After the event, text me so I can collect my badge on {{ app_name }}.{% endblocktranslate %}</span></label>
+      <button class="button" type="submit">{% translate "Text me a code" %}</button>
+    </form>
+  </section>
+{% endif %}
+
+<p class="open-app"><a class="button secondary" href="{{ app_link }}">{% translate "Open in app" %}</a></p>
+{% if support_email %}<p class="small">{% translate "Questions?" %} <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>{% endif %}
+{% endblock %}

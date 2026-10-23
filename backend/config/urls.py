@@ -8,6 +8,8 @@ from events import invites as event_invites
 from events import views as event_views
 from profiles import views as profile_views
 from stats.views import owner_stats
+from texting import webhook as sms_webhook
+from web import views as web_views
 
 from . import views
 
@@ -17,6 +19,18 @@ if settings.ADMIN_REQUIRE_2FA:
     admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
+    # Milestone 5: the guest web pages at globeville.app, and texting replies.
+    path("", web_views.landing, name="landing"),
+    path("e/<str:code>", web_views.event_page, name="web-event"),
+    path("e/<str:code>/rsvp", web_views.rsvp_start, name="web-rsvp"),
+    path("e/<str:code>/verify", web_views.rsvp_verify, name="web-verify"),
+    path("e/<str:code>/cancel-rsvp", web_views.rsvp_cancel, name="web-cancel-rsvp"),
+    path("e/<str:code>/calendar.ics", web_views.calendar_file, name="web-calendar"),
+    path("r/<str:token>", web_views.cant_make_it, name="web-cant-make-it"),
+    path("c/<str:token>", web_views.collect_page, name="web-collect"),
+    path(".well-known/apple-app-site-association", web_views.apple_app_site_association),
+    path(".well-known/assetlinks.json", web_views.android_asset_links),
+    path("webhooks/sms", sms_webhook.incoming, name="sms-webhook"),
     # The owner stats page sits inside admin, behind the same login (and
     # two-step code, when on) as the rest of admin.
     path(f"{settings.ADMIN_URL}stats/", admin.site.admin_view(owner_stats), name="owner-stats"),

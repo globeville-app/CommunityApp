@@ -29,7 +29,8 @@ REPO_ROOT = BASE_DIR.parent
 # The app name lives in ONE place: shared/app_config.json. Every user-facing
 # mention reads APP_NAME from here, never a hard-coded string.
 with open(REPO_ROOT / "shared" / "app_config.json", encoding="utf-8") as f:
-    APP_NAME = json.load(f)["app_name"]
+    _shared_config = json.load(f)
+APP_NAME = _shared_config["app_name"]
 
 # Interests are event category keys now (events/categories.py).
 
@@ -106,6 +107,10 @@ INSTALLED_APPS = [
     "badges",
     "notifications",
     "organizations",
+    # Milestone 5: invite links, guests who RSVP from the web, and texting.
+    "guests",
+    "texting",
+    "web",
 ]
 
 MIDDLEWARE = [
@@ -165,6 +170,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "America/Denver"
 USE_I18N = True
+# The guest web pages (Milestone 5) come in these two languages.
+LANGUAGES = [("en", "English"), ("es", "Español")]
 USE_TZ = True
 
 STATIC_URL = "static/"
@@ -273,6 +280,35 @@ REST_FRAMEWORK = {
 # Where invite links and the guest web pages live (Milestone 5), e.g.
 # https://globeville.app/e/Ab3dEf7hJk. No trailing slash.
 PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
+
+# --- Texting guests (Milestone 5) -------------------------------------------
+# Off until the owner has registered with the carriers (A2P 10DLC) and had the
+# wording reviewed: then no text reaches the real provider anywhere; the fake
+# one only logs what would have been sent (never the number).
+SMS_LIVE = os.environ.get("SMS_LIVE", "0") == "1"
+SMS_PROVIDER = os.environ.get("SMS_PROVIDER", "twilio")
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "")
+SMS_MESSAGING_SERVICE_ID = os.environ.get("SMS_MESSAGING_SERVICE_ID", "")
+# Spending cap for texts, per calendar month (Denver time). At 80% the owner
+# gets an email; at 100% reminders and collect texts pause until next month.
+SMS_MONTHLY_BUDGET_USD = float(os.environ.get("SMS_MONTHLY_BUDGET_USD", "50"))
+SMS_COST_PER_TEXT_USD = float(os.environ.get("SMS_COST_PER_TEXT_USD", "0.01"))
+OWNER_ALERT_EMAILS = [
+    address.strip() for address in os.environ.get("OWNER_ALERT_EMAILS", "").split(",") if address.strip()
+]
+# Shown in the HELP reply and on the guest pages.
+SUPPORT_EMAIL = os.environ.get("SUPPORT_EMAIL", "")
+
+# Deep links (Milestone 5): the files that let globeville.app/e/... open the app.
+APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")
+ANDROID_CERT_SHA256 = os.environ.get("ANDROID_CERT_SHA256", "")
+APP_BUNDLE_ID = "app." + APP_NAME.lower()  # mobile/app.config.ts APP_ID; set once, never changed
+# The app's own link scheme (mobile/app.config.ts "scheme"), for "Open in app".
+APP_SCHEME = APP_NAME.lower()
+# Store pages, for the "Collect your badge" and landing pages.
+IOS_STORE_URL = _shared_config.get("ios_store_url", "")
+ANDROID_STORE_URL = _shared_config.get("android_store_url", "")
 
 # The oldest app version the server still works with, e.g. "1.2.0". Older
 # apps show "Please update" (GET /api/config). Empty = every version works.

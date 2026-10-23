@@ -78,11 +78,20 @@ def events_for(profile, user, own_neighborhood_only=False):
         .exclude(blocked)
         .select_related("organizer__profile", "organization")
         .annotate(
-            going_count=Count("goings", distinct=True),
+            # Members and guests (Changes Milestone 2); guests the host removed don't count.
+            going_count=Count("goings", distinct=True)
+            + Count("guest_rsvps", filter=Q(guest_rsvps__cancelled_at__isnull=True, guest_rsvps__removed_by_host_at__isnull=True), distinct=True),
             is_going=Exists(Going.objects.filter(event=OuterRef("pk"), user=user)),
             is_following=Exists(Follow.objects.filter(organization=OuterRef("organization"), user=user)),
         )
     )
+
+
+def going_total(event):
+    """Everyone going: members plus guests who RSVP'd on the web (Milestone 5)."""
+    from guests.rsvp import going_guests
+
+    return Going.objects.filter(event=event).count() + going_guests(event).count()
 
 
 def can_manage(event, user):
@@ -306,14 +315,17 @@ class GoingView(APIView):
     def _reply(self, event, request):
         return Response(
             {
-                "going_count": Going.objects.filter(event=event).count(),
+                "going_count": going_total(event),
                 "is_going": Going.objects.filter(event=event, user=request.user).exists(),
             }
         )
 
     def put(self, request, event_id):
         event = self._check(request, event_id)
-        Going.objects.get_or_create(event=event, user=request.user)
+        source = request.data.get("source") if hasattr(request.data, "get") else None
+        if source not in Going.Source.values:
+            source = Going.Source.UNKNOWN
+        Going.objects.get_or_create(event=event, user=request.user, defaults={"source": source})
         scheduling.schedule_reminder(request.user, event)
         return self._reply(event, request)
 

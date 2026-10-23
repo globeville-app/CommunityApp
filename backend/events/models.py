@@ -95,6 +95,24 @@ class Going(models.Model):
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="goings")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="goings")
+
+    class Source(models.TextChoices):
+        """
+        The screen they tapped "I'm going" on (GO_LIVE.md §4, value signals):
+        found in the app, or invited. A screen name, not tracking; only
+        ever shown as counts.
+        """
+
+        CALENDAR = "calendar", "Calendar"
+        FOR_YOU = "for_you", "For you"
+        FOLLOWING = "following", "Following"
+        ORG_PAGE = "org_page", "Organization page"
+        INVITE_LINK = "invite_link", "Invite link"
+        SHARE_CARD = "share_card", "Share card"
+        EVENT_DETAIL = "event_detail", "Event opened directly"
+        UNKNOWN = "unknown", "Unknown (before this was recorded)"
+
+    source = models.CharField(max_length=20, choices=Source.choices, default=Source.UNKNOWN)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

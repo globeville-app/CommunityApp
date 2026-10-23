@@ -1,0 +1,273 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-23 12:13-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/web/base.html:13
+msgid "Language"
+msgstr "Idioma"
+
+#: templates/web/cancelled.html:6
+msgid "This event was cancelled."
+msgstr "Este evento fue cancelado."
+
+#: templates/web/cant_make_it.html:7
+msgid ""
+"Got it. You're no longer going, and we won't text you about this event."
+msgstr "Listo. Ya no vas, y no te enviaremos más mensajes sobre este evento."
+
+#: templates/web/cant_make_it.html:9
+msgid "Can't make it? Tap below to cancel your RSVP."
+msgstr "¿No puedes ir? Toca abajo para cancelar tu confirmación."
+
+#: templates/web/cant_make_it.html:11
+msgid "I can't make it"
+msgstr "No puedo ir"
+
+#: templates/web/collect.html:6
+msgid "Badge collected"
+msgstr "Insignia recogida"
+
+#: templates/web/collect.html:7
+msgid "This one is already on your profile."
+msgstr "Ya está en tu perfil."
+
+#: templates/web/collect.html:9
+msgid "This badge can't be collected anymore"
+msgstr "Ya no se puede recoger esta insignia"
+
+#: templates/web/collect.html:10
+msgid "Badges can be collected for 7 days after an event."
+msgstr "Las insignias se pueden recoger durante 7 días después de un evento."
+
+#: templates/web/collect.html:12
+#, python-format
+msgid "Collect your badge on %(app_name)s"
+msgstr "Recoge tu insignia en %(app_name)s"
+
+#: templates/web/collect.html:13
+#, python-format
+msgid ""
+"You went to %(title)s. Join to collect your badge and see what's happening "
+"near you."
+msgstr ""
+"Fuiste a %(title)s. Únete para recoger tu insignia y ver qué pasa cerca de "
+"ti."
+
+#: templates/web/collect.html:15
+msgid "Install the app"
+msgstr "Instala la app"
+
+#: templates/web/collect.html:19
+msgid "Sign up, then enter this code:"
+msgstr "Regístrate y luego escribe este código:"
+
+#: templates/web/collect.html:21
+msgid "Copy code"
+msgstr "Copiar código"
+
+#: templates/web/collect.html:24
+#, python-format
+msgid "Collect it by %(day)s."
+msgstr "Recógela antes del %(day)s."
+
+#: templates/web/collect.html:25 templates/web/event.html:66
+msgid "Open in app"
+msgstr "Abrir en la app"
+
+#: templates/web/collect.html:29
+msgid "Copied"
+msgstr "Copiado"
+
+#: templates/web/event.html:7
+#, python-format
+msgid "Hosted by %(host_name)s on %(app_name)s"
+msgstr "Organizado por %(host_name)s en %(app_name)s"
+
+#: templates/web/event.html:17
+#, python-format
+msgid "Hosted by %(host_name)s"
+msgstr "Organizado por %(host_name)s"
+
+#: templates/web/event.html:19
+#, python-format
+msgid "%(counter)s person going"
+msgid_plural "%(counter)s people going"
+msgstr[0] "%(counter)s persona va"
+msgstr[1] "%(counter)s personas van"
+
+#: templates/web/event.html:25
+msgid "This event has already happened."
+msgstr "Este evento ya pasó."
+
+#: templates/web/event.html:28
+msgid "You're going!"
+msgstr "¡Vas a ir!"
+
+#: templates/web/event.html:29
+msgid "Where"
+msgstr "Dónde"
+
+#: templates/web/event.html:31
+msgid "Add to calendar"
+msgstr "Agregar al calendario"
+
+#: templates/web/event.html:33
+msgid "Can't make it"
+msgstr "No puedo ir"
+
+#: templates/web/event.html:38
+msgid "Enter the code we texted you"
+msgstr "Escribe el código que te enviamos por mensaje"
+
+#: templates/web/event.html:41
+msgid "6-digit code"
+msgstr "Código de 6 dígitos"
+
+#: templates/web/event.html:43
+msgid "Confirm"
+msgstr "Confirmar"
+
+#: templates/web/event.html:45
+msgid "Didn't get it? Start again"
+msgstr "¿No te llegó? Empieza de nuevo"
+
+#: templates/web/event.html:49
+msgid "I'm going"
+msgstr "Voy"
+
+#: templates/web/event.html:51
+msgid "First name"
+msgstr "Nombre"
+
+#: templates/web/event.html:53
+msgid "Mobile number (US)"
+msgstr "Número de celular (EE. UU.)"
+
+#: templates/web/event.html:56
+msgid ""
+"Text me a code and updates about this event (like a cancellation or a "
+"reminder I ask for). Msg & data rates may apply. Reply STOP to opt out."
+msgstr ""
+"Envíenme por mensaje un código y novedades de este evento (como una "
+"cancelación o un recordatorio que pida). Pueden aplicarse tarifas de "
+"mensajes y datos. Responde STOP para no recibir más."
+
+#: templates/web/event.html:58
+msgid "Remind me the day before."
+msgstr "Recuérdenme el día anterior."
+
+#: templates/web/event.html:60
+#, python-format
+msgid "After the event, text me so I can collect my badge on %(app_name)s."
+msgstr ""
+"Después del evento, envíenme un mensaje para recoger mi insignia en "
+"%(app_name)s."
+
+#: templates/web/event.html:61
+msgid "Text me a code"
+msgstr "Envíenme un código"
+
+#: templates/web/event.html:67
+msgid "Questions?"
+msgstr "¿Preguntas?"
+
+#: templates/web/expired.html:5
+msgid "This invite link has expired"
+msgstr "Este enlace de invitación ya venció"
+
+#: templates/web/expired.html:6
+msgid "Ask the host for a new link."
+msgstr "Pídele un enlace nuevo a quien organiza."
+
+#: templates/web/landing.html:5
+msgid "Your neighborhood, in one place"
+msgstr "Tu vecindario, en un solo lugar"
+
+#: templates/web/landing.html:6
+msgid ""
+"Find events in your Denver neighborhood, meet your neighbors, and collect "
+"badges for showing up."
+msgstr ""
+"Encuentra eventos en tu vecindario de Denver, conoce a tus vecinos y recoge "
+"insignias por participar."
+
+#: templates/web/landing.html:9
+msgid "Coming soon to the App Store and Google Play."
+msgstr "Muy pronto en App Store y Google Play."
+
+#: views.py:37
+msgid "Please check the box to agree to event texts."
+msgstr "Marca la casilla para aceptar los mensajes del evento."
+
+#: views.py:38
+msgid "Please enter your first name."
+msgstr "Escribe tu nombre."
+
+#: views.py:39
+msgid "Please use 30 characters or fewer."
+msgstr "Usa 30 caracteres o menos."
+
+#: views.py:40
+msgid "Please enter a US mobile number."
+msgstr "Escribe un número de celular de EE. UU."
+
+#: views.py:41
+msgid "This event has reached its limit of RSVPs."
+msgstr "Este evento llegó a su límite de confirmaciones."
+
+#: views.py:42
+msgid "Too many tries. Please wait a little and try again."
+msgstr "Demasiados intentos. Espera un poco y vuelve a intentarlo."
+
+#: views.py:43
+msgid "This number can't RSVP here."
+msgstr "Este número no puede confirmar aquí."
+
+#: views.py:45
+msgid ""
+"You replied STOP to our texts, so we can't text you a code. Reply START to "
+"that same text thread to turn them back on, then try again."
+msgstr ""
+"Respondiste STOP a nuestros mensajes, así que no podemos enviarte un código."
+" Responde START en esa misma conversación para volver a activarlos y vuelve "
+"a intentarlo."
+
+#: views.py:48
+msgid "That code isn't right. Check the text and try again."
+msgstr "Ese código no es correcto. Revisa el mensaje y vuelve a intentarlo."
+
+#: views.py:49
+msgid "That code has expired. Ask for a new one."
+msgstr "Ese código ya venció. Pide uno nuevo."
+
+#: views.py:50
+msgid "Too many wrong tries. Ask for a new code."
+msgstr "Demasiados intentos incorrectos. Pide un código nuevo."
+
+#: views.py:51
+msgid "This event has ended or was cancelled."
+msgstr "Este evento ya terminó o fue cancelado."
+
+#: views.py:52
+msgid "The host removed this RSVP."
+msgstr "Quien organiza quitó esta confirmación."
+
+#: views.py:53
+msgid "We couldn't send the text just now. Please try again in a minute."
+msgstr "No pudimos enviar el mensaje ahora. Vuelve a intentarlo en un minuto."

@@ -1,0 +1,8 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+{% block content %}
+<article class="card">
+  <h1>{{ title }}</h1>
+  <p>{% translate "This event was cancelled." %}</p>
+</article>
+{% endblock %}
