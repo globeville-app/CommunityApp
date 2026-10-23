@@ -5,6 +5,7 @@ from django_otp.admin import OTPAdminSite
 from django.urls import include, path
 
 from events import invites as event_invites
+from guests import views as guest_views
 from events import views as event_views
 from profiles import views as profile_views
 from stats.views import owner_stats
@@ -47,6 +48,7 @@ urlpatterns = [
     path("api/", include("notifications.urls")),
     path("api/", include("organizations.urls")),
     path("api/invites/<str:code>", event_invites.OpenInviteView.as_view(), name="open-invite"),
+    path("api/claims", guest_views.ClaimView.as_view(), name="claims"),
     path("api/events", event_views.EventListView.as_view(), name="events"),
     path("api/events/", include("events.urls")),
 ]

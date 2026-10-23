@@ -11,4 +11,7 @@ urlpatterns = [
     path("<int:event_id>/translate", views.EventTranslateView.as_view(), name="event-translate"),
     path("<int:event_id>/invite", invites.EventInviteView.as_view(), name="event-invite"),
     path("<int:event_id>/invite/reset", invites.EventInviteResetView.as_view(), name="event-invite-reset"),
+    path("<int:event_id>/invite/shared", invites.InviteSharedView.as_view(), name="event-invite-shared"),
+    path("<int:event_id>/guests", invites.GuestListView.as_view(), name="event-guests"),
+    path("<int:event_id>/guests/<int:rsvp_id>/remove", invites.RemoveGuestView.as_view(), name="event-guest-remove"),
 ]

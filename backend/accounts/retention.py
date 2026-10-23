@@ -7,6 +7,10 @@ keepsakes, follows and organization roles, and each event's title, category,
 neighborhood, time and host. Deleting the account removes the member's part
 straight away (accounts/deletion.py).
 
+Guests who RSVP'd on the web (Milestone 5) are deleted, phone number and
+all, 30 days after the last text about their events, unless they joined
+or have another RSVP coming up.
+
 Everything else is deleted once its job is done, by a daily job:
 `python manage.py cleanup_old_data` (.do/app.yaml). Each rule below says
 what goes and when; `--dry-run` only counts.
@@ -19,6 +23,21 @@ from django.db.models import Q
 from django.utils import timezone
 
 YEAR = timedelta(days=365)
+
+
+def guests_done_with(now):
+    """Guests whose last text was over 30 days ago, who didn't join and have nothing coming up."""
+    from django.db.models import Max
+
+    from guests.models import ACTIVE_RSVP, Guest, GuestRSVP
+
+    upcoming = GuestRSVP.objects.filter(ACTIVE_RSVP, event__starts_at__gte=now - timedelta(days=1)).values("guest")
+    return (
+        Guest.objects.annotate(last_text=Max("texts__send_at"))
+        .filter(last_text__lt=now - timedelta(days=30))
+        .exclude(pk__in=upcoming)
+        .exclude(rsvps__pending__claimed_at__isnull=False)
+    )
 
 
 def cleanup(now=None, dry_run=False):
@@ -52,6 +71,9 @@ def cleanup(now=None, dry_run=False):
         "organization reports": OrganizationReport.objects.filter(created_at__lt=year_ago),
         "decided organization changes": OrganizationChangeRequest.objects.filter(decided_at__lt=year_ago),
         "problem reports": ProblemReport.objects.filter(created_at__lt=year_ago),
+        # Guests' phone numbers (Milestone 5): 30 days after the last text
+        # about their events, unless they joined or have another RSVP coming.
+        "guest phone numbers": guests_done_with(now),
         # Logins and codes that already stopped working.
         "expired logins": DeviceToken.objects.filter(last_used_at__lt=now - EXPIRES_AFTER),
         "expired email codes": EmailCode.objects.filter(expires_at__lt=now),

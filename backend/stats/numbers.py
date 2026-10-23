@@ -24,6 +24,8 @@ from notifications.models import PushToken, ScheduledNotification
 from organizations.models import TYPES, Follow, Organization, OrganizationChangeRequest
 from support.models import ProblemReport
 
+from .signals import invite_numbers, signal_numbers
+
 
 def _days_ago(now, days):
     return now - timedelta(days=days)
@@ -167,5 +169,7 @@ def all_numbers(now=None):
         "badges": badge_numbers(now),
         "organizations": organization_numbers(now),
         "jobs": job_numbers(now),
+        "signals": signal_numbers(now),
+        "invites": invite_numbers(now),
         "generated_at": timezone.localtime(now),
     }

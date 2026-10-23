@@ -18,6 +18,24 @@
   <p>Updated {{ generated_at|date:"M j, Y, g:i A" }} (Denver time). Counts only; staff and test accounts with staff status are left out.</p>
 
   <section>
+    <h2>Value signals: is this worth using?</h2>
+    <p>Are people using the app for things Partiful and group chats don't do? (docs/GO_LIVE.md §4)</p>
+    <table>
+      <thead><tr><th>Signal</th><th>Last 30 days</th><th>Since launch</th></tr></thead>
+      <tbody>
+      {% with a=signals.last_30 b=signals.since_launch %}
+      <tr><td>1. Events without a Partiful link</td><td>{% if a.no_partiful_pct is None %}not yet tracked{% else %}{{ a.no_partiful_pct }}%{% endif %}</td><td>{% if b.no_partiful_pct is None %}not yet tracked{% else %}{{ b.no_partiful_pct }}%{% endif %}</td></tr>
+      <tr><td>2. RSVPs found in the app (vs. invited)</td><td>{% if a.found_pct is None %}not yet tracked{% else %}{{ a.found_pct }}%{% endif %}</td><td>{% if b.found_pct is None %}not yet tracked{% else %}{{ b.found_pct }}%{% endif %}</td></tr>
+      <tr><td>3. Active members in Spanish</td><td>{% if a.spanish_members_pct is None %}not yet tracked{% else %}{{ a.spanish_members_pct }}%{% endif %}</td><td>{% if b.spanish_members_pct is None %}not yet tracked{% else %}{{ b.spanish_members_pct }}%{% endif %}</td></tr>
+      <tr><td>3. Guest RSVPs in Spanish</td><td>{% if a.spanish_guests_pct is None %}not yet tracked{% else %}{{ a.spanish_guests_pct }}%{% endif %}</td><td>{% if b.spanish_guests_pct is None %}not yet tracked{% else %}{{ b.spanish_guests_pct }}%{% endif %}</td></tr>
+      <tr><td>4. First-timers who came back within 60 days</td><td>{% if a.came_back_pct is None %}not yet tracked{% else %}{{ a.came_back_pct }}%{% endif %}</td><td>{% if b.came_back_pct is None %}not yet tracked{% else %}{{ b.came_back_pct }}%{% endif %}</td></tr>
+      <tr><td><b>5. Guest-to-member conversion</b> (guests who joined ÷ guests whose events ended)</td><td>{% if a.conversion.pct is None %}not yet tracked{% else %}<b>{{ a.conversion.pct }}%</b> ({{ a.conversion.joined }} of {{ a.conversion.of }}){% endif %}</td><td>{% if b.conversion.pct is None %}not yet tracked{% else %}<b>{{ b.conversion.pct }}%</b> ({{ b.conversion.joined }} of {{ b.conversion.of }}){% endif %}</td></tr>
+      {% endwith %}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
     <h2>Members</h2>
     <div class="tiles">
       <div class="tile"><b>{{ members.total }}</b>total</div>
@@ -100,6 +118,25 @@
       {% for kind, counts in organizations.by_type %}<tr><td>{{ kind }}</td>{% for n in counts %}<td>{{ n }}</td>{% endfor %}</tr>{% endfor %}
       </tbody>
     </table>
+  </section>
+
+  <section>
+    <h2>Invite links and guests (last 30 days)</h2>
+    <div class="tiles">
+      <div class="tile"><b>{{ invites.invite_shares }}</b>invite shares</div>
+      <div class="tile"><b>{{ invites.web_page_views }}</b>invite page views</div>
+      <div class="tile"><b>{{ invites.guest_rsvps }}</b>guest RSVPs</div>
+      <div class="tile"><b>{{ invites.collect_opt_ins }}</b>opted in to the collect text</div>
+      <div class="tile"><b>{{ invites.collect_texts_sent }}</b>collect texts sent</div>
+      <div class="tile"><b>{{ invites.guests_joined }}</b>guests who joined</div>
+      <div class="tile"><b>{{ invites.opt_outs }}</b>opt-outs (STOP)</div>
+    </div>
+    <h3>Texts sent</h3>
+    <table>
+      <tbody>{% for kind, n in invites.texts_by_kind.items %}<tr><td>{{ kind }}</td><td>{{ n }}</td></tr>{% endfor %}</tbody>
+    </table>
+    <p>Texting this month (since {{ invites.month_start|date:"M j" }}): <b>${{ invites.spent_usd }}</b> of the ${{ invites.budget_usd }} budget{% if invites.budget_pct is not None %} ({{ invites.budget_pct }}%){% endif %}.
+      {% if invites.budget_pct is not None and invites.budget_pct >= 100 %}<b style="color: var(--error-fg);">Reminders and collect texts are paused until next month.</b>{% endif %}</p>
   </section>
 
   <section>
