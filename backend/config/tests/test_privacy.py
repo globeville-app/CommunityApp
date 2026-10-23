@@ -74,6 +74,11 @@ class AddressIsNeverStoredTests(FixtureNeighborhoodsMixin, APITestCase):
         hits = []
         with connection.cursor() as cursor:
             for table in connection.introspection.table_names():
+                # Django's own list of applied migrations: names and the times
+                # they ran, written before the test starts. A time like
+                # 18:42:42 would otherwise "contain" the house number 4242.
+                if table == "django_migrations":
+                    continue
                 cursor.execute(f'SELECT * FROM "{table}"')
                 for row in cursor.fetchall():
                     if secret in " ".join(str(value) for value in row):
