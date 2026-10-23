@@ -61,3 +61,13 @@ it("auto check-in never sends or keeps a location", () => {
   expect(geofencing).not.toMatch(/getCurrentPositionAsync|watchPositionAsync|getLastKnownPositionAsync|startLocationUpdatesAsync/);
   expect(geofencing).not.toMatch(/AsyncStorage|SecureStore\.set|console\./);
 });
+
+it("never asks for the phone's contacts (Milestone 5: invites go through the share sheet)", () => {
+  expect(deps).not.toContain("expo-contacts");
+  expect(deps.filter((d) => /contacts/i.test(d))).toEqual([]);
+  for (const [file, source] of sourceFiles()) {
+    expect([file, /expo-contacts|READ_CONTACTS|NSContactsUsageDescription/.test(source)]).toEqual([file, false]);
+  }
+  const config = fs.readFileSync(path.join(__dirname, "..", "app.config.ts"), "utf8");
+  expect(config).not.toMatch(/contacts/i);
+});

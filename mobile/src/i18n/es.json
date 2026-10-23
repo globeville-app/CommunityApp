@@ -177,7 +177,12 @@
     "invalid_push_token": "No se pudieron activar las notificaciones en este teléfono.",
     "invalid_code": "Ese código no es correcto o ya venció. Revisa el correo o pide un código nuevo.",
     "email_not_verified": "Primero confirma tu correo.",
-    "invite_not_found": "Esa invitación ya no está abierta."
+    "invite_not_found": "Esa invitación ya no está abierta.",
+    "invite_revoked": "Este enlace de invitación ha vencido. Pídele uno nuevo al anfitrión.",
+    "claim_not_found": "Ese código no es correcto. Revísalo e inténtalo de nuevo.",
+    "claim_used": "Esa insignia ya fue recogida.",
+    "claim_expired": "Ese código ha vencido. Los códigos duran 7 días después del evento.",
+    "guest_not_found": "Esa persona ya no está en la lista."
   },
   "demo": {
     "banner_label": "Demo",
@@ -364,7 +369,10 @@
     "filter_following": "Siguiendo",
     "empty_following": "Sigue organizaciones para ver sus eventos aquí.",
     "following_tag": "Siguiendo",
-    "hosted_by": "Organizado por {{name}}"
+    "hosted_by": "Organizado por {{name}}",
+    "link_only": "Solo con enlace",
+    "invite_people": "Invitar gente",
+    "guest_list": "Lista de invitados"
   },
   "picker": {
     "event_title": "¿Qué tipo de evento?",
@@ -427,7 +435,12 @@
     "as_you": "Tú",
     "where_title": "¿En qué barrio?",
     "where_intro": "{{name}} atiende estos barrios. Cada evento pertenece a uno.",
-    "posting_as": "Publicando como {{name}} en {{neighborhood}}"
+    "posting_as": "Publicando como {{name}} en {{neighborhood}}",
+    "visibility_label": "¿Quién puede verlo?",
+    "visibility_neighborhood": "Vecindario + enlace",
+    "visibility_link_only": "Solo con enlace",
+    "visibility_neighborhood_note": "En el calendario de tu vecindario, y cualquiera a quien le envíes el enlace puede verlo.",
+    "visibility_link_only_note": "No aparece en ningún calendario. Solo lo ven las personas a quienes les envíes el enlace."
   },
   "badges": {
     "local": {
@@ -730,7 +743,19 @@
     "button": "Actualizar"
   },
   "invite": {
-    "message": "¡Ven a {title} el {date}! Confirma aquí: {link}"
+    "message": "¡Ven a {title} el {date}! Confirma aquí: {link}",
+    "title": "Invitar gente",
+    "intro": "Envía este enlace a quien quieras invitar. Se envía desde tu teléfono.",
+    "message_label": "Tu mensaje",
+    "share": "Compartir",
+    "copy": "Copiar enlace",
+    "copied": "Enlace copiado",
+    "no_contacts": "{{app}} nunca ve tus contactos. Tú eliges a quién enviarlo.",
+    "reset": "Restablecer enlace",
+    "reset_confirm": "¿Restablecer el enlace? El enlace anterior deja de funcionar. Quienes ya lo abrieron conservan el acceso.",
+    "was_reset": "Listo. Este es el nuevo enlace.",
+    "go_to_event": "Ir a tu evento",
+    "done": "Listo"
   },
   "texts": {
     "code": "{app}: tu código es {code}. Vence en 10 minutos.",
@@ -738,5 +763,29 @@
     "reminder": "{app}: recordatorio, {title} es mañana a las {time}. ¿No puedes ir? {link}",
     "collect": "{app}: ¡fuiste a {title}! Recoge tu insignia: {link}. Responde STOP para no recibir más.",
     "help": "{app}: mensajes de eventos para quienes confirmaron. Responde STOP para no recibir más. Ayuda: {email}"
+  },
+  "guests": {
+    "title": "Lista de invitados",
+    "guest_name": "{{name}} (invitado)",
+    "remove": "Quitar",
+    "remove_confirm": "¿Quitar a {{name}} de este evento? Recibirá un mensaje diciendo que el anfitrión quitó su confirmación.",
+    "none": "Nadie todavía. ¡Comparte tu enlace de invitación!",
+    "names_hidden": "En ferias de recursos y colectas de donaciones solo se muestra el número, para proteger la privacidad.",
+    "came": "Asistieron: {{confirmed}} de {{of}} (confirmados)",
+    "came_note": "Cuenta a quienes registraron su llegada o recogieron su insignia. Algunas personas van y no lo confirman, así que el número real puede ser mayor."
+  },
+  "invite_open": {
+    "signed_out_title": "¡Estás invitado!",
+    "signed_out_body": "Abre la página del evento para confirmar, o únete a {{app}} para verlo aquí.",
+    "open_page": "Abrir la página del evento",
+    "join": "Unirme o iniciar sesión",
+    "to_events": "Ir a eventos"
+  },
+  "claim": {
+    "title": "¿Tienes un código de insignia?",
+    "intro": "¿Fuiste a un evento como invitado? Escribe el código de 6 caracteres de tu página para recoger.",
+    "code_label": "Código de insignia",
+    "button": "Recoger mi insignia",
+    "collected": "¡Recogida! Ya está en tu perfil."
   }
 }

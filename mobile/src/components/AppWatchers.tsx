@@ -3,14 +3,16 @@
  *   - unlock moments: unseen celebrations show once, never mid-post
  *   - auto check-in: refresh which event places the phone watches
  *   - push notifications: make sure the server has this phone's token
+ *   - a badge collect link opened before joining: claim it now (Milestone 5)
  */
 import { router, usePathname } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 
-import { getCelebrations } from "../api";
+import { ApiError, claimBadge, getCelebrations } from "../api";
 import { useAuth } from "../auth";
 import { syncGeofences } from "../checkin/geofencing";
+import { savePendingClaim, takePendingClaim } from "../claims";
 import { registerThisPhone } from "../notifications/push";
 
 /** Screens an unlock moment may appear over. Never the post/edit flow or joining. */
@@ -53,7 +55,19 @@ export function AppWatchers() {
   useEffect(() => {
     if (!token || !due.current || checking.current || !canCelebrateOn(pathname)) return;
     checking.current = true;
-    getCelebrations(token)
+    // A saved collect link first: claiming it adds the new celebrations.
+    // Expired or already used: nothing to show, so it's simply dropped.
+    takePendingClaim()
+      .then((claimToken) =>
+        claimToken
+          ? claimBadge(token, { token: claimToken }).catch((e: ApiError) => {
+              // Offline or a server hiccup: keep it for next time.
+              if (["network", "timeout", "server_error"].includes(e.code)) return savePendingClaim(claimToken);
+            })
+          : undefined,
+      )
+      .catch(() => undefined)
+      .then(() => getCelebrations(token))
       .then(({ celebrations }) => {
         due.current = false;
         if (celebrations.length > 0) router.push("/celebrate");

@@ -29,6 +29,7 @@ import {
 import { useAuth } from "../auth";
 import { badgeName, inProgress, progress, stageName } from "../badges";
 import { turnOnAutoCheckin } from "../checkin/autoCheckin";
+import { BadgeCodeField } from "../components/BadgeCodeField";
 import { Badge } from "../components/badges/Badge";
 import { shortDate } from "../i18n/dates";
 import { errorMessage } from "../i18n/errors";
@@ -210,6 +211,7 @@ export default function MyImpact() {
         </GlassCard>
       ) : null}
 
+      <BadgeCodeField />
       <TextLink label={t("badges.see_all")} onPress={() => router.push("/badges")} />
     </Screen>
   );

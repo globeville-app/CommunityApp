@@ -1,6 +1,7 @@
 /**
  * Where the login token is kept on the phone: secure storage (Keychain on
- * iPhone, Keystore on Android). The token is the ONLY thing the app saves.
+ * iPhone, Keystore on Android). The token is the only secret the app saves,
+ * besides a not-yet-collected guest badge link (claims.ts, Milestone 5).
  *
  * (tokenStorage.web.ts is the browser demo's version.)
  */

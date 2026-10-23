@@ -114,6 +114,10 @@ export type DemoEvent = Omit<EventData, "group" | "is_past" | "organizer_name" |
   viewerGoing?: boolean;
   // Posted as an organization (fakeOrgs.ts).
   orgId?: number | null;
+  // Milestone 5: the invite link (reset counts up), and members from other
+  // neighborhoods who opened it.
+  inviteResets?: number;
+  accessEmails?: string[];
 };
 
 /** A pretend organization (fakeOrgs.ts). */

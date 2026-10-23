@@ -19,6 +19,7 @@ import {
   ApiError,
   createEvent,
   EventInput,
+  Visibility,
   newFormKey,
   getEvent,
   getMyOrganizations,
@@ -63,6 +64,7 @@ type Step = "who" | "where" | "category" | "partiful" | "details" | "pin";
 const DENVER: LatLng = { latitude: 39.7392, longitude: -104.9903 };
 
 // An example link, the same in every language.
+const VISIBILITIES: Visibility[] = ["neighborhood", "link_only"];
 const PARTIFUL_PLACEHOLDER = "https://partiful.com/e/…";
 
 /** Tomorrow's date in Denver, "2026-10-25", as a starting point. */
@@ -92,6 +94,7 @@ export default function EventForm() {
   const [category, setCategory] = useState<string | null>(null);
   const [otherText, setOtherText] = useState("");
   const [partifulUrl, setPartifulUrl] = useState("");
+  const [visibility, setVisibility] = useState<Visibility>("neighborhood");
   const [partifulNote, setPartifulNote] = useState<"found" | "not_found" | null>(null);
   const [suggestion, setSuggestion] = useState<string | null>(null);
   // The language the organizer writes in: the app's language for a new
@@ -162,6 +165,7 @@ export default function EventForm() {
         setCategory(event.category);
         setOtherText(event.category_other ?? "");
         setPartifulUrl(event.partiful_url ?? "");
+        setVisibility(event.visibility ?? "neighborhood");
         setWriting(event.language);
         setTitle(event.title);
         const startParts = denverParts(event.starts_at);
@@ -233,6 +237,7 @@ export default function EventForm() {
       latitude: pin?.latitude ?? null,
       longitude: pin?.longitude ?? null,
       partiful_url: partifulUrl.trim(),
+      visibility,
       ...(asOrg && orgNeighborhood ? { organization: asOrg.id, neighborhood: orgNeighborhood.id } : {}),
     };
     setBusy(true);
@@ -243,8 +248,8 @@ export default function EventForm() {
         router.back();
       } else {
         const created = await createEvent(token, body, formKey);
-        // Land on the new event.
-        router.replace({ pathname: "/event/[id]", params: { id: String(created.id) } });
+        // On to "Invite people", then the new event.
+        router.replace({ pathname: "/invite/[id]", params: { id: String(created.id), fresh: "1" } });
       }
     } catch (e) {
       setError(e as ApiError);
@@ -437,6 +442,21 @@ export default function EventForm() {
           keyboardType="url"
         />
       ) : null}
+
+      <GlassCard>
+        <Section>{t("post.visibility_label")}</Section>
+        <View style={styles.row}>
+          {VISIBILITIES.map((option) => (
+            <Choice
+              key={option}
+              label={t(`post.visibility_${option}`)}
+              selected={visibility === option}
+              onPress={() => setVisibility(option)}
+            />
+          ))}
+        </View>
+        <Caption onGlass>{t(`post.visibility_${visibility}_note`)}</Caption>
+      </GlassCard>
 
       <ErrorMessage message={errorMessage(t, error)} />
       <Button

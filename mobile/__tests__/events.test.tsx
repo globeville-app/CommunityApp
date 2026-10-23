@@ -184,7 +184,7 @@ describe("posting an event", () => {
     expect(screen.queryByRole("button", { name: "Suggested: Potluck / Cookout" })).toBeNull();
   });
 
-  it("posts the details in Denver time and lands on the new event", async () => {
+  it("posts the details in Denver time and lands on Invite people, then the event", async () => {
     mocked.createEvent.mockResolvedValue(sampleEvent({ id: 42, title: "River cleanup", category: "cleanup", group: "community", is_organizer: true }));
     mocked.getEvent.mockResolvedValue(sampleEvent({ id: 42, title: "River cleanup", category: "cleanup", group: "community", is_organizer: true }));
     await chooseCleanup();
@@ -217,7 +217,10 @@ describe("posting an event", () => {
       latitude: 39.7621,
       longitude: -105.0098,
       partiful_url: "",
+      visibility: "neighborhood",
     }, expect.any(String)); // the form's key: a double tap posts it once
+    expect(await screen.findByRole("header", { name: "Invite people" })).toBeTruthy();
+    await pressAndSettle(screen.getByRole("button", { name: "Go to your event" }));
     expect(await screen.findByRole("header", { name: "River cleanup" })).toBeTruthy();
   });
 
@@ -243,10 +246,10 @@ describe("the event detail", () => {
     expect(screen.getByText("Posted by Ben R.")).toBeTruthy();
 
     await pressAndSettle(screen.getByRole("button", { name: "I'm going" }));
-    expect(mocked.setGoing).toHaveBeenLastCalledWith("tok-123", 7, true);
+    expect(mocked.setGoing).toHaveBeenLastCalledWith("tok-123", 7, true, "event_detail");
     expect(screen.getByText("13 neighbors going")).toBeTruthy();
     await pressAndSettle(screen.getByRole("button", { name: "You're going · tap to undo" }));
-    expect(mocked.setGoing).toHaveBeenLastCalledWith("tok-123", 7, false);
+    expect(mocked.setGoing).toHaveBeenLastCalledWith("tok-123", 7, false, "event_detail");
     expect(screen.getByText("12 neighbors going")).toBeTruthy();
   });
 

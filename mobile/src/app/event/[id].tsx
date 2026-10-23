@@ -6,6 +6,9 @@
  * Milestone 3: the location opens the "Open in" sheet, the organizer's name
  * opens their member page, organizers of pinless upcoming events get an
  * "Add a map pin" prompt, and the first "I'm going" offers auto check-in.
+ *
+ * Milestone 5: hosts get Invite people and the Guest list. `from` is the
+ * screen that opened this one, recorded with "I'm going" (counts only).
  */
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -19,6 +22,7 @@ import {
   cancelEvent,
   EventData,
   getEvent,
+  GoingSource,
   getMyProfile,
   reportEvent,
   setGoing,
@@ -54,7 +58,7 @@ export default function EventDetail() {
   const { t } = useTranslation();
   const { token } = useAuth();
   const { language } = useLanguage();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: GoingSource }>();
   const eventId = Number(id);
 
   const [event, setEvent] = useState<EventData | null>(null);
@@ -134,7 +138,7 @@ export default function EventDetail() {
     setBusy(true);
     setError(null);
     try {
-      const result = await setGoing(token, event.id, !event.is_going);
+      const result = await setGoing(token, event.id, !event.is_going, from ?? "event_detail");
       setEvent({ ...event, ...result });
       // Watch (or stop watching) this event's place, if auto check-in is on.
       syncGeofences(token).catch(() => undefined);
@@ -192,6 +196,7 @@ export default function EventDetail() {
         <View style={{ flex: 1, gap: space.xs }}>
           <CategoryChip category={event.category} group={event.group} otherText={event.category_other} />
           {cancelled ? <Text style={styles.cancelled}>{t("events.cancelled")}</Text> : null}
+          {event.visibility === "link_only" ? <Caption>{t("events.link_only")}</Caption> : null}
         </View>
       </View>
       <Title>{title}</Title>
@@ -292,6 +297,23 @@ export default function EventDetail() {
         </GlassCard>
       ) : null}
 
+      {event.is_organizer && !cancelled ? (
+        <View style={styles.organizer}>
+          <View style={{ flex: 1 }}>
+            <Button
+              title={t("events.invite_people")}
+              onPress={() => router.push({ pathname: "/invite/[id]", params: { id: String(event.id) } })}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button
+              title={t("events.guest_list")}
+              variant="secondary"
+              onPress={() => router.push({ pathname: "/guests/[id]", params: { id: String(event.id) } })}
+            />
+          </View>
+        </View>
+      ) : null}
       {event.is_organizer && !cancelled ? (
         <View style={styles.organizer}>
           <View style={{ flex: 1 }}>

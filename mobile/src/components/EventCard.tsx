@@ -7,7 +7,7 @@ import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import type { EventData } from "../api";
+import type { EventData, GoingSource } from "../api";
 import { dateBlock, timeRange } from "../i18n/dates";
 import { useLanguage } from "../language";
 import { colors, radius, space, type } from "../theme";
@@ -29,7 +29,8 @@ export function DateBlock({ startsAt }: { startsAt: string }) {
   );
 }
 
-export function EventCard({ event }: { event: EventData }) {
+/** `from`: the list it's shown in, recorded with "I'm going" (counts only). */
+export function EventCard({ event, from = "calendar" }: { event: EventData; from?: GoingSource }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const cancelled = event.status === "cancelled";
@@ -38,7 +39,7 @@ export function EventCard({ event }: { event: EventData }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
-      onPress={() => router.push({ pathname: "/event/[id]", params: { id: String(event.id) } })}
+      onPress={() => router.push({ pathname: "/event/[id]", params: { id: String(event.id), from } })}
       style={({ pressed }) => [styles.card, cancelled && styles.cancelledCard, pressed && { opacity: 0.8 }]}
     >
       <DateBlock startsAt={event.starts_at} />

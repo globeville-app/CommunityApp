@@ -21,6 +21,12 @@
  *   - EAS_PROJECT_ID: from `npx eas init` (Expo account). Push tokens need it.
  *   - Android push also needs a Firebase project, set up in the Expo account
  *     (README, "Push notifications").
+ *
+ * Milestone 5 (invite links): globeville.app/e/... and /c/... open the app
+ * when it's installed (iOS Universal Links, Android App Links). The domain
+ * is the invite_url in shared/app_config.json. The server's
+ * /.well-known files need APPLE_TEAM_ID and ANDROID_CERT_SHA256 (README).
+ * Changing this needs a new app build.
  */
 import type { ExpoConfig } from "expo/config";
 
@@ -46,6 +52,7 @@ const BUILD_NUMBER = 1;
 // NEVER change it: a new ID is a new app to the stores.
 const APP_ID = "app.globeville";
 const slug = appName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+const linkDomain = new URL(shared.invite_url).host;
 
 const config: ExpoConfig = {
   name: appName,
@@ -59,6 +66,7 @@ const config: ExpoConfig = {
     supportsTablet: false,
     bundleIdentifier: APP_ID,
     buildNumber: String(BUILD_NUMBER),
+    associatedDomains: [`applinks:${linkDomain}`],
     infoPlist: {
       // Lets the "Open in" sheet see whether these maps apps are installed.
       LSApplicationQueriesSchemes: ["comgooglemaps", "waze"],
@@ -73,6 +81,17 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
     package: APP_ID,
     versionCode: BUILD_NUMBER,
+    intentFilters: [
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [
+          { scheme: "https", host: linkDomain, pathPrefix: "/e/" },
+          { scheme: "https", host: linkDomain, pathPrefix: "/c/" },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ],
   },
   web: {
     favicon: "./assets/brand/favicon.png",

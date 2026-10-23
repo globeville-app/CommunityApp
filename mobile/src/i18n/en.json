@@ -177,7 +177,12 @@
     "invalid_push_token": "Notifications couldn't be set up on this phone.",
     "invalid_code": "That code isn't right or has expired. Check the email, or ask for a new code.",
     "email_not_verified": "Please confirm your email first.",
-    "invite_not_found": "That invitation isn't open anymore."
+    "invite_not_found": "That invitation isn't open anymore.",
+    "invite_revoked": "This invite link has expired. Ask the host for a new one.",
+    "claim_not_found": "That code isn't right. Check it and try again.",
+    "claim_used": "That badge was already collected.",
+    "claim_expired": "That code has expired. Codes last 7 days after the event.",
+    "guest_not_found": "That guest isn't on the list anymore."
   },
   "demo": {
     "banner_label": "Demo",
@@ -364,7 +369,10 @@
     "filter_following": "Following",
     "empty_following": "Follow organizations to see their events here.",
     "following_tag": "Following",
-    "hosted_by": "Hosted by {{name}}"
+    "hosted_by": "Hosted by {{name}}",
+    "link_only": "Link only",
+    "invite_people": "Invite people",
+    "guest_list": "Guest list"
   },
   "picker": {
     "event_title": "What kind of event?",
@@ -427,7 +435,12 @@
     "as_you": "You",
     "where_title": "Which neighborhood?",
     "where_intro": "{{name}} serves these neighborhoods. Each event belongs to one.",
-    "posting_as": "Posting as {{name}} in {{neighborhood}}"
+    "posting_as": "Posting as {{name}} in {{neighborhood}}",
+    "visibility_label": "Who can see this?",
+    "visibility_neighborhood": "Neighborhood + link",
+    "visibility_link_only": "Link only",
+    "visibility_neighborhood_note": "On your neighborhood's calendar, and anyone you send the link to can see it.",
+    "visibility_link_only_note": "Not on any calendar. Only people you send the link to can see it."
   },
   "badges": {
     "local": {
@@ -730,7 +743,19 @@
     "button": "Update"
   },
   "invite": {
-    "message": "Come to {title} on {date}! RSVP here: {link}"
+    "message": "Come to {title} on {date}! RSVP here: {link}",
+    "title": "Invite people",
+    "intro": "Text this link to anyone you want to invite. It sends from your phone.",
+    "message_label": "Your message",
+    "share": "Share",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "no_contacts": "{{app}} never sees your contacts. You choose who to send it to.",
+    "reset": "Reset link",
+    "reset_confirm": "Reset the link? The old link stops working. People who already opened it keep access.",
+    "was_reset": "Done. Here's the new link.",
+    "go_to_event": "Go to your event",
+    "done": "Done"
   },
   "texts": {
     "code": "{app}: your code is {code}. It expires in 10 minutes.",
@@ -738,5 +763,29 @@
     "reminder": "{app}: reminder, {title} is tomorrow at {time}. Can't make it? {link}",
     "collect": "{app}: you went to {title}! Collect your badge: {link}. Reply STOP to opt out.",
     "help": "{app}: event texts for RSVPs. Reply STOP to opt out. Help: {email}"
+  },
+  "guests": {
+    "title": "Guest list",
+    "guest_name": "{{name}} (guest)",
+    "remove": "Remove",
+    "remove_confirm": "Remove {{name}} from this event? They'll get a text saying the host removed their RSVP.",
+    "none": "No one yet. Share your invite link!",
+    "names_hidden": "For resource fairs and donation drives, only the count is shown, to protect people's privacy.",
+    "came": "Came: {{confirmed}} of {{of}} (confirmed)",
+    "came_note": "Counts people who checked in or collected their badge. Some people come and never confirm, so the real number may be higher."
+  },
+  "invite_open": {
+    "signed_out_title": "You're invited!",
+    "signed_out_body": "Open the event page to RSVP, or join {{app}} to see it here.",
+    "open_page": "Open the event page",
+    "join": "Join or log in",
+    "to_events": "Go to events"
+  },
+  "claim": {
+    "title": "Have a badge code?",
+    "intro": "Went to an event as a guest? Type the 6-character code from your collect page.",
+    "code_label": "Badge code",
+    "button": "Collect my badge",
+    "collected": "Collected! It's on your profile now."
   }
 }

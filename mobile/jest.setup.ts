@@ -164,6 +164,7 @@ jest.mock("react-native-maps", () => {
 });
 
 jest.mock("react-native-view-shot", () => ({ captureRef: jest.fn(async () => "file:///tmp/badge-card.png") }));
+jest.mock("expo-clipboard", () => ({ setStringAsync: jest.fn(async () => true) }));
 jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(async () => undefined), isAvailableAsync: jest.fn(async () => true) }));
 
 // ---- Milestone 4 ----

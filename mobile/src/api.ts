@@ -28,6 +28,9 @@ import {
   ProfileSettings,
   EventData,
   EventInput,
+  GoingSource,
+  GuestList,
+  InviteInfo,
   MatchResult,
   ProblemReportInput,
   Profile,
@@ -222,10 +225,11 @@ export function cancelEvent(token: string, id: number) {
 }
 
 /** I'm going (true) or not anymore (false). */
-export function setGoing(token: string, id: number, going: boolean) {
+export function setGoing(token: string, id: number, going: boolean, source?: GoingSource) {
   return request<{ going_count: number; is_going: boolean }>(`/api/events/${id}/going`, {
     method: going ? "PUT" : "DELETE",
     token,
+    json: going && source ? { source } : undefined,
   });
 }
 
@@ -410,4 +414,38 @@ export function translateOrganization(token: string, id: number, target: Languag
 
 export function getOrganizationImpact(token: string, id: number) {
   return request<{ impact: Impact; badges: BadgeData[] }>(`/api/organizations/${id}/impact`, { token });
+}
+
+// ---- Milestone 5: invite links, guests and badge claims ----
+
+export function getInvite(token: string, eventId: number) {
+  return request<InviteInfo>(`/api/events/${eventId}/invite`, { token });
+}
+
+/** Old links stop working; people who already opened one keep access. */
+export function resetInvite(token: string, eventId: number) {
+  return request<InviteInfo>(`/api/events/${eventId}/invite/reset`, { method: "POST", token });
+}
+
+/** Counts a share-sheet open for the owner stats (nothing about who). */
+export function logInviteShare(token: string, eventId: number) {
+  return request<void>(`/api/events/${eventId}/invite/shared`, { method: "POST", token });
+}
+
+/** A member opened an invite link: the event, from any neighborhood. */
+export function openInvite(token: string, code: string) {
+  return request<EventData>(`/api/invites/${encodeURIComponent(code)}`, { token });
+}
+
+export function getGuests(token: string, eventId: number) {
+  return request<GuestList>(`/api/events/${eventId}/guests`, { token });
+}
+
+export function removeGuest(token: string, eventId: number, guestId: number) {
+  return request<void>(`/api/events/${eventId}/guests/${guestId}/remove`, { method: "POST", token });
+}
+
+/** Collect a badge earned as a guest: the link's token, or the code typed in. */
+export function claimBadge(token: string, claim: { token: string } | { code: string }) {
+  return request<{ celebrations: Celebration[] }>("/api/claims", { method: "POST", token, json: claim });
 }

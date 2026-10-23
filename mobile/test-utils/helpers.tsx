@@ -36,6 +36,10 @@ import Profile from "../src/app/(tabs)/profile";
 import EventDetail from "../src/app/event/[id]";
 import EventForm from "../src/app/event-form";
 import Interests from "../src/app/interests";
+import InvitePeople from "../src/app/invite/[id]";
+import GuestListScreen from "../src/app/guests/[id]";
+import OpenInvite from "../src/app/e/[code]";
+import CollectLink from "../src/app/c/[token]";
 import ProfileSetup from "../src/app/profile-setup";
 import Report from "../src/app/report";
 import Settings from "../src/app/settings";
@@ -87,6 +91,10 @@ export function renderApp(initialUrl = "/") {
       "organization-impact": OrganizationImpact,
       "organizations/index": Organizations,
       "organizations/[id]": OrganizationPage,
+      "invite/[id]": InvitePeople,
+      "guests/[id]": GuestListScreen,
+      "e/[code]": OpenInvite,
+      "c/[token]": CollectLink,
     },
     { initialUrl },
   );

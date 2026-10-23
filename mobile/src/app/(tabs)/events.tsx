@@ -151,7 +151,13 @@ function Events() {
           <Caption onGlass>{empty}</Caption>
         </GlassCard>
       ) : (
-        events.map((event) => <EventCard key={event.id} event={event} />)
+        events.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              from={filter === "for_you" ? "for_you" : filter === "following" ? "following" : "calendar"}
+            />
+          ))
       )}
       {/* Room for the floating tab bar. */}
       <View style={{ height: 96 }} />

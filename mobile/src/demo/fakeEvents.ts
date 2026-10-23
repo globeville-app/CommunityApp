@@ -4,13 +4,14 @@
  * events from made-up neighbors are added to each neighborhood so the demo
  * isn't empty. Nothing leaves the browser.
  */
-import { ApiError, EventData, EventInput, Translation } from "../apiTypes";
+import { ApiError, EventData, EventInput, GuestList, InviteInfo, Translation } from "../apiTypes";
 import type { Language } from "../i18n";
 import {
   CATEGORY_GROUPS,
   CATEGORY_KEYS,
   DemoEvent,
   Db,
+  languageOf,
   load,
   neighborhoodCenter,
   pause,
@@ -272,6 +273,7 @@ export function toJson(db: Db, event: DemoEvent, email: string): EventData {
     going_count: event.goingEmails.length + event.extraGoing + (isGoing(db, event, email) && !event.goingEmails.includes(email) ? 1 : 0),
     is_going: isGoing(db, event, email),
     matches_interests: (profile?.interests ?? []).includes(event.category),
+    visibility: event.visibility ?? "neighborhood",
   };
 }
 
@@ -279,7 +281,11 @@ function findEvent(db: Db, id: number, neighborhoodId: number, email?: string) {
   const event = db.events[id];
   // Admins also see their organizations' events in other neighborhoods.
   const admin = !!email && !!event?.orgId && !!db.orgs?.[event.orgId]?.adminEmails.includes(email);
-  if (!event || (event.neighborhoodId !== neighborhoodId && !admin)) throw new ApiError("event_not_found", 404);
+  // Milestone 5: so do members who opened its invite link.
+  const invited = !!email && !!event?.accessEmails?.includes(email);
+  if (!event || (event.neighborhoodId !== neighborhoodId && !admin && !invited)) {
+    throw new ApiError("event_not_found", 404);
+  }
   return event;
 }
 
@@ -337,6 +343,7 @@ function check(input: Partial<EventInput>, existing?: DemoEvent) {
     latitude,
     longitude,
     partiful_url: url || null,
+    visibility: merged.visibility === "link_only" ? ("link_only" as const) : ("neighborhood" as const),
   };
 }
 
@@ -349,6 +356,8 @@ export async function listEvents(token: string, filter: { group?: string; forYou
   const groupKeys = filter.group ? (CATEGORY_GROUPS.find((g) => g.key === filter.group)?.categories ?? []) : null;
   const events = Object.values(db.events)
     .filter((e) => e.neighborhoodId === profile.neighborhoodId && !ended(e))
+    // Link-only events are on no calendar, except their host's own.
+    .filter((e) => e.visibility !== "link_only" || canManage(db, e, email))
     .filter((e) => !groupKeys || groupKeys.includes(e.category))
     .filter((e) => !filter.forYou || profile.interests.includes(e.category))
     .filter((e) => !filter.following || (!!e.orgId && !!db.orgs?.[e.orgId]?.followerEmails.includes(email)))
@@ -424,10 +433,10 @@ export async function cancelEvent(token: string, id: number) {
   return toJson(db, event, email);
 }
 
-export async function setGoing(token: string, id: number, going: boolean) {
+export async function setGoing(token: string, id: number, going: boolean, _source?: string) {
   await pause(250);
   const { email, db, profile } = member(token);
-  const event = findEvent(db, id, profile.neighborhoodId);
+  const event = findEvent(db, id, profile.neighborhoodId, email);
   if (event.status === "cancelled") throw new ApiError("event_cancelled", 409);
   if (ended(event)) throw new ApiError("event_past", 409);
   event.goingEmails = event.goingEmails.filter((e) => e !== email);
@@ -467,4 +476,87 @@ export async function translateEvent(token: string, id: number, target: Language
   const canned = target === "es" ? DEMO_TRANSLATIONS[event.title] : undefined;
   if (!canned) throw new ApiError("translation_unavailable", 503);
   return { ...canned, target, machine: true };
+}
+
+// ---- Invite links (Milestone 5) -------------------------------------------------
+
+function inviteCode(event: DemoEvent) {
+  return `demo${event.id}x${event.inviteResets ?? 0}`;
+}
+
+function inviteFor(event: DemoEvent, language: Language): InviteInfo {
+  const code = inviteCode(event);
+  const url = `https://globeville.app/e/${code}`;
+  const date = new Date(event.starts_at).toLocaleDateString(language === "es" ? "es-US" : "en-US", {
+    timeZone: DENVER,
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const message =
+    language === "es"
+      ? `¡Ven a ${event.title} el ${date}! Confirma aquí: ${url}`
+      : `Come to ${event.title} on ${date}! RSVP here: ${url}`;
+  return { code, url, message };
+}
+
+function managed(token: string, id: number) {
+  const { email, db, profile } = member(token);
+  const event = findEvent(db, id, profile.neighborhoodId, email);
+  if (!canManage(db, event, email)) throw new ApiError("not_organizer", 403);
+  return { db, event, language: languageOf(db, email) };
+}
+
+export async function getInvite(token: string, id: number) {
+  await pause(150);
+  const { db, event, language } = managed(token, id);
+  return inviteFor(event, language);
+}
+
+export async function resetInvite(token: string, id: number) {
+  await pause();
+  const { db, event, language } = managed(token, id);
+  event.inviteResets = (event.inviteResets ?? 0) + 1;
+  save(db);
+  return inviteFor(event, language);
+}
+
+export async function logInviteShare(_token: string, _id: number) {
+  await pause(50);
+}
+
+export async function openInvite(token: string, code: string) {
+  await pause(200);
+  const { email, db } = member(token);
+  const event = Object.values(db.events).find((e) => code.startsWith(`demo${e.id}x`));
+  if (!event) throw new ApiError("invite_not_found", 404);
+  if (inviteCode(event) !== code) throw new ApiError("invite_revoked", 410);
+  event.accessEmails = Array.from(new Set([...(event.accessEmails ?? []), email]));
+  save(db);
+  return toJson(db, event, email);
+}
+
+export async function getGuests(token: string, id: number): Promise<GuestList> {
+  await pause(200);
+  const { db, event } = managed(token, id);
+  const sensitive = event.category === "resource_fair" || event.category === "donation_drive";
+  return {
+    going_count: event.goingEmails.length + event.extraGoing,
+    names_hidden: sensitive,
+    members: sensitive ? [] : event.goingEmails.map((e) => ({ display_name: db.profiles[e]?.display_name ?? "" })),
+    // The demo has no web guests (they RSVP by text on the real server).
+    guests: [],
+    came: null,
+  };
+}
+
+export async function removeGuest(_token: string, _id: number, _guestId: number) {
+  await pause();
+  throw new ApiError("guest_not_found", 404);
+}
+
+/** The demo has no guest RSVPs, so there's never a badge to claim. */
+export async function claimBadge(_token: string, _claim: { token: string } | { code: string }): Promise<{ celebrations: never[] }> {
+  await pause();
+  throw new ApiError("claim_not_found", 404);
 }

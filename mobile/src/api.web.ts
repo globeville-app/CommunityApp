@@ -29,11 +29,18 @@ export {
 } from "./demo/fakeBackend";
 export {
   cancelEvent,
+  claimBadge,
   createEvent,
   getEvent,
+  getGuests,
+  getInvite,
   listEvents,
+  logInviteShare,
+  openInvite,
   partifulPreview,
+  removeGuest,
   reportEvent,
+  resetInvite,
   setGoing,
   translateEvent,
   updateEvent,

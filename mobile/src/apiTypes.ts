@@ -72,6 +72,8 @@ export type EventData = {
   is_organizer: boolean;
   going_count: number;
   is_going: boolean;
+  /** Milestone 5: on the neighborhood calendar plus the link, or the link only. */
+  visibility?: Visibility;
   matches_interests: boolean;
 };
 
@@ -90,6 +92,7 @@ export type EventInput = {
   latitude: number | null;
   longitude: number | null;
   partiful_url?: string;
+  visibility?: Visibility;
   /** Post as an organization the member runs, in one of its neighborhoods. */
   organization?: number;
   neighborhood?: number;
@@ -291,3 +294,31 @@ export type OrgInput = {
 export function newFormKey() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 }
+
+// ---- Milestone 5: invite links, guests and badge claims ----
+
+export type Visibility = "neighborhood" | "link_only";
+
+/** Where an "I'm going" came from, for the owner's counts only (never shown per person). */
+export type GoingSource =
+  | "calendar"
+  | "for_you"
+  | "following"
+  | "org_page"
+  | "invite_link"
+  | "share_card"
+  | "event_detail";
+
+/** The host's invite link and a ready-to-send message in their language. */
+export type InviteInfo = { code: string; url: string; message: string };
+
+/** Who's going, for the host only. Never phone numbers. */
+export type GuestList = {
+  going_count: number;
+  /** Resource fairs and donation drives: counts only. */
+  names_hidden: boolean;
+  members: { display_name: string }[];
+  guests: { id: number; first_name: string }[];
+  /** After the event: confirmed attendance out of everyone who was going. */
+  came: { confirmed: number; of: number } | null;
+};

@@ -70,6 +70,13 @@ const SERVER_CALLS = [
   "reportOrganization",
   "translateOrganization",
   "getOrganizationImpact",
+  "getInvite",
+  "resetInvite",
+  "logInviteShare",
+  "openInvite",
+  "getGuests",
+  "removeGuest",
+  "claimBadge",
 ] as const;
 
 export function fakeApi() {
@@ -107,5 +114,11 @@ export function useDefaultReplies(mocked: jest.Mocked<typeof Api>) {
       { id: 3, name: "Highland" },
     ],
   });
+  mocked.getInvite.mockImplementation(async (_token, id) => ({
+    code: "Abc234defG",
+    url: "https://globeville.app/e/Abc234defG",
+    message: `Come to the event ${id}! RSVP here: https://globeville.app/e/Abc234defG`,
+  }));
+  mocked.logInviteShare.mockResolvedValue(undefined);
   mocked.updateProfileSettings.mockImplementation(async (_token, settings) => ({ ...HIGHLAND_PROFILE, ...settings }));
 }

@@ -202,7 +202,7 @@ export default function OrganizationPage() {
       {org.upcoming_events.length === 0 ? (
         <Caption>{t("organizations.no_upcoming")}</Caption>
       ) : (
-        org.upcoming_events.map((event) => <EventCard key={event.id} event={event} />)
+        org.upcoming_events.map((event) => <EventCard key={event.id} event={event} from="org_page" />)
       )}
       <Caption>{t("organizations.past_count", { count: org.past_event_count })}</Caption>
 

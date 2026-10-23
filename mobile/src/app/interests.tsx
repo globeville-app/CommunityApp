@@ -13,6 +13,7 @@ import { useAuth } from "../auth";
 import { useCategories } from "../categories";
 import { CategoryPicker } from "../components/CategoryPicker";
 import { errorMessage } from "../i18n/errors";
+import { BadgeCodeField } from "../components/BadgeCodeField";
 import { resetTo } from "../navigation";
 import { BackButton, Button, ErrorMessage, Intro, Loading, Screen, TextLink, Title } from "../ui";
 
@@ -61,6 +62,7 @@ export default function Interests() {
       <CategoryPicker mode="multi" selected={selected} onChange={setSelected} />
       <ErrorMessage message={errorMessage(t, error)} />
       <Button title={t("picker.done")} onPress={onDone} busy={busy} />
+      {onboarding ? <BadgeCodeField celebrateNow={false} /> : null}
     </Screen>
   );
 }
