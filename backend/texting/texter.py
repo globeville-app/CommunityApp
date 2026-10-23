@@ -34,11 +34,16 @@ class FakeTexter:
     """Logs the message instead of sending it. Tests read `outbox`."""
 
     outbox = []  # (phone, body) pairs, for tests only
+    # A server running with SMS_LIVE off keeps only the latest few.
+    OUTBOX_LIMIT = 200
+    _sent = 0
 
     def send(self, phone, body):
         FakeTexter.outbox.append((phone, body))
+        del FakeTexter.outbox[: -self.OUTBOX_LIMIT]
         logger.info("Text not sent (SMS_LIVE is off): %s", body)
-        return Sent(message_id=f"fake-{len(FakeTexter.outbox)}")
+        FakeTexter._sent += 1
+        return Sent(message_id=f"fake-{FakeTexter._sent}")
 
 
 class TwilioTexter:

@@ -599,6 +599,10 @@ notifications (`PUSH_ENABLED=0`); set it to `1` in the dashboard when you
 want to try push on your own phone. Switch the staging app off when you
 don't need it, to save money.
 
+Staging never sends real texts (`SMS_LIVE=0`). Its invite links point at
+`https://api-staging.globeville.app/e/...`; to RSVP there as a guest, read
+the 6-digit code from the staging app's Runtime Logs.
+
 ### 6. App builds (EAS)
 From `mobile/`, after `npx eas login`:
 
@@ -704,6 +708,96 @@ Known limits:
   matches the description in `BADGE_UI.md` (see `mobile/src/components/badges/emblems.ts`).
 - Lucide icons are copied in by `node mobile/scripts/gen-badge-icons.mjs`
   (run it again after updating `lucide-static`).
+
+## Invite links and guest texts (Milestone 5)
+
+Every event has an invite link, `https://globeville.app/e/{code}`. A host
+sends it from their own phone (the app never sees their contacts). Someone
+without the app opens a web page, RSVPs with a first name and a US mobile
+number confirmed by a 6-digit text, and later collects their badge if they
+join. Django serves those pages too, on the same DigitalOcean app
+(`globeville.app` is a second domain in `.do/app.yaml`).
+
+**No real text is ever sent while `SMS_LIVE` is `0`** (the default
+everywhere). The server then writes what it *would* have sent to its log,
+without the phone number, so you can still try the web RSVP: the 6-digit code
+shows in DigitalOcean → the app → Runtime Logs (or your terminal). Turn it on
+only after the owner checklist below.
+
+### New settings (DigitalOcean → the app → Settings → Environment variables)
+
+| Setting | What it is | Example |
+| --- | --- | --- |
+| `PUBLIC_BASE_URL` | Where invite links point | `https://globeville.app` |
+| `SMS_LIVE` | `1` sends real texts; anything else logs them instead | `0` |
+| `SMS_PROVIDER` | The texting company | `twilio` (the only one built) |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | From the Twilio console | — |
+| `SMS_MESSAGING_SERVICE_ID` | The Twilio Messaging Service that holds your registered number | `MG…` |
+| `SMS_MONTHLY_BUDGET_USD` | Monthly cap. At 80% an email goes out; at 100% reminders and collect texts pause until next month (codes and cancellations still send) | `50` |
+| `SMS_COST_PER_TEXT_USD` | Planning cost per text, for the budget | `0.01` |
+| `OWNER_ALERT_EMAILS` | Who gets the 80% budget email (comma-separated) | `you@example.com` |
+| `SUPPORT_EMAIL` | Shown in the HELP reply and on the web pages | `hello@globeville.app` |
+| `APPLE_TEAM_ID` | Apple Developer → Membership, for iPhone app links | `AB12CD34EF` |
+| `ANDROID_CERT_SHA256` | `npx eas credentials` → Android → SHA-256 fingerprint, for Android app links | `AB:CD:…` |
+
+In Twilio, set the Messaging Service's incoming-message webhook to
+`https://globeville.app/webhooks/sms` (POST). Replies of STOP, START and HELP
+(and the Spanish ALTO, PARAR, AYUDA) are handled there; a request without
+Twilio's signature is refused.
+
+The texts themselves are worded in `mobile/src/i18n/en.json` and `es.json`
+(the `texts` and `invite` sections), like push notifications. The web pages'
+Spanish is in `backend/web/locale/es/LC_MESSAGES/django.po`. After changing
+it, rebuild it with `cd backend && django-admin compilemessages` (needs
+`gettext`: `sudo apt install gettext`, or `brew install gettext` on a Mac)
+and commit both the `.po` and `.mo` files.
+
+The 15-minute `send-notifications` job also sends due texts (reminders at
+5 PM the day before, collect texts the morning after; never between 8 PM and
+9 AM Denver time), makes the collect links once an event ends, and the daily
+cleanup job deletes a guest (name and phone number) 30 days after the last text we sent them, unless they have another event coming up or joined the app.
+
+### Manual check
+
+1. Post an event and text the link from your phone to a phone without the app.
+2. RSVP in the browser, with and without the collect consent. Confirm the
+   meeting spot appears only after RSVP, and that the iMessage and WhatsApp
+   previews show no meeting spot.
+3. Reply STOP and confirm nothing more arrives, then START.
+4. After the event, follow the collect text, install the app, join from a
+   different neighborhood, enter the code, and confirm the badge grows.
+
+Steps 1–2 work with `SMS_LIVE=0` (read the code from the log); steps 3–4
+need real texts.
+
+### Milestone 5: what needs you
+
+- **Text provider and carrier registration:** a Twilio account, a Messaging
+  Service, and **US A2P 10DLC registration** (can take days to weeks) before
+  `SMS_LIVE=1`. Confirm current prices.
+- **Legal review** of the consent wording on the RSVP page, the texts, and
+  the privacy policy (it needs a section on guest phone numbers).
+- **Monthly texting budget** (`SMS_MONTHLY_BUDGET_USD`, $50 is set).
+- **Support email** (`SUPPORT_EMAIL`) and **alert emails** (`OWNER_ALERT_EMAILS`).
+- **`globeville.app` DNS:** point it at the DigitalOcean app (it's in
+  `.do/app.yaml`). Then the Apple Team ID and the Android fingerprint
+  (above), and **a new app build**, so links open the app.
+- **Store links:** `ios_store_url` and `android_store_url` in
+  `shared/app_config.json` once the app is listed (the collect page shows them).
+- **Spanish review** of the web pages (`django.po`) and the new app screens
+  (`invite`, `guests`, `claim`, `invite_open`, `texts` in `es.json`).
+- **Launch timing:** before or right after the public launch.
+
+Decisions made while building (approved defaults):
+
+- Resource fairs and donation drives: the host's guest list shows counts
+  only, never names.
+- "Link only" events are on no calendar, except their own host's list.
+- When a guest is deleted after 30 days, their consent records go too.
+  If your legal review says consent proof must be kept longer, that's a
+  one-line change in `backend/accounts/retention.py`.
+- A guest who collects becomes "going" with the source "invite link", so
+  the owner stats count them as invited.
 
 ## Not in this milestone (and still needed before real users)
 

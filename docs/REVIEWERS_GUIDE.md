@@ -35,11 +35,12 @@ requirements to check the code against:
 | `MILESTONE_2.md` | Neighborhood events: post, edit, cancel, "I'm going", report |
 | `MILESTONE_3.md`, `BADGES.md`, `BADGE_UI.md` | Map pins, attendance (auto check-in or collect), badges, impact numbers, share cards |
 | `MILESTONE_4.md` | Push reminders, organizations, following, organization badges |
-| `GO_LIVE.md` | Hosting, production settings, the owner stats page |
+| `MILESTONE_5.md` | Invite links, guest RSVP on the web with text codes, guest texts, claiming a badge after joining, deep links |
+| `GO_LIVE.md` | Hosting, production settings, the owner stats page, value signals |
 
 Where the code made a decision the specs left open, it's listed in the
-README under "Milestone 3: what needs you" and "Milestone 4: what needs you"
-(the owner approved each one).
+README under "Milestone 3: what needs you", "Milestone 4: what needs you"
+and "Milestone 5: what needs you" (the owner approved each one).
 
 ## Running it
 
@@ -83,7 +84,10 @@ backend/
   badges/                 attendance, the badge engine, impact numbers, community badges
   notifications/          push tokens, reminder scheduling, sending (Expo)
   organizations/          organizations, admins, approval, follows
-  stats/                  the owner stats page (inside Django admin)
+  stats/                  the owner stats page (inside Django admin), value signals
+  guests/                 (M5) guests without accounts: phone codes, consent, RSVPs, badge claims
+  texting/                (M5) the Texter (fake or Twilio), scheduled texts, quiet hours, budget, STOP webhook
+  web/                    (M5) the public web pages: invite links, RSVP, collect page, .well-known files
   support/                problem reports with screenshots
 mobile/src/
   app/                    one file per screen (expo-router)
@@ -114,6 +118,9 @@ The app makes these promises to its members. Please try to break them.
 | Push text never includes the meeting spot | `backend/notifications/texts.py` | `backend/notifications/tests/` |
 | The admin who posts for an organization is never shown in the app | `backend/events/views.py` (`organizer_name`) | `backend/organizations/tests/test_organizations.py` |
 | Deleting an account removes the member's data (see the README section "Deleting members") | `backend/accounts/views.py` (DeleteAccountView) | `backend/accounts/tests/`, `backend/badges/tests/`, `backend/organizations/tests/` |
+| Guests' phone numbers never appear in an API response, page or log; hosts see first names only (counts only for resource fairs and donation drives) | `backend/guests/`, `backend/web/views.py`, `backend/texting/texter.py`, `backend/events/invites.py` (GuestListView) | `backend/web/tests/test_pages.py`, `backend/guests/tests/test_claims.py` |
+| No real text is sent while `SMS_LIVE` is off; STOP stops everything at once | `backend/texting/` | `backend/texting/tests/test_texts.py` |
+| The app never reads the phone's contacts (invites go through the share sheet) | `mobile/src/app/invite/[id].tsx` | `mobile/__tests__/privacy.test.ts` |
 | Production logs never contain addresses or report text | `backend/config/settings.py` (logging) | `backend/config/tests/test_production.py` |
 
 ### 2. Who can see and do what
@@ -125,6 +132,12 @@ organization's events in other neighborhoods. Please check every view in
 something you shouldn't: `get_event`, `events_for`, `can_manage` in
 `backend/events/views.py`, and `get_org`, `admin_org` in
 `backend/organizations/views.py`.
+
+Milestone 5 deliberately widens this: anyone holding an event's invite link
+can see it (members through `EventAccess`, made in `OpenInviteView`,
+`backend/events/invites.py`; everyone else on the web page). "Link only"
+events are on no calendar. A reset link stops working for new people but
+doesn't take access away from those who already opened it.
 
 ### 3. Security basics
 
@@ -152,7 +165,16 @@ conditions (two people collecting at once) are worth a look.
 
 `backend/notifications/sending.py` must never send a reminder twice, even if
 the 15-minute job overlaps itself. It claims each row with a single
-conditional UPDATE before sending.
+conditional UPDATE before sending. Guest texts (`backend/texting/sending.py`)
+work the same way, and also check quiet hours, opt-outs and the monthly
+budget at send time.
+
+### 6. Guest codes and claims (Milestone 5)
+
+The 6-digit phone code (`backend/guests/rsvp.py`) and the 6-character badge
+claim code (`backend/guests/claims.py`) are short, so they rely on limits:
+5 wrong tries per code, codes per number per hour and day, RSVPs per IP, and
+the `auth` rate limit on `POST /api/claims`. Worth trying to brute-force.
 
 ## Known gaps and limits
 

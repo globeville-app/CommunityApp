@@ -2,7 +2,10 @@
 # phones before members get it (review D5, README "Staging server"). Same as
 # app.yaml except: it deploys the `staging` branch, has its own small
 # database and its own Spaces folder, says STAGING in the admin, sends no real
-# push notifications (PUSH_ENABLED=0), and has no daily cleanup job.
+# push notifications (PUSH_ENABLED=0), has no daily cleanup job, and never
+# sends real texts (SMS_LIVE=0: codes show in the server log instead).
+# Invite links point at api-staging.globeville.app/e/... (PUBLIC_BASE_URL),
+# so staging needs no second link domain; they open the web page, not the app.
 # Create it like the real one (Apps → Create App → "Import from app spec")
 # and fill in every CHANGE_ME. Never reuse production's secrets here.
 name: globeville-staging
@@ -90,6 +93,19 @@ services:
       - key: SERVER_ERROR_EMAILS
         type: SECRET
         value: CHANGE_ME
+      # Texting guests (Milestone 5): always off here. Codes are written to
+      # the server log (Runtime Logs) instead, so you can RSVP on your phone.
+      - key: PUBLIC_BASE_URL
+        value: https://api-staging.globeville.app
+      - key: SMS_LIVE
+        value: "0"
+      - key: SMS_MONTHLY_BUDGET_USD
+        value: "5"
+      - key: OWNER_ALERT_EMAILS
+        type: SECRET
+        value: CHANGE_ME
+      - key: SUPPORT_EMAIL
+        value: CHANGE_ME
       # Staging never buzzes phones; set to "1" to try push on your own phone.
       - key: PUSH_ENABLED
         value: "0"
@@ -153,6 +169,16 @@ jobs:
         value: ${db.DATABASE_URL}
       - key: PUSH_ENABLED
         value: "0"
+      # The job also schedules guest texts (Milestone 5); off on staging.
+      - key: PUBLIC_BASE_URL
+        value: https://api-staging.globeville.app
+      - key: SMS_LIVE
+        value: "0"
+      - key: SMS_MONTHLY_BUDGET_USD
+        value: "5"
+      - key: OWNER_ALERT_EMAILS
+        type: SECRET
+        value: CHANGE_ME
 
 databases:
   - name: db
