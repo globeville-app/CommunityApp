@@ -227,6 +227,6 @@ The beta mixes all three groups and invites them in waves, so bugs are caught be
 - **Reminders:** Milestone 4, before Phase B.
 
 ## Milestone 5 (invite links) notes
-- **Launch timing:** not yet decided. Ship it before Phase B, as the growth engine, or right after.
+- **Launch timing (decided Nov 7, 2026):** split in two. **5.1** (invite links, link-only events, the web event page with "Get the app", guest list, deep links) ships in the first release. **5.2** (web RSVP by texted code, guest texts, guest badge claims) turns on later with `SMS_LIVE=1`, once the items below are done.
 - **Texting registration:** if it ships, US carrier registration (A2P 10DLC) and a legal review of the consent wording must be done first.
 - **Store privacy labels and the privacy policy:** add guest first names and phone numbers, used only for event texts.

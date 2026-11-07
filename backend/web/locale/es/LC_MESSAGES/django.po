@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 12:13-0600\n"
+"POT-Creation-Date: 2026-11-07 20:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,8 +27,7 @@ msgid "This event was cancelled."
 msgstr "Este evento fue cancelado."
 
 #: templates/web/cant_make_it.html:7
-msgid ""
-"Got it. You're no longer going, and we won't text you about this event."
+msgid "Got it. You're no longer going, and we won't text you about this event."
 msgstr "Listo. Ya no vas, y no te enviaremos más mensajes sobre este evento."
 
 #: templates/web/cant_make_it.html:9
@@ -86,7 +85,7 @@ msgstr "Copiar código"
 msgid "Collect it by %(day)s."
 msgstr "Recógela antes del %(day)s."
 
-#: templates/web/collect.html:25 templates/web/event.html:66
+#: templates/web/collect.html:25 templates/web/event.html:74
 msgid "Open in app"
 msgstr "Abrir en la app"
 
@@ -132,34 +131,51 @@ msgid "Can't make it"
 msgstr "No puedo ir"
 
 #: templates/web/event.html:38
+msgid "Want to go?"
+msgstr "¿Quieres ir?"
+
+#: templates/web/event.html:39
+#, python-format
+msgid ""
+"Get the %(app_name)s app to say you're going, see where it meets, and find "
+"more events near you."
+msgstr ""
+"Descarga la app de %(app_name)s para decir que vas, ver dónde se reúnen y "
+"encontrar más eventos cerca de ti."
+
+#: templates/web/event.html:42 templates/web/landing.html:9
+msgid "Coming soon to the App Store and Google Play."
+msgstr "Muy pronto en App Store y Google Play."
+
+#: templates/web/event.html:46
 msgid "Enter the code we texted you"
 msgstr "Escribe el código que te enviamos por mensaje"
 
-#: templates/web/event.html:41
+#: templates/web/event.html:49
 msgid "6-digit code"
 msgstr "Código de 6 dígitos"
 
-#: templates/web/event.html:43
+#: templates/web/event.html:51
 msgid "Confirm"
 msgstr "Confirmar"
 
-#: templates/web/event.html:45
+#: templates/web/event.html:53
 msgid "Didn't get it? Start again"
 msgstr "¿No te llegó? Empieza de nuevo"
 
-#: templates/web/event.html:49
+#: templates/web/event.html:57
 msgid "I'm going"
 msgstr "Voy"
 
-#: templates/web/event.html:51
+#: templates/web/event.html:59
 msgid "First name"
 msgstr "Nombre"
 
-#: templates/web/event.html:53
+#: templates/web/event.html:61
 msgid "Mobile number (US)"
 msgstr "Número de celular (EE. UU.)"
 
-#: templates/web/event.html:56
+#: templates/web/event.html:64
 msgid ""
 "Text me a code and updates about this event (like a cancellation or a "
 "reminder I ask for). Msg & data rates may apply. Reply STOP to opt out."
@@ -168,22 +184,22 @@ msgstr ""
 "cancelación o un recordatorio que pida). Pueden aplicarse tarifas de "
 "mensajes y datos. Responde STOP para no recibir más."
 
-#: templates/web/event.html:58
+#: templates/web/event.html:66
 msgid "Remind me the day before."
 msgstr "Recuérdenme el día anterior."
 
-#: templates/web/event.html:60
+#: templates/web/event.html:68
 #, python-format
 msgid "After the event, text me so I can collect my badge on %(app_name)s."
 msgstr ""
 "Después del evento, envíenme un mensaje para recoger mi insignia en "
 "%(app_name)s."
 
-#: templates/web/event.html:61
+#: templates/web/event.html:69
 msgid "Text me a code"
 msgstr "Envíenme un código"
 
-#: templates/web/event.html:67
+#: templates/web/event.html:75
 msgid "Questions?"
 msgstr "¿Preguntas?"
 
@@ -206,10 +222,6 @@ msgid ""
 msgstr ""
 "Encuentra eventos en tu vecindario de Denver, conoce a tus vecinos y recoge "
 "insignias por participar."
-
-#: templates/web/landing.html:9
-msgid "Coming soon to the App Store and Google Play."
-msgstr "Muy pronto en App Store y Google Play."
 
 #: views.py:37
 msgid "Please check the box to agree to event texts."
@@ -244,9 +256,9 @@ msgid ""
 "You replied STOP to our texts, so we can't text you a code. Reply START to "
 "that same text thread to turn them back on, then try again."
 msgstr ""
-"Respondiste STOP a nuestros mensajes, así que no podemos enviarte un código."
-" Responde START en esa misma conversación para volver a activarlos y vuelve "
-"a intentarlo."
+"Respondiste STOP a nuestros mensajes, así que no podemos enviarte un código. "
+"Responde START en esa misma conversación para volver a activarlos y vuelve a "
+"intentarlo."
 
 #: views.py:48
 msgid "That code isn't right. Check the text and try again."

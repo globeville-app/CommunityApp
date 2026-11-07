@@ -10,7 +10,7 @@ import { Share, Text } from "react-native";
 import * as api from "../src/api";
 import { ApiError } from "../src/api";
 import { useDefaultReplies } from "../test-utils/apiMock";
-import { fakeStore, renderApp, resetLanguage, sampleEvent } from "../test-utils/helpers";
+import { CONFIG, fakeStore, renderApp, resetLanguage, sampleEvent } from "../test-utils/helpers";
 
 jest.mock("../src/api", () => require("../test-utils/apiMock").fakeApi());
 
@@ -225,6 +225,16 @@ describe("links that open the app", () => {
 });
 
 describe("Have a badge code?", () => {
+  // Guests can RSVP on the web (Milestone 5.2), so a code can exist.
+  beforeEach(() => mocked.getConfig.mockResolvedValue({ ...CONFIG, guest_badges: true }));
+
+  it("is hidden until guests can RSVP on the web (Milestone 5.1)", async () => {
+    mocked.getConfig.mockResolvedValue({ ...CONFIG, guest_badges: false });
+    renderApp("/impact");
+    expect(await screen.findByRole("header", { name: "My Impact" })).toBeTruthy();
+    expect(screen.queryByLabelText("Badge code")).toBeNull();
+  });
+
   it("on the last joining step: the code is collected, the moment waits for the events tab", async () => {
     mocked.claimBadge.mockResolvedValue({
       celebrations: [{ id: 9, badge_key: "clean_sweeper", kind: "earned", stage: 1, count: 1 }],

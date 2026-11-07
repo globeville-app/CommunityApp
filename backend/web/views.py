@@ -145,12 +145,18 @@ def event_page(request, code, step=None, error=None, pending="", form=None, stat
         "page_url": f"{settings.PUBLIC_BASE_URL}/e/{code}",
         "og_image": f"{settings.PUBLIC_BASE_URL}{settings.STATIC_URL}web/og-default.png",
         "app_link": f"{settings.APP_SCHEME}://e/{code}",
+        # Milestone 5.1 vs 5.2: see GUEST_RSVP_OPEN in config/settings.py.
+        "rsvp_open": settings.GUEST_RSVP_OPEN,
+        "ios_store_url": settings.IOS_STORE_URL,
+        "android_store_url": settings.ANDROID_STORE_URL,
     }
     return _render(request, "web/event.html", context, status=status)
 
 
 @require_POST
 def rsvp_start(request, code):
+    if not settings.GUEST_RSVP_OPEN:
+        return redirect(f"/e/{code}")
     link = _link_or_404(code)
     if link.revoked_at is not None:
         return _render(request, "web/expired.html", {}, status=410)
@@ -170,6 +176,8 @@ def rsvp_start(request, code):
 
 @require_POST
 def rsvp_verify(request, code):
+    if not settings.GUEST_RSVP_OPEN:
+        return redirect(f"/e/{code}")
     link = _link_or_404(code)
     if link.revoked_at is not None:
         return _render(request, "web/expired.html", {}, status=410)

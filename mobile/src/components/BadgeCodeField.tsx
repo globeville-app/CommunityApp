@@ -10,12 +10,14 @@ import { useTranslation } from "react-i18next";
 
 import { ApiError, claimBadge } from "../api";
 import { useAuth } from "../auth";
+import { useCategories } from "../categories";
 import { errorMessage } from "../i18n/errors";
 import { Button, Caption, ErrorMessage, Field, GlassCard, Notice, Section } from "../ui";
 
 export function BadgeCodeField({ celebrateNow = true }: { celebrateNow?: boolean }) {
   const { t } = useTranslation();
   const { token } = useAuth();
+  const { guestBadges } = useCategories();
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -38,6 +40,8 @@ export function BadgeCodeField({ celebrateNow = true }: { celebrateNow?: boolean
     }
   }
 
+  // Until guests can RSVP on the web (Milestone 5.2) there are no codes to type.
+  if (!guestBadges) return null;
   return (
     <GlassCard>
       <Section>{t("claim.title")}</Section>

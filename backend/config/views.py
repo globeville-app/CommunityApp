@@ -17,6 +17,9 @@ def app_config(request):
             # Older app versions are asked to update ("" = no minimum). Set
             # MIN_APP_VERSION before shipping a server change old apps can't handle.
             "min_app_version": settings.MIN_APP_VERSION,
+            # Milestone 5.2: whether guests can RSVP on the web, so the app
+            # shows "Have a badge code?" only when there can be one.
+            "guest_badges": settings.GUEST_RSVP_OPEN,
             # Event categories, also used for interests.
             **config_json(),
         }

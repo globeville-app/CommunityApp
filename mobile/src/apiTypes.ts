@@ -33,6 +33,8 @@ export type AppConfig = {
   languages: string[];
   /** Older app versions must update first ("" = no minimum). */
   min_app_version?: string;
+  /** Milestone 5.2: guests can RSVP on the web, so a badge code can exist. */
+  guest_badges?: boolean;
   category_groups: CategoryGroup[];
   other_category: string;
   other_max_length: number;

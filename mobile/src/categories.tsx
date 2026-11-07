@@ -30,6 +30,8 @@ type CategoriesState = {
   maxInterests: number;
   /** The oldest app version the server works with ("" = any). */
   minAppVersion: string;
+  /** Guests can earn badges on the web (Milestone 5.2), so "Have a badge code?" shows. */
+  guestBadges: boolean;
   ready: boolean;
   failed: boolean;
   reload: () => void;
@@ -58,6 +60,7 @@ export function CategoriesProvider({ children }: { children: ReactNode }) {
     otherMaxLength: config?.other_max_length ?? 40,
     maxInterests: config?.max_interests ?? 8,
     minAppVersion: config?.min_app_version ?? "",
+    guestBadges: config?.guest_badges ?? false,
     ready: !!config,
     failed,
     reload,

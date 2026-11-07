@@ -286,6 +286,12 @@ PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "http://localhost:8000").rst
 # wording reviewed: then no text reaches the real provider anywhere; the fake
 # one only logs what would have been sent (never the number).
 SMS_LIVE = os.environ.get("SMS_LIVE", "0") == "1"
+# Milestone 5.2: guests RSVP on the web with a texted code, and collect badges
+# after joining. That only works once texts are live, so until then (5.1) the
+# event page shows the event and "Get the app" instead. On your computer, and
+# on staging with GUEST_RSVP_WITHOUT_TEXTS=1, it stays open and the code is
+# read from the server log. Never set that on production.
+GUEST_RSVP_OPEN = SMS_LIVE or os.environ.get("GUEST_RSVP_WITHOUT_TEXTS", "1" if DEBUG else "0") == "1"
 SMS_PROVIDER = os.environ.get("SMS_PROVIDER", "twilio")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "")

@@ -185,3 +185,31 @@ class DeepLinkFileTests(GuestTestCase):
         self.assertTrue(apple["applinks"]["details"][0]["appIDs"][0].startswith("TEAM123.app."))
         android = self.web.get("/.well-known/assetlinks.json").json()
         self.assertEqual(android[0]["target"]["sha256_cert_fingerprints"], ["AB:CD"])
+
+
+@override_settings(GUEST_RSVP_OPEN=False)
+class BeforeTextsAreLiveTests(GuestTestCase):
+    """Milestone 5.1: the link works and shows the event, but guests can't RSVP on the web until 5.2."""
+
+    def test_the_page_shows_the_event_and_get_the_app_instead_of_the_form(self):
+        page = self.web.get(f"/e/{self.code}")
+        self.assertContains(page, "Fall potluck")
+        self.assertContains(page, "Want to go?")
+        self.assertContains(page, "Open in app")
+        self.assertNotContains(page, 'name="phone"')
+        self.assertNotContains(page, "Lowell")
+        self.assertContains(self.web.get(f"/e/{self.code}?lang=es"), "¿Quieres ir?")
+
+    def test_rsvp_posts_are_turned_away_and_nothing_is_texted(self):
+        form = {"first_name": "Maria", "phone": PHONE, "consent_event_texts": "on"}
+        self.assertRedirects(self.web.post(f"/e/{self.code}/rsvp", form), f"/e/{self.code}", fetch_redirect_response=False)
+        self.assertRedirects(
+            self.web.post(f"/e/{self.code}/verify", {"pending": "x", "code": "123456"}),
+            f"/e/{self.code}",
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(Guest.objects.exists())
+        self.assertFalse(PhoneCode.objects.exists())
+
+    def test_the_app_is_told_there_are_no_guest_badges_yet(self):
+        self.assertIs(self.web.get("/api/config").json()["guest_badges"], False)

@@ -776,7 +776,7 @@
   },
   "invite_open": {
     "signed_out_title": "You're invited!",
-    "signed_out_body": "Open the event page to RSVP, or join {{app}} to see it here.",
+    "signed_out_body": "Open the event page to see the details, or join {{app}} to say you're going.",
     "open_page": "Open the event page",
     "join": "Join or log in",
     "to_events": "Go to events"

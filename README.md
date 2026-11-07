@@ -718,6 +718,21 @@ number confirmed by a 6-digit text, and later collects their badge if they
 join. Django serves those pages too, on the same DigitalOcean app
 (`globeville.app` is a second domain in `.do/app.yaml`).
 
+**It ships in two parts, with one switch between them:**
+
+- **5.1 (first release):** invite links, "Link only" events, Invite people,
+  the host's guest list, links that open the app, and the web event page.
+  Someone without the app sees the event, the going count and "Get the
+  app"; they can't RSVP on the web yet.
+- **5.2 (when texts are approved):** the web RSVP with a texted code,
+  reminder and collect texts, and guests collecting badges after joining.
+  Setting `SMS_LIVE=1` turns all of it on; no new code or app build is
+  needed. The app's "Have a badge code?" field appears by itself.
+
+On your computer, and on staging (`GUEST_RSVP_WITHOUT_TEXTS=1`), the web RSVP
+stays open without real texts so it can be tried. Never set that on
+production: guests would wait for a code that never comes.
+
 **No real text is ever sent while `SMS_LIVE` is `0`** (the default
 everywhere). The server then writes what it *would* have sent to its log,
 without the phone number, so you can still try the web RSVP: the 6-digit code
@@ -729,7 +744,8 @@ only after the owner checklist below.
 | Setting | What it is | Example |
 | --- | --- | --- |
 | `PUBLIC_BASE_URL` | Where invite links point | `https://globeville.app` |
-| `SMS_LIVE` | `1` sends real texts; anything else logs them instead | `0` |
+| `SMS_LIVE` | `1` sends real texts and opens the web RSVP (5.2); anything else logs them instead | `0` |
+| `GUEST_RSVP_WITHOUT_TEXTS` | Staging only: `1` opens the web RSVP with texts off (codes in the log) | unset |
 | `SMS_PROVIDER` | The texting company | `twilio` (the only one built) |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | From the Twilio console | — |
 | `SMS_MESSAGING_SERVICE_ID` | The Twilio Messaging Service that holds your registered number | `MG…` |
@@ -767,8 +783,11 @@ cleanup job deletes a guest (name and phone number) 30 days after the last text 
 4. After the event, follow the collect text, install the app, join from a
    different neighborhood, enter the code, and confirm the badge grows.
 
-Steps 1–2 work with `SMS_LIVE=0` (read the code from the log); steps 3–4
-need real texts.
+For 5.1, on production: open an invite link on a phone without the app and
+confirm it shows the event and "Get the app", with no RSVP form; open it on
+a phone with the app and confirm the event opens there. Steps 1–2 work on
+staging with texts off (read the code from the log); steps 3–4 need real
+texts (5.2).
 
 ### Milestone 5: what needs you
 

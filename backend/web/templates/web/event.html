@@ -33,6 +33,14 @@
       <button class="button secondary" type="submit">{% translate "Can't make it" %}</button>
     </form>
   </section>
+{% elif not rsvp_open %}
+  <section class="card">
+    <h2>{% translate "Want to go?" %}</h2>
+    <p>{% blocktranslate %}Get the {{ app_name }} app to say you're going, see where it meets, and find more events near you.{% endblocktranslate %}</p>
+    {% if ios_store_url %}<a class="button" href="{{ ios_store_url }}">App Store</a>{% endif %}
+    {% if android_store_url %}<a class="button" href="{{ android_store_url }}">Google Play</a>{% endif %}
+    {% if not ios_store_url and not android_store_url %}<p class="note">{% translate "Coming soon to the App Store and Google Play." %}</p>{% endif %}
+  </section>
 {% elif step == "verify" %}
   <section class="card">
     <h2>{% translate "Enter the code we texted you" %}</h2>

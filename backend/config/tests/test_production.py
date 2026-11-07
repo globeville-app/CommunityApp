@@ -56,6 +56,15 @@ class ProductionSettingsTests(TestCase):
         result = run_manage("check", "--deploy", "--fail-level", "WARNING", env=PRODUCTION_ENV)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_guest_rsvp_starts_closed_on_production(self):
+        """Milestone 5.1: no web RSVP until texts are live (5.2), so no guest waits for a code that never comes."""
+        code = "from django.conf import settings; print(settings.GUEST_RSVP_OPEN)"
+        self.assertEqual(run_manage("shell", "-c", code, env=PRODUCTION_ENV).stdout.strip().splitlines()[-1], "False")
+        texts_on = {**PRODUCTION_ENV, "SMS_LIVE": "1"}
+        self.assertEqual(run_manage("shell", "-c", code, env=texts_on).stdout.strip().splitlines()[-1], "True")
+        staging = {**PRODUCTION_ENV, "GUEST_RSVP_WITHOUT_TEXTS": "1"}
+        self.assertEqual(run_manage("shell", "-c", code, env=staging).stdout.strip().splitlines()[-1], "True")
+
     def test_admin_moves_to_its_secret_path(self):
         code = "from django.urls import reverse; print(reverse('admin:index'))"
         result = run_manage("shell", "-c", code, env=PRODUCTION_ENV)

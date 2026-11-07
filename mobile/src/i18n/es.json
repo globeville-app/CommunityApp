@@ -776,7 +776,7 @@
   },
   "invite_open": {
     "signed_out_title": "¡Estás invitado!",
-    "signed_out_body": "Abre la página del evento para confirmar, o únete a {{app}} para verlo aquí.",
+    "signed_out_body": "Abre la página del evento para ver los detalles, o únete a {{app}} para decir que vas.",
     "open_page": "Abrir la página del evento",
     "join": "Unirme o iniciar sesión",
     "to_events": "Ir a eventos"

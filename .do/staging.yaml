@@ -101,6 +101,10 @@ services:
         value: "0"
       - key: SMS_MONTHLY_BUDGET_USD
         value: "5"
+      # Lets you try the guest web RSVP (Milestone 5.2) with texts off.
+      # Never on production.
+      - key: GUEST_RSVP_WITHOUT_TEXTS
+        value: "1"
       - key: OWNER_ALERT_EMAILS
         type: SECRET
         value: CHANGE_ME

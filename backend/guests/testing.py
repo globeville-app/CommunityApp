@@ -16,7 +16,7 @@ PHONE_E164 = "+13035550123"
 LOCMEM = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 
-@override_settings(CACHES=LOCMEM, PUBLIC_BASE_URL="https://globeville.test", SMS_LIVE=False)
+@override_settings(CACHES=LOCMEM, PUBLIC_BASE_URL="https://globeville.test", SMS_LIVE=False, GUEST_RSVP_OPEN=True)
 class GuestTestCase(EventTestCase):
     def setUp(self):
         super().setUp()
