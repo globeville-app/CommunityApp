@@ -1,7 +1,14 @@
-# DigitalOcean App Platform spec (docs/GO_LIVE.md §2). Create the app from
-# this file (Apps → Create App → "Import from app spec"), then fill in every
-# value marked CHANGE_ME in the dashboard. Secrets stay in the dashboard,
-# never in this repository.
+# DigitalOcean App Platform spec (docs/GO_LIVE.md §2, README "Going live").
+#
+# The settings at the top (`envs`) are shared by the website and all three
+# jobs, so each secret is typed in ONCE. Only these six need filling in, in
+# the dashboard (Settings → App-Level Environment Variables), never in this
+# file: DJANGO_SECRET_KEY, ADMIN_URL, SPACES_KEY, SPACES_SECRET,
+# EMAIL_HOST_USER and EMAIL_HOST_PASSWORD (both the Postmark server token).
+# The ones left blank below are for later steps; each says when.
+#
+# The database is a managed PostgreSQL cluster created first, named
+# globeville-db (README, "3. The app").
 name: globeville
 region: sfo
 
@@ -10,6 +17,99 @@ region: sfo
 alerts:
   - rule: DEPLOYMENT_FAILED
   - rule: DOMAIN_FAILED
+
+envs:
+  - key: DJANGO_DEBUG
+    value: "0"
+  # 60+ random characters, e.g. from a password manager's generator.
+  - key: DJANGO_SECRET_KEY
+    type: SECRET
+    value: CHANGE_ME
+  # globeville.org serves the invite-link and legal pages (Milestone 5).
+  - key: ALLOWED_HOSTS
+    value: api.globeville.org,globeville.org
+  - key: CSRF_TRUSTED_ORIGINS
+    value: https://api.globeville.org,https://globeville.org
+  - key: PUBLIC_BASE_URL
+    value: https://globeville.org
+  # A path only the team knows, ending in "/", e.g. team-7f3k/.
+  - key: ADMIN_URL
+    type: SECRET
+    value: CHANGE_ME/
+  # Where the caller's real address comes from, for rate limits
+  # (backend/config/throttling.py). Check it after the first deploy.
+  - key: CLIENT_IP_HEADER
+    value: DO-Connecting-IP
+  - key: DATABASE_URL
+    scope: RUN_AND_BUILD_TIME
+    value: ${db.DATABASE_URL}
+
+  # Photos and screenshots: the private Spaces bucket.
+  - key: SPACES_BUCKET
+    value: globeville-media
+  - key: SPACES_ENDPOINT
+    value: https://sfo3.digitaloceanspaces.com
+  - key: SPACES_REGION
+    value: sfo3
+  - key: SPACES_KEY
+    type: SECRET
+    value: CHANGE_ME
+  - key: SPACES_SECRET
+    type: SECRET
+    value: CHANGE_ME
+
+  # Email through Postmark: the server API token goes in BOTH settings.
+  - key: EMAIL_BACKEND
+    value: django.core.mail.backends.smtp.EmailBackend
+  - key: EMAIL_HOST
+    value: smtp.postmarkapp.com
+  - key: EMAIL_PORT
+    value: "587"
+  - key: EMAIL_HOST_USER
+    type: SECRET
+    value: CHANGE_ME
+  - key: EMAIL_HOST_PASSWORD
+    type: SECRET
+    value: CHANGE_ME
+  - key: DEFAULT_FROM_EMAIL
+    value: globeville <info@globeville.org>
+  # Who gets problem reports, budget alerts and crash notices.
+  - key: PROBLEM_REPORT_EMAILS
+    value: info@globeville.org
+  - key: OWNER_ALERT_EMAILS
+    value: info@globeville.org
+  - key: SERVER_ERROR_EMAILS
+    value: info@globeville.org
+  - key: SUPPORT_EMAIL
+    value: info@globeville.org
+
+  # Texting guests (Milestone 5.2). SMS_LIVE stays "0" until the carrier
+  # registration and the legal review are done (docs/MILESTONE_5.md); the
+  # Twilio settings are filled in then, as encrypted values.
+  - key: SMS_LIVE
+    value: "0"
+  - key: TWILIO_ACCOUNT_SID
+    value: ""
+  - key: TWILIO_AUTH_TOKEN
+    value: ""
+  - key: SMS_MESSAGING_SERVICE_ID
+    value: ""
+  - key: SMS_MONTHLY_BUDGET_USD
+    value: "50"
+  - key: SMS_COST_PER_TEXT_USD
+    value: "0.01"
+
+  # Links that open the app (Milestone 5): fill in once Apple approves the
+  # developer account (Membership → Team ID) and after the first Android
+  # build (`npx eas credentials` → SHA-256 fingerprint).
+  - key: APPLE_TEAM_ID
+    value: ""
+  - key: ANDROID_CERT_SHA256
+    value: ""
+  # Optional: Expo account → Access tokens, for push notifications
+  # (README, "Push notifications"). Add as an encrypted value.
+  - key: EXPO_ACCESS_TOKEN
+    value: ""
 
 services:
   - name: api
@@ -32,97 +132,10 @@ services:
         operator: GREATER_THAN
         value: 85
         window: TEN_MINUTES
-    envs:
-      - key: DJANGO_DEBUG
-        value: "0"
-      - key: DJANGO_SECRET_KEY
-        type: SECRET
-        value: CHANGE_ME
-      # globeville.org serves the invite-link pages (Milestone 5).
-      - key: ALLOWED_HOSTS
-        value: api.globeville.org,globeville.org
-      - key: CSRF_TRUSTED_ORIGINS
-        value: https://api.globeville.org,https://globeville.org
-      - key: PUBLIC_BASE_URL
-        value: https://globeville.org
-      - key: ADMIN_URL
-        type: SECRET
-        value: CHANGE_ME/
-      # Where the caller's real address comes from, for rate limits
-      # (backend/config/throttling.py). Check it after the first deploy.
-      - key: CLIENT_IP_HEADER
-        value: DO-Connecting-IP
-      - key: DATABASE_URL
-        scope: RUN_AND_BUILD_TIME
-        value: ${db.DATABASE_URL}
-      - key: SPACES_BUCKET
-        value: CHANGE_ME
-      - key: SPACES_ENDPOINT
-        value: https://sfo3.digitaloceanspaces.com
-      - key: SPACES_REGION
-        value: sfo3
-      - key: SPACES_KEY
-        type: SECRET
-        value: CHANGE_ME
-      - key: SPACES_SECRET
-        type: SECRET
-        value: CHANGE_ME
-      - key: EMAIL_BACKEND
-        value: django.core.mail.backends.smtp.EmailBackend
-      - key: EMAIL_HOST
-        value: smtp.postmarkapp.com
-      - key: EMAIL_PORT
-        value: "587"
-      - key: EMAIL_HOST_USER
-        type: SECRET
-        value: CHANGE_ME
-      - key: EMAIL_HOST_PASSWORD
-        type: SECRET
-        value: CHANGE_ME
-      - key: DEFAULT_FROM_EMAIL
-        value: globeville <info@globeville.org>
-      - key: PROBLEM_REPORT_EMAILS
-        type: SECRET
-        value: CHANGE_ME
-      # Texting guests (Milestone 5). SMS_LIVE stays "0" until the carrier
-      # registration and the legal review are done (docs/MILESTONE_5.md).
-      - key: SMS_LIVE
-        value: "0"
-      - key: TWILIO_ACCOUNT_SID
-        type: SECRET
-        value: CHANGE_ME
-      - key: TWILIO_AUTH_TOKEN
-        type: SECRET
-        value: CHANGE_ME
-      - key: SMS_MESSAGING_SERVICE_ID
-        type: SECRET
-        value: CHANGE_ME
-      - key: SMS_MONTHLY_BUDGET_USD
-        value: "50"
-      - key: SMS_COST_PER_TEXT_USD
-        value: "0.01"
-      - key: OWNER_ALERT_EMAILS
-        type: SECRET
-        value: CHANGE_ME
-      - key: SUPPORT_EMAIL
-        value: CHANGE_ME
-      # Deep links: the Apple Team ID and the Android signing fingerprint (eas credentials).
-      - key: APPLE_TEAM_ID
-        value: CHANGE_ME
-      - key: ANDROID_CERT_SHA256
-        value: CHANGE_ME
-      # Who gets a short email when the server crashes (backend/config/alerts.py).
-      - key: SERVER_ERROR_EMAILS
-        type: SECRET
-        value: CHANGE_ME
-      # From the Expo account (Access tokens), for push notifications.
-      - key: EXPO_ACCESS_TOKEN
-        type: SECRET
-        value: CHANGE_ME
     domains:
       - domain: api.globeville.org
         type: PRIMARY
-      # The invite-link pages and the deep-link files (Milestone 5).
+      # The invite-link pages, the legal pages and the deep-link files.
       - domain: globeville.org
         type: ALIAS
 
@@ -138,21 +151,10 @@ jobs:
       branch: main
     instance_size_slug: apps-s-1vcpu-0.5gb
     run_command: sh -c "python manage.py migrate --noinput && python manage.py createcachetable && python manage.py load_neighborhoods"
-    envs:
-      - key: DJANGO_DEBUG
-        value: "0"
-      - key: DJANGO_SECRET_KEY
-        type: SECRET
-        value: CHANGE_ME
-      - key: ALLOWED_HOSTS
-        value: api.globeville.org
-      - key: DATABASE_URL
-        scope: RUN_AND_BUILD_TIME
-        value: ${db.DATABASE_URL}
 
   # Every 15 minutes: send event reminders and any cancellation notices
-  # that couldn't go out right away (docs/MILESTONE_4.md), and credit hosts
-  # for events that have ended. Safe to run twice.
+  # that couldn't go out right away (docs/MILESTONE_4.md), guest texts when
+  # they're on, and credit hosts for events that have ended. Safe to run twice.
   - name: send-notifications
     kind: SCHEDULED
     schedule:
@@ -163,56 +165,7 @@ jobs:
       repo: globeville-app/CommunityApp
       branch: main
     instance_size_slug: apps-s-1vcpu-0.5gb
-    # Then credit hosts for events that ended with 2+ neighbors checked in.
     run_command: sh -c "python manage.py send_due_notifications; python manage.py count_hosted_events"
-    envs:
-      - key: DJANGO_DEBUG
-        value: "0"
-      - key: DJANGO_SECRET_KEY
-        type: SECRET
-        value: CHANGE_ME
-      - key: ALLOWED_HOSTS
-        value: api.globeville.org
-      - key: DATABASE_URL
-        scope: RUN_AND_BUILD_TIME
-        value: ${db.DATABASE_URL}
-      - key: EXPO_ACCESS_TOKEN
-        type: SECRET
-        value: CHANGE_ME
-      # It also sends guest texts (Milestone 5), so it needs the same
-      # texting and email settings as the web service.
-      - key: PUBLIC_BASE_URL
-        value: https://globeville.org
-      - key: SMS_LIVE
-        value: "0"
-      - key: TWILIO_ACCOUNT_SID
-        type: SECRET
-        value: CHANGE_ME
-      - key: TWILIO_AUTH_TOKEN
-        type: SECRET
-        value: CHANGE_ME
-      - key: SMS_MESSAGING_SERVICE_ID
-        type: SECRET
-        value: CHANGE_ME
-      - key: SMS_MONTHLY_BUDGET_USD
-        value: "50"
-      - key: SMS_COST_PER_TEXT_USD
-        value: "0.01"
-      - key: OWNER_ALERT_EMAILS
-        type: SECRET
-        value: CHANGE_ME
-      - key: EMAIL_BACKEND
-        value: django.core.mail.backends.smtp.EmailBackend
-      - key: EMAIL_HOST
-        value: smtp.postmarkapp.com
-      - key: EMAIL_HOST_USER
-        type: SECRET
-        value: CHANGE_ME
-      - key: EMAIL_HOST_PASSWORD
-        type: SECRET
-        value: CHANGE_ME
-      - key: DEFAULT_FROM_EMAIL
-        value: globeville <info@globeville.org>
 
   # Once a day: delete what has done its job (backend/accounts/retention.py
   # lists every rule, e.g. problem reports after a year).
@@ -227,33 +180,12 @@ jobs:
       branch: main
     instance_size_slug: apps-s-1vcpu-0.5gb
     run_command: python manage.py cleanup_old_data
-    envs:
-      - key: DJANGO_DEBUG
-        value: "0"
-      - key: DJANGO_SECRET_KEY
-        type: SECRET
-        value: CHANGE_ME
-      - key: ALLOWED_HOSTS
-        value: api.globeville.org
-      - key: DATABASE_URL
-        scope: RUN_AND_BUILD_TIME
-        value: ${db.DATABASE_URL}
-      - key: SPACES_BUCKET
-        value: CHANGE_ME
-      - key: SPACES_ENDPOINT
-        value: https://sfo3.digitaloceanspaces.com
-      - key: SPACES_REGION
-        value: sfo3
-      - key: SPACES_KEY
-        type: SECRET
-        value: CHANGE_ME
-      - key: SPACES_SECRET
-        type: SECRET
-        value: CHANGE_ME
 
 databases:
+  # A managed PostgreSQL 16 cluster with daily backups, created BEFORE the
+  # app (Databases → Create, region SFO3, named exactly globeville-db).
   - name: db
     engine: PG
     version: "16"
     production: true
-    cluster_name: CHANGE_ME
+    cluster_name: globeville-db

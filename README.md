@@ -521,27 +521,40 @@ into the DigitalOcean dashboard, never into this repository.
 2. API → Spaces Keys → generate a key. Keep the key and secret for step 3.
 
 ### 3. The app (server, database, domain)
-1. Apps → Create App → **Import from app spec** → upload `.do/app.yaml`.
-2. Fill in every `CHANGE_ME` (Settings → App-Level / Component environment
-   variables):
+1. **Database first.** Create → Databases → PostgreSQL 16, region
+   **San Francisco (SFO3)**, the smallest Basic plan, named exactly
+   **`globeville-db`**. Daily backups are included. Wait until it says
+   "Online" (a few minutes).
+2. **Create the app.** Apps → Create App → GitHub → connect the
+   `globeville-app/CommunityApp` repository, branch `main`, "Autodeploy" on.
+   Then open the app's **Settings → App Spec → Edit**, replace everything
+   with the contents of `.do/app.yaml`, and save. (If the Create App page
+   offers "Import from app spec", uploading `.do/app.yaml` there does the
+   same.)
+3. **Fill in the six secrets**, once each, under Settings → **App-Level
+   Environment Variables** (tick "Encrypt" on each):
 
 | Setting | What to put |
 | --- | --- |
-| `DJANGO_SECRET_KEY` | 60+ random characters (a password manager can make one). The same value in the `migrate` job. |
+| `DJANGO_SECRET_KEY` | 60+ random letters and numbers from a password manager's generator. |
 | `ADMIN_URL` | A path only you know, ending in `/`, e.g. `team-7f3k/`. Admin then lives at `https://api.globeville.org/team-7f3k/`. |
-| `SPACES_BUCKET`, `SPACES_KEY`, `SPACES_SECRET` | From step 2 (`SPACES_ENDPOINT` and `SPACES_REGION` match the bucket's region). |
-| `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Postmark → Server → API Tokens: the server token, as both. |
-| `PROBLEM_REPORT_EMAILS` | Who gets problem reports, comma-separated. |
-| `SERVER_ERROR_EMAILS` | Who gets a short email when the server crashes (only the kind of error and the page, never anyone's data). |
-| `DATABASE_URL` | Filled in by DigitalOcean from the database (`${db.DATABASE_URL}`). |
+| `SPACES_KEY`, `SPACES_SECRET` | The Spaces access key from step 2. |
+| `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Postmark → Server → API Tokens: the server token, in **both**. |
 
-3. Deploy. Every push to `main` deploys again; before each deploy the
+   Everything else is already filled in (`globeville-media`, the
+   `info@globeville.org` emails) or deliberately blank until a later step
+   (Twilio, the Apple Team ID, the Android fingerprint, the Expo token);
+   `.do/app.yaml` says when for each.
+4. Deploy. Every push to `main` deploys again; before each deploy the
    `migrate` job updates the database, the rate-limit table and the
    neighborhood map.
-4. Settings → Domains: add `api.globeville.org` and create the DNS record it
-   shows. HTTPS certificates are automatic.
-5. Check from a phone's browser: `https://api.globeville.org/api/config`
-   shows the app name and categories.
+5. Settings → Domains: `api.globeville.org` and `globeville.org` are listed.
+   Create the DNS records DigitalOcean shows for each at Porkbun (replacing
+   Porkbun's parking `ALIAS` and `*` records). HTTPS certificates are
+   automatic.
+6. Check from a phone's browser: `https://api.globeville.org/api/config`
+   shows the app name and categories, and `https://globeville.org/privacy`
+   shows the privacy policy.
 
 The server refuses to start if `DJANGO_SECRET_KEY` is missing, so a forgotten
 secret fails loudly instead of running insecurely.
