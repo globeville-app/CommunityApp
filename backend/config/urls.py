@@ -10,6 +10,7 @@ from events import views as event_views
 from profiles import views as profile_views
 from stats.views import owner_stats
 from texting import webhook as sms_webhook
+from web import legal as web_legal
 from web import views as web_views
 
 from . import views
@@ -29,6 +30,9 @@ urlpatterns = [
     path("e/<str:code>/calendar.ics", web_views.calendar_file, name="web-calendar"),
     path("r/<str:token>", web_views.cant_make_it, name="web-cant-make-it"),
     path("c/<str:token>", web_views.collect_page, name="web-collect"),
+    path("privacy", web_legal.legal_page, {"document": "privacy"}, name="privacy"),
+    path("terms", web_legal.legal_page, {"document": "terms"}, name="terms"),
+    path("delete-account", web_legal.legal_page, {"document": "delete_account"}, name="delete-account"),
     path(".well-known/apple-app-site-association", web_views.apple_app_site_association),
     path(".well-known/assetlinks.json", web_views.android_asset_links),
     path("webhooks/sms", sms_webhook.incoming, name="sms-webhook"),

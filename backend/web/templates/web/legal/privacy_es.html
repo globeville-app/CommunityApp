@@ -1,0 +1,128 @@
+{% extends "web/legal/base.html" %}
+{% block doc_title %}Política de privacidad{% endblock %}
+{% block doc %}
+<p class="lede">{{ app_name }} ayuda a los vecinos de Denver a encontrar eventos en su vecindario e ir a ellos. Esta política explica qué datos recopilamos, para qué, quién puede verlos, cuánto tiempo los guardamos y qué opciones tienes. "Nosotros" significa {{ legal.operator }}, que opera {{ app_name }}.</p>
+
+<section class="summary">
+  <h2>En resumen</h2>
+  <ul>
+    <li><strong>Nunca guardamos tu dirección.</strong> La escribes una vez para encontrar tu vecindario y después se borra, de nuestros servidores y de tu teléfono.</li>
+    <li><strong>Sin anuncios, sin rastreo, sin ventas.</strong> No vendemos ni alquilamos tu información, no mostramos anuncios y no usamos herramientas de publicidad o de análisis que te sigan.</li>
+    <li><strong>Los vecinos ven tu nombre y la inicial de tu apellido,</strong> nunca tu correo electrónico.</li>
+    <li><strong>El registro automático de llegada se queda en tu teléfono.</strong> Si lo activas, tu teléfono nota cuando llegas a un evento. Nosotros solo sabemos que asististe, nunca dónde estás.</li>
+    <li><strong>Nunca leemos tus contactos.</strong> Las invitaciones se envían con el menú de compartir de tu propio teléfono.</li>
+    <li><strong>Puedes eliminar tu cuenta</strong> en la app cuando quieras (Ajustes → Eliminar cuenta).</li>
+  </ul>
+</section>
+
+<h2 id="collect">1. Qué recopilamos</h2>
+
+<h3>Cuando creas una cuenta</h3>
+<ul>
+  <li><strong>Correo electrónico y contraseña.</strong> Para iniciar tu sesión y enviarte correos de la cuenta, como un código de registro o para restablecer la contraseña. Tu contraseña se guarda codificada, así que nadie, ni siquiera nosotros, puede leerla.</li>
+  <li><strong>Perfil:</strong> tu nombre y la primera letra de tu apellido (nunca pedimos ni guardamos tu apellido completo), una foto de perfil opcional, tu vecindario y el nombre local que elijas para él, tu idioma (inglés o español) y los tipos de eventos que te interesan.</li>
+  <li><strong>Tu dirección, usada una sola vez.</strong> Para encontrar tu vecindario, enviamos la dirección que escribes al servicio gratuito de búsqueda de direcciones de la Oficina del Censo de EE. UU., que nos devuelve coordenadas en el mapa. Revisamos en qué vecindario oficial de Denver caen y luego descartamos la dirección y las coordenadas. No las guardamos ni las registramos.</li>
+  <li><strong>Fotos de perfil:</strong> antes de guardar una foto, le quitamos la información oculta que pueden llevar las fotos, como el lugar donde se tomó.</li>
+</ul>
+
+<h3>Cuando usas la app</h3>
+<ul>
+  <li><strong>Eventos que publicas:</strong> título, descripción, categoría, fecha y hora, el punto de encuentro que escribes y su marcador en el mapa, quién puede verlo (tu vecindario o solo quienes tengan el enlace) y un enlace opcional de Partiful.</li>
+  <li><strong>"Voy":</strong> los eventos a los que dices que vas y en qué pantalla lo tocaste (por ejemplo, el calendario o un enlace de invitación). La pantalla solo se cuenta en totales, nunca se muestra por persona.</li>
+  <li><strong>Asistencia e insignias:</strong> los eventos a los que asististe, si se registró con el registro automático o al tocar "Recoger", y las insignias que ganas con ellos.</li>
+  <li><strong>Enlaces de invitación que abres,</strong> para que puedas seguir viendo un evento de otro vecindario al que te invitaron.</li>
+  <li><strong>Organizaciones:</strong> las organizaciones que sigues, solicitas o ayudas a administrar, y lo que publicas por ellas.</li>
+  <li><strong>Herramientas de seguridad:</strong> los reportes que haces sobre un evento, una organización o un miembro, y los miembros que bloqueas.</li>
+  <li><strong>Ajustes:</strong> quién puede ver tus insignias, tus preferencias de notificaciones y si el registro automático está activado.</li>
+  <li><strong>Notificaciones:</strong> si las permites, una dirección de notificaciones de tu teléfono que da Apple o Google, para enviarte recordatorios y cancelaciones de eventos.</li>
+  <li><strong>Última actividad:</strong> una sola fecha y hora, que se actualiza como máximo una vez por hora, para contar cuántas personas usan la app. No registra qué hiciste ni dónde.</li>
+</ul>
+
+<h3>Cuando reportas un problema</h3>
+<p>Tu mensaje, una captura de pantalla opcional (sin la información de ubicación oculta), la versión de la app, el modelo y sistema de tu teléfono, tu idioma y la pantalla en la que estabas. Si no has iniciado sesión, el correo que nos das para responderte.</p>
+
+<h3>Ubicación (registro automático de llegada)</h3>
+<p>El registro automático es opcional y está apagado hasta que lo actives. Si lo activas, el servicio de ubicación de tu teléfono nota cuando llegas a los eventos a los que dijiste que vas, incluso con la app cerrada. Esto ocurre en tu teléfono. Nuestro servidor solo recibe "este miembro llegó a este evento". Nunca recibimos ni guardamos tu ubicación, tus coordenadas ni tu historial de ubicaciones. Puedes apagarlo en los Ajustes de la app o de tu teléfono cuando quieras.</p>
+
+<h3>Información técnica</h3>
+<p>Como cualquier sitio web o app, nuestros servidores ven la dirección de internet (IP) de tu dispositivo cuando te conectas. La usamos brevemente para evitar abusos, como demasiados intentos de inicio de sesión. Esos contadores vencen en menos de un día. Los registros de solicitudes de nuestro proveedor de alojamiento pueden incluirla por un tiempo limitado. Nos aseguramos de que esos registros nunca contengan direcciones, coordenadas ni el texto de los reportes de problemas.</p>
+
+<h3>Invitados que confirman por la web</h3>
+<p>Algunos eventos se pueden compartir con un enlace de invitación. Cualquiera puede abrirlo y ver el evento sin la app. Contamos cuántas veces se ven las páginas de eventos, pero no quién las vio. Recordamos tu idioma en una cookie.</p>
+<p>Cuando las confirmaciones por mensaje de texto estén disponibles, un invitado nos da su nombre y un número de celular de EE. UU., que confirma con un código que le enviamos por mensaje, y nos dice si acepta mensajes sobre el evento y un mensaje después del evento. Guardamos un registro de esa aceptación, los eventos a los que confirma y los mensajes que enviamos. Usamos el número solo para mensajes sobre esos eventos. El anfitrión ve el nombre del invitado, nunca su número. Responde STOP (o ALTO) a cualquier mensaje para dejar de recibirlos todos, o AYUDA para pedir ayuda.</p>
+
+<h3>Lo que no recopilamos</h3>
+<p>Tu dirección (después de la búsqueda única), tu ubicación o historial de ubicaciones, tus contactos, tu historial de navegación, información de pago, identificadores de publicidad ni tu apellido completo. No usamos herramientas externas de análisis, publicidad ni reportes de fallos.</p>
+
+<h2 id="use">2. Cómo la usamos</h2>
+<ul>
+  <li>Para que la app funcione: mostrarte los eventos de tu vecindario, dejarte publicar eventos y decir que vas, registrar asistencia e insignias, y mostrar tu impacto.</li>
+  <li>Para enviarte correos de la cuenta, y las notificaciones y mensajes que aceptaste.</li>
+  <li>Para cuidar a la comunidad: revisar reportes, quitar contenido que no cumple nuestros <a href="/terms">Términos de uso</a> y detener abusos.</li>
+  <li>Para saber si la app funciona, solo con totales (por ejemplo, cuántas personas se registraron esta semana). Esos totales nunca muestran quién eres.</li>
+  <li>Para arreglar los problemas que nos reportas.</li>
+</ul>
+<p>No usamos tu información para publicidad y no tomamos decisiones automáticas sobre ti que tengan efectos legales o igualmente importantes.</p>
+
+<h2 id="see">3. Quién puede ver qué</h2>
+<ul>
+  <li><strong>Otros miembros</strong> ven tu nombre y la inicial de tu apellido, tu foto, tu vecindario, los eventos que publicas (con el punto de encuentro) y tus insignias (a menos que elijas ocultarlas en Ajustes). Nunca ven tu correo electrónico.</li>
+  <li><strong>Quién va:</strong> los miembros solo ven cuántas personas van, no quiénes. El anfitrión de un evento y los administradores de su organización pueden ver los nombres de quienes van, para planear. En ferias de recursos y colectas de donaciones, el anfitrión solo ve el número. El anfitrión nunca ve quién no llegó.</li>
+  <li><strong>Las personas con el enlace de invitación de un evento</strong> pueden verlo, incluso desde otro vecindario. En la página web, el punto de encuentro solo se muestra a invitados que confirmaron, y nunca en las vistas previas del enlace.</li>
+  <li><strong>Organizaciones:</strong> la página, los eventos y los números de impacto de una organización son públicos en la app. No se muestra qué miembro publica por la organización.</li>
+  <li><strong>Nuestro equipo</strong> puede ver la información de una cuenta cuando hace falta para operar la app, responderte o revisar un reporte. El acceso es limitado y está protegido con inicio de sesión en dos pasos.</li>
+</ul>
+
+<h2 id="share">4. Con quién la compartimos</h2>
+<p><strong>No vendemos ni alquilamos tu información personal y no la compartimos para publicidad.</strong> Usamos unos pocos proveedores que manejan información por nosotros, solo para dar su servicio:</p>
+<ul>
+  <li><strong>DigitalOcean:</strong> aloja nuestros servidores, la base de datos y las fotos, en Estados Unidos.</li>
+  <li><strong>Postmark:</strong> envía nuestros correos.</li>
+  <li><strong>Expo, Apple y Google:</strong> entregan las notificaciones. Reciben la dirección de notificaciones de tu teléfono y el texto de la notificación, como el título y la hora de un evento, nunca su punto de encuentro.</li>
+  <li><strong>Búsqueda de direcciones de la Oficina del Censo de EE. UU.:</strong> recibe la dirección que escribes al unirte, como se explica arriba.</li>
+  <li><strong>Mapas:</strong> los mapas de eventos los muestra Apple Maps en iPhone y Google Maps en Android, que cargan las imágenes del área que se ve. "Abrir en" pasa la ubicación de un evento a la app de mapas que elijas.</li>
+  <li><strong>Twilio</strong> (cuando los mensajes a invitados estén activos): envía mensajes a los invitados que los pidieron.</li>
+  <li><strong>Un servicio de traducción</strong> (si activamos uno): recibiría el título y la descripción de un evento cuando pides leerlo en tu idioma, nunca nada sobre ti.</li>
+</ul>
+<p>También podemos compartir información si la ley lo exige, para proteger la seguridad de alguien, o como parte de un traspaso de la app a un nuevo operador, que tendría que respetar esta política.</p>
+
+<h2 id="keep">5. Cuánto tiempo la guardamos</h2>
+<p>Tu cuenta, tu perfil, tu asistencia, tus insignias y los datos básicos de los eventos que organizaste (título, categoría, vecindario y hora) se guardan mientras exista tu cuenta, porque tu historial y tu impacto se construyen con ellos. Un proceso diario borra lo demás cuando ya no hace falta:</p>
+<table>
+  <thead><tr><th>Qué</th><th>Se borra</th></tr></thead>
+  <tbody>
+    <tr><td>Puntos de encuentro y descripciones de eventos pasados, y sus traducciones</td><td>1 año después del evento</td></tr>
+    <tr><td>Los "Voy"</td><td>1 año después del evento</td></tr>
+    <tr><td>Recordatorios enviados</td><td>30 días después de enviarlos</td></tr>
+    <tr><td>Direcciones de notificaciones del teléfono</td><td>Tras 90 días sin uso, al cerrar sesión en ese teléfono o al eliminar tu cuenta</td></tr>
+    <tr><td>Celebraciones de insignias que ya viste</td><td>90 días después de verlas</td></tr>
+    <tr><td>Reportes (de eventos, organizaciones y miembros), reportes de problemas y sus capturas</td><td>1 año</td></tr>
+    <tr><td>Sesiones sin uso por 90 días y códigos de correo vencidos</td><td>En cuanto dejan de funcionar</td></tr>
+    <tr><td>El nombre, número y registros de aceptación de un invitado</td><td>30 días después del último mensaje que le enviamos, a menos que tenga otro evento próximo o se haya unido a la app</td></tr>
+  </tbody>
+</table>
+<p>Nuestro proveedor de alojamiento guarda copias de seguridad de la base de datos por un periodo corto y luego las reemplaza.</p>
+
+<h2 id="choices">6. Tus opciones y derechos</h2>
+<ul>
+  <li><strong>Cambia tu información</strong> en la app: tu nombre, foto, intereses, idioma, quién ve tus insignias y tus notificaciones.</li>
+  <li><strong>Apaga</strong> el registro automático, las notificaciones o el permiso de ubicación cuando quieras.</li>
+  <li><strong>Bloquea</strong> a un miembro para dejar de ver sus eventos.</li>
+  <li><strong>Elimina tu cuenta</strong> en la app (Ajustes → Eliminar cuenta). Esto borra tu inicio de sesión, perfil, foto, intereses, tus "Voy", tu asistencia, tus insignias y tus direcciones de notificaciones. Los eventos próximos que publicaste se cancelan y los pasados muestran "Exvecino" en lugar de tu nombre. Los reportes de problemas que enviaste se guardan sin tu nombre ni tu correo, para poder arreglar el problema. Si no puedes usar la app, mira <a href="/delete-account">cómo pedirnos que eliminemos tu cuenta</a>.</li>
+  <li><strong>Pide una copia de tu información, o que la corrijamos o borremos,</strong> escribiendo a <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a> desde el correo de tu cuenta. Te responderemos en un plazo de 45 días. No te trataremos de forma distinta por pedirlo.</li>
+</ul>
+<p>Según dónde vivas, incluido Colorado, puedes tener derechos legales para acceder a tus datos personales, corregirlos, borrarlos u obtener una copia, y para oponerte a que se vendan o se usen para publicidad dirigida (no hacemos ninguna de las dos cosas). Escríbenos para ejercerlos. Si rechazamos una solicitud, puedes apelar respondiendo a nuestra respuesta.</p>
+
+<h2 id="children">7. Menores</h2>
+<p>{{ app_name }} no es para menores de {{ legal.minimum_age }} años. No recopilamos a sabiendas información de menores de {{ legal.minimum_age }}. Si crees que un menor de {{ legal.minimum_age }} tiene una cuenta, escríbenos y la eliminaremos.</p>
+
+<h2 id="security">8. Seguridad</h2>
+<p>Todas las conexiones con {{ app_name }} están cifradas (HTTPS). Las contraseñas se guardan codificadas. Las fotos y capturas se guardan en privado y solo se muestran con enlaces que vencen pronto. Nuestro equipo usa inicio de sesión en dos pasos. Ningún sistema es perfectamente seguro, pero si una filtración afecta tu información, te avisaremos como lo exige la ley.</p>
+
+<h2 id="changes">9. Cambios a esta política</h2>
+<p>Si cambiamos esta política, actualizaremos la fecha de arriba. Si el cambio es importante, como un nuevo tipo de información o un nuevo uso, te avisaremos en la app o por correo antes de que entre en vigor.</p>
+
+<h2 id="contact">10. Contáctanos</h2>
+<p>{{ legal.operator }}<br>{{ legal.mailing_address }}<br><a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a></p>
+<p class="small">Esta es una traducción. Si hay diferencias con la versión en inglés, la versión en inglés es la que vale.</p>
+{% endblock %}

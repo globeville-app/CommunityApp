@@ -1,39 +1,92 @@
 # Store privacy answers (draft)
 
-Drafted from the code for the Apple App Privacy label and the Google Play
-Data safety form (docs/GO_LIVE.md §3). **The owner reviews and submits
-these.** Update them when Milestone 3 (badges and auto check-in) ships;
-the Phase B notes are at the bottom.
+Drafted from the code for the Apple **App Privacy** label and the Google
+Play **Data safety** form (docs/GO_LIVE.md §3), for the first release:
+Milestones 1–4 and 5.1. **The owner reviews and submits these.** They must
+match the privacy policy (`/privacy`, `backend/web/templates/web/legal/`).
+Update both when Milestone 5.2 (guest texts) turns on; the notes are at the
+bottom.
 
-## Data collected (Phase A)
+## Links the stores ask for
 
-| Data | Why | Linked to the person | Required |
-| --- | --- | --- | --- |
-| Email address | Login, problem-report replies | Yes | Yes |
-| Name (first name and last initial only; the full last name is never stored) | Shown to neighbors | Yes | Yes |
-| Photo | Profile photo; location data is removed on upload | Yes | No |
-| Neighborhood (one of Denver's official neighborhoods) | Shows local events | Yes | Yes |
-| Language preference | Shows the app in English or Spanish | Yes | Yes |
-| Interests (event categories) | "For you" events | Yes | No |
-| Events posted, "I'm going" taps | The neighborhood calendar | Yes | No |
-| Problem reports: the message, an optional screenshot (location data removed), app version, phone model and system, language, screen name | Fixing bugs | Yes when signed in | No |
-| Last active time (a timestamp, at most hourly) | Counting active members | Yes | Yes |
+| Field | Value |
+| --- | --- |
+| Privacy policy URL (both stores) | `https://globeville.app/privacy` |
+| Terms of use / EULA (Apple, optional field) | `https://globeville.app/terms` |
+| Account deletion URL (Google, required) | `https://globeville.app/delete-account` |
+| Support URL / email | the `contact_email` in `shared/app_config.json` |
+
+## Data collected
+
+All of it is **linked to the person**, used for **app functionality** only
+(plus "Developer communications" for account emails). None is used for
+tracking, advertising or analytics products.
+
+| Data | Apple category | Google category | Why | Required |
+| --- | --- | --- | --- | --- |
+| Email address | Contact Info → Email Address | Personal info → Email address | Sign-in, account emails, replies to problem reports | Yes |
+| First name and last initial (full last name never stored) | Contact Info → Name | Personal info → Name | Shown to neighbors | Yes |
+| Profile photo | User Content → Photos or Videos | Photos and videos → Photos | Profile; location data removed on upload | No |
+| Neighborhood (one of Denver's official neighborhoods) | Location → Coarse Location | Location → Approximate location | Shows local events. Derived once from an address that is never stored. | Yes |
+| Events posted (with meeting spot), organizations, reports | User Content → Other User Content | App activity → Other user-generated content | The calendar, organization pages, safety | No |
+| "I'm going", attendance, badges, follows, interests | Usage Data → Product Interaction | App activity → App interactions | The calendar, badges, "For you" | No |
+| Last active time (a timestamp, at most hourly) | Usage Data → Product Interaction | App activity → App interactions | Counting active members | Yes |
+| Push notification token | Identifiers → Device ID | Device or other IDs | Reminders and cancellations | No |
+| Problem reports: message, optional screenshot, app version, phone model and system, language, screen | Diagnostics → Other Diagnostic Data; User Content → Customer Support | App info and performance → Other; Messages → Other in-app messages | Fixing bugs | No |
+
+Language preference and settings (badge visibility, notifications, auto
+check-in on/off) are app settings, not a data type either store asks about.
 
 ## Not collected
 
-- **Home address.** It's used once to find the neighborhood and never stored or logged.
-- Location (precise or approximate), location history, contacts, browsing history, payment info, advertising IDs.
-- No third-party analytics, crash reporting or advertising.
+- **Home address.** Sent once to the U.S. Census Bureau's geocoder to find
+  the neighborhood, then discarded; never stored or logged.
+- **Precise location.** Auto check-in runs on the phone (geofencing). The
+  server receives only "attended event X", never coordinates.
+- Contacts, browsing history, search history, payment info, advertising IDs,
+  health, financial info, audio, files.
+- No third-party analytics, advertising or crash-reporting SDKs.
 
 ## Other answers
 
-- **Tracking (Apple):** no. Nothing is used to track people across other apps or websites.
-- **Data shared with third parties (Google):** none sold. Service providers only: DigitalOcean (hosting), Postmark (email). Event title and description go to a translation service only if one is switched on.
-- **Encrypted in transit:** yes (HTTPS only).
-- **Deletion:** members can delete their account in the app (Settings → Delete account). This removes their login, profile, photo, interests, "I'm going" taps and match. Their problem reports stay without their name or email.
+- **Tracking (Apple):** No.
+- **Data shared (Google):** No. Service providers acting for us (DigitalOcean
+  hosting, Postmark email, Expo/Apple/Google push) don't count as sharing.
+- **Data sold:** No.
+- **Encrypted in transit:** Yes (HTTPS only).
+- **Users can request deletion:** Yes, in the app (Settings → Delete
+  account) and at `https://globeville.app/delete-account`.
+- **Data deleted on request** except problem reports, which are kept for up
+  to 1 year without the person's name or email.
+- **Independent security review (Google, optional):** No.
 
-## Phase B additions (Milestone 3)
+## Permissions and the reviewers' questions
 
-- **Location:** auto check-in uses the phone's location *on the phone only*, to notice arriving at an event. The server receives only "attended event X", never coordinates. Apple: declare **no** location data collected, but the app asks for "Always" location permission, so the review notes must explain auto check-in. Google: complete the **background location** declaration, with a short video of the feature.
-- **Attendance and badges:** events attended, badges earned. Linked to the person, used for app functionality.
-- **Shares:** only a count per badge per day; nothing about who shared or where.
+- **Location, "Always" (iPhone) / background location (Android).** Used only
+  for optional auto check-in, explained on a screen before the phone asks
+  ("even when the app is closed"). Google needs the **background location
+  declaration** with a short video: turn on auto check-in from Settings,
+  show the explanation screen, then the permission prompts. Apple: say in the
+  review notes that auto check-in uses geofencing and no location leaves the
+  phone. Android has no location foreground service.
+- **Photos.** The system photo picker, for a profile photo. No broad photo
+  or file permission on Android.
+- **Notifications.** Asked after the first "I'm going", with an explanation.
+- **No camera, microphone, contacts or tracking permission.**
+- **User-generated content (Apple 1.2).** Terms agreed at sign-up, with
+  zero tolerance for objectionable content; report events, organizations and
+  members; block members; the team reviews reports in the admin; contact
+  email in the app's legal pages.
+- **Age rating.** Answer the questionnaire with user-generated content
+  (members post events, names and photos) and no other mature content. The
+  terms set the minimum age at 13.
+- **Sign-in for App Review.** Give Apple and Google a working test account
+  (email and password) on the production server, already past the email
+  code, with a profile in a neighborhood that has sample events.
+
+## When Milestone 5.2 (guest texts) turns on
+
+Add for guests, who have no account: **Phone number** (Contact Info /
+Personal info), first name, and consent records, used only for texts about
+the events they RSVP'd to, deleted 30 days after their last text. Twilio is
+a service provider. The app itself collects nothing new.

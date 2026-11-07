@@ -18,9 +18,11 @@ type Props = {
   submit: (email: string, password: string) => Promise<AuthResult>;
   /** Extra links under the button, e.g. "Forgot password?" on Log in. */
   links?: ReactNode;
+  /** Shown just above the button, e.g. the terms on Sign up. */
+  agreement?: ReactNode;
 };
 
-export function EmailPasswordForm({ title, buttonTitle, hint, screen, submit, links }: Props) {
+export function EmailPasswordForm({ title, buttonTitle, hint, screen, submit, links, agreement }: Props) {
   const { t } = useTranslation();
   const { signIn } = useAuth();
   const { syncAfterLogin } = useLanguage();
@@ -72,6 +74,7 @@ export function EmailPasswordForm({ title, buttonTitle, hint, screen, submit, li
       />
       {hint ? <Caption>{hint}</Caption> : null}
       <ErrorMessage message={errorMessage(t, error)} />
+      {agreement}
       <Button title={buttonTitle} onPress={onSubmit} busy={busy} disabled={!email || !password} />
       {links}
       <TroubleLink from={screen} />

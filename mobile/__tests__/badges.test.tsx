@@ -218,7 +218,7 @@ describe("auto check-in", () => {
     mocked.setGoing.mockResolvedValue({ going_count: 13, is_going: true });
     renderApp("/event/7");
     await pressAndSettle(await screen.findByRole("button", { name: "I'm going" }));
-    expect(await screen.findByText("Your phone notices when you arrive at events you're going to, and your badge grows on its own.")).toBeTruthy();
+    expect(await screen.findByText("Your phone notices when you arrive at events you're going to, even when the app is closed, and your badge grows on its own.")).toBeTruthy();
     expect(screen.getByText("We never see or store where you are.")).toBeTruthy();
     expect(mocked.markCheckinOfferSeen).toHaveBeenCalledWith("tok-123", "first");
     await pressAndSettle(screen.getByRole("button", { name: "Not now" }));

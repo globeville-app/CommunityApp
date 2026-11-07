@@ -12,9 +12,13 @@ with the date and who did it.
 - [ ] **Tone check.** Neighbors confirm that informal "tú" is right.
       (docs/LANGUAGE.md, open items)
 
-- [ ] **Privacy policy and terms.** Required by the App Store and Play Store.
-      They should say home addresses are never stored. Put the links in
-      `privacy_url` and `terms_url` in `shared/app_config.json`.
+- [ ] **Privacy policy and terms.** Drafted by Claude Code from the code
+      (Nov 7, 2026) at `/privacy`, `/terms` and `/delete-account`, in English
+      and Spanish (`backend/web/templates/web/legal/`); the app links to them.
+      Still needed: fill in the `legal` section of `shared/app_config.json`
+      (who runs the app, contact email, mailing address, effective date;
+      the pages say "Draft" until then), confirm the minimum age (13), and
+      a legal review. See docs/STANDARDS_CHECK.md.
 - [ ] **Problem report emails.** Set `PROBLEM_REPORT_EMAILS` on the server.
 - [ ] **Email service.** Choose one (for example Postmark or Amazon SES) and
       set the `EMAIL_*` settings on the server (see the README).

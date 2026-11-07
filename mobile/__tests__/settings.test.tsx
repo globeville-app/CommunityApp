@@ -96,17 +96,13 @@ describe("the settings screen", () => {
     expect(screen.getByText("Configuración")).toBeTruthy();
   });
 
-  it("shows 'Coming soon' for the privacy policy and terms until they exist", async () => {
+  it("opens the privacy policy and terms on the web", async () => {
     loggedIn();
     renderApp("/settings");
     fireEvent.press(await screen.findByRole("button", { name: "Privacy policy" }));
-    expect(await screen.findByText("Coming soon")).toBeTruthy();
-    expect(screen.getByRole("header", { name: "Privacy policy" })).toBeTruthy();
-    fireEvent.press(screen.getByRole("button", { name: "Back" }));
-    fireEvent.press(await screen.findByRole("button", { name: "Terms of use" }));
-    expect(await screen.findByRole("header", { name: "Terms of use" })).toBeTruthy();
-    expect(screen.getByText("Coming soon")).toBeTruthy();
-    expect(WebBrowser.openBrowserAsync).not.toHaveBeenCalled();
+    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.app/privacy");
+    fireEvent.press(screen.getByRole("button", { name: "Terms of use" }));
+    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.app/terms");
   });
 
   it("edit profile opens the setup form filled in, with the neighborhood fixed", async () => {

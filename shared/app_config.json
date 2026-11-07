@@ -1,8 +1,16 @@
 {
   "app_name": "Globeville",
-  "privacy_url": "",
-  "terms_url": "",
+  "privacy_url": "https://globeville.app/privacy",
+  "terms_url": "https://globeville.app/terms",
   "invite_url": "https://globeville.app",
   "ios_store_url": "",
-  "android_store_url": ""
+  "android_store_url": "",
+  "legal": {
+    "operator": "",
+    "contact_email": "",
+    "mailing_address": "",
+    "effective_date": "",
+    "minimum_age": 13,
+    "governing_state": "Colorado"
+  }
 }

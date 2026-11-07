@@ -41,6 +41,7 @@ jest.mock("expo-constants", () => {
           apiBaseUrl: "http://test-server:8000",
           privacyUrl: shared.privacy_url,
           termsUrl: shared.terms_url,
+          minimumAge: shared.legal.minimum_age,
           inviteUrl: shared.invite_url,
           buildNumber: "12",
         },

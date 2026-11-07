@@ -1,0 +1,18 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+{% block title %}{{ doc_name }} · {{ app_name }}{% endblock %}
+{% block content %}
+<article class="card legal">
+  {% if is_draft %}
+    <p class="draft" role="note">{% translate "Draft: not yet in effect. It still needs the owner's details and a legal review." %}</p>
+  {% endif %}
+  <h1>{% block doc_title %}{% endblock %}</h1>
+  <p class="small">{% translate "Effective date:" %} {{ legal.effective_date }}</p>
+  {% block doc %}{% endblock %}
+  <nav class="legal-links" aria-label="{% translate 'Legal' %}">
+    <a href="/privacy">{% translate "Privacy Policy" %}</a> ·
+    <a href="/terms">{% translate "Terms of Use" %}</a> ·
+    <a href="/delete-account">{% translate "Delete your account" %}</a>
+  </nav>
+</article>
+{% endblock %}

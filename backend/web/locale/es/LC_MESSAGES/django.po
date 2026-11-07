@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 20:49+0000\n"
+"POT-Creation-Date: 2026-11-07 21:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,6 +21,14 @@ msgstr ""
 #: templates/web/base.html:13
 msgid "Language"
 msgstr "Idioma"
+
+#: templates/web/base.html:23 templates/web/legal/base.html:13
+msgid "Privacy Policy"
+msgstr "Política de privacidad"
+
+#: templates/web/base.html:24 templates/web/legal/base.html:14
+msgid "Terms of Use"
+msgstr "Términos de uso"
 
 #: templates/web/cancelled.html:6
 msgid "This event was cancelled."
@@ -222,6 +230,26 @@ msgid ""
 msgstr ""
 "Encuentra eventos en tu vecindario de Denver, conoce a tus vecinos y recoge "
 "insignias por participar."
+
+#: templates/web/legal/base.html:7
+msgid ""
+"Draft: not yet in effect. It still needs the owner's details and a legal "
+"review."
+msgstr ""
+"Borrador: todavía no está vigente. Aún faltan los datos del responsable y "
+"una revisión legal."
+
+#: templates/web/legal/base.html:10
+msgid "Effective date:"
+msgstr "Fecha de vigencia:"
+
+#: templates/web/legal/base.html:12
+msgid "Legal"
+msgstr "Legal"
+
+#: templates/web/legal/base.html:15
+msgid "Delete your account"
+msgstr "Eliminar tu cuenta"
 
 #: views.py:37
 msgid "Please check the box to agree to event texts."

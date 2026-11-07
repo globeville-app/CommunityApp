@@ -495,7 +495,7 @@ host. A daily job (`python manage.py cleanup_old_data`, `cleanup-old-data` in
 | Reminders that were sent | 30 days after sending |
 | Phone push tokens | not used for 90 days |
 | Celebrations already seen | 90 days after being seen |
-| Event and organization reports, decided organization changes, problem reports (with screenshots) | 1 year |
+| Event, organization and member reports, decided organization changes, problem reports (with screenshots) | 1 year |
 | Logins unused for 90 days, expired email codes | as soon as they stop working |
 
 `python manage.py cleanup_old_data --dry-run` shows what it would delete.
@@ -817,6 +817,19 @@ Decisions made while building (approved defaults):
   one-line change in `backend/accounts/retention.py`.
 - A guest who collects becomes "going" with the source "invite link", so
   the owner stats count them as invited.
+
+## Privacy policy, terms and the standards check
+
+The privacy policy, terms of use and account-deletion page are served by
+the server at `/privacy`, `/terms` and `/delete-account` (English and
+Spanish, `backend/web/templates/web/legal/`). The app links to them from
+Sign up and Settings. The facts only the owner can give are in the `legal`
+section of `shared/app_config.json`; until they're filled in, every page
+says "Draft". **When you change what data the app collects or how long it's
+kept, update the policy and `docs/STORE_PRIVACY.md` in the same change.**
+
+`docs/STANDARDS_CHECK.md` lists the App Store, Google Play and privacy rules
+the first release was checked against, and what still needs the owner.
 
 ## Not in this milestone (and still needed before real users)
 

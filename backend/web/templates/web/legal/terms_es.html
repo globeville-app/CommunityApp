@@ -1,0 +1,72 @@
+{% extends "web/legal/base.html" %}
+{% block doc_title %}Términos de uso{% endblock %}
+{% block doc %}
+<p class="lede">Estos términos son un acuerdo entre tú y {{ legal.operator }}, que opera {{ app_name }}. Al crear una cuenta o usar {{ app_name }}, aceptas estos términos y nuestra <a href="/privacy">Política de privacidad</a>. Si no los aceptas, por favor no uses {{ app_name }}.</p>
+
+<h2>1. Quién puede usar {{ app_name }}</h2>
+<ul>
+  <li>Debes tener al menos {{ legal.minimum_age }} años.</li>
+  <li>Danos un correo electrónico real y no compartas tu contraseña. Eres responsable de lo que pase en tu cuenta.</li>
+  <li>Una cuenta por persona. No te hagas pasar por otra persona.</li>
+  <li>Si antes eliminamos tu cuenta, no crees una nueva sin nuestro permiso.</li>
+</ul>
+
+<h2>2. Reglas de la comunidad</h2>
+<p>{{ app_name }} es para vecinos. Cuando publicas un evento, un perfil, una foto, una organización o cualquier otra cosa, aceptas que no:</p>
+<ul>
+  <li>acosará, amenazará, intimidará ni molestará a nadie;</li>
+  <li>promoverá el odio ni la discriminación por raza, origen étnico, nacionalidad, situación migratoria, religión, sexo, identidad de género, orientación sexual, discapacidad, edad u otras características similares;</li>
+  <li>será sexualmente explícito, violento ni gráfico;</li>
+  <li>tendrá que ver con algo ilegal, como la venta de drogas, armas o alcohol en formas que la ley no permite;</li>
+  <li>compartirá información privada de otra persona, como su dirección, teléfono o foto, sin su permiso;</li>
+  <li>será falso, engañoso ni spam, como un evento que no es real o que es solo publicidad;</li>
+  <li>violará los derechos de otros, como derechos de autor o marcas;</li>
+  <li>intentará dañar, sobrecargar, copiar en masa o burlar la seguridad de {{ app_name }}.</li>
+</ul>
+<p><strong>No toleramos contenido inaceptable ni usuarios abusivos.</strong> Puedes reportar un evento, una organización o un miembro en la app, y bloquear a un miembro para dejar de ver sus eventos. Revisamos los reportes, normalmente en menos de 24 horas. Podemos quitar contenido, ocultar eventos, o suspender o eliminar cuentas que no cumplan estas reglas, con o sin aviso.</p>
+
+<h2>3. Eventos y seguridad</h2>
+<ul>
+  <li>Los anfitriones son responsables de sus eventos: que sean reales, legales, estén bien descritos y sean seguros para quienes llegan. Eso incluye los permisos que el evento necesite.</li>
+  <li>Por tu seguridad, el punto de encuentro debe ser un lugar público o una cuadra o esquina, nunca tu dirección ni la de otra persona, a menos que el evento sea de verdad en ese lugar y te sientas cómodo compartiéndolo.</li>
+  <li><strong>No organizamos, revisamos ni supervisamos los eventos.</strong> Tú decides a qué eventos ir y eres responsable de tu propia seguridad. Usa el sentido común, como en cualquier reunión pública.</li>
+  <li>Los anfitriones pueden ver los nombres de quienes van a su evento para planear. Úsalos solo para ese evento.</li>
+</ul>
+
+<h2>4. Organizaciones</h2>
+<p>Si solicitas o administras una organización, confirmas que puedes representarla. Las páginas de organizaciones se revisan antes de aparecer. Podemos rechazar, ocultar o quitar una organización. Los negocios deben seguir las reglas que se muestran al solicitar.</p>
+
+<h2>5. Insignias</h2>
+<p>Las insignias y los números de impacto celebran que participas en tu vecindario. No tienen valor en dinero, no se pueden comprar, vender ni transferir, y pueden cambiar a medida que mejoramos {{ app_name }}. No intentes ganarlas de forma deshonesta, por ejemplo registrando tu llegada a eventos a los que no fuiste.</p>
+
+<h2>6. Mensajes de texto a invitados</h2>
+<p>Cuando las confirmaciones por mensaje estén disponibles, un invitado que nos da su número de celular acepta recibir mensajes sobre los eventos a los que confirma, como máximo unos pocos por evento. Pueden aplicarse tarifas de mensajes y datos. Responde STOP (o ALTO) para dejar de recibir mensajes, o AYUDA para pedir ayuda. Aceptar los mensajes no es condición para comprar nada.</p>
+
+<h2>7. Lo que publicas</h2>
+<p>Lo que publicas sigue siendo tuyo. Nos das una licencia no exclusiva, gratuita y mundial para guardarlo, mostrarlo, copiarlo, traducirlo y compartirlo dentro de {{ app_name }} y nuestras páginas web, solo para operar y mejorar {{ app_name }}. Esta licencia termina cuando se borra tu contenido, salvo las copias de seguridad que se reemplazan con el tiempo y el contenido que otros ya compartieron.</p>
+
+<h2>8. Nuestra app</h2>
+<p>Te damos una licencia personal, intransferible y revocable para usar {{ app_name }} para lo que fue hecha. La app, su diseño, su nombre y sus insignias son nuestros o de quienes nos dan licencia. Las partes de código abierto tienen sus propias licencias, que aparecen en la app en Ajustes.</p>
+
+<h2>9. Otros servicios</h2>
+<p>{{ app_name }} puede tener enlaces a otros servicios, como Partiful, apps de mapas y tiendas de apps. Tienen sus propios términos y políticas de privacidad, y no somos responsables de ellos. Si descargaste {{ app_name }} de la App Store de Apple o de Google Play, sus términos también aplican. Apple y Google no son responsables de {{ app_name }} ni de darle soporte.</p>
+
+<h2>10. Si dejas de usar {{ app_name }}</h2>
+<p>Puedes dejar de usar {{ app_name }} y eliminar tu cuenta cuando quieras (Ajustes → Eliminar cuenta). Podemos suspender o terminar tu acceso si no cumples estos términos o para proteger a otros. Las secciones 7 (en lo que sigue vigente), 11, 12 y 13 siguen vigentes después de que termine tu cuenta.</p>
+
+<h2>11. Exención de garantías</h2>
+<p>{{ app_name }} se ofrece "tal cual" y "según disponibilidad". En la medida en que la ley lo permita, no prometemos que siempre funcione, que no tenga errores, ni que los eventos que aparecen sean exactos, seguros o vayan a ocurrir como se describen.</p>
+
+<h2>12. Límite de responsabilidad</h2>
+<p>En la medida en que la ley lo permita, no somos responsables de daños indirectos, incidentales, especiales o consecuentes, ni de nada que ocurra en un evento o entre miembros. Nuestra responsabilidad total por cualquier reclamo sobre {{ app_name }} se limita a $100. Algunos lugares no permiten estos límites, así que puede que no apliquen en tu caso.</p>
+
+<h2>13. Disputas</h2>
+<p>Estos términos se rigen por las leyes del estado de {{ legal.governing_state }}, sin importar las reglas de conflicto de leyes. Antes de presentar un reclamo, escríbenos para intentar resolverlo de manera informal. Todo reclamo legal debe presentarse en los tribunales estatales o federales de Denver, {{ legal.governing_state }}, a menos que la ley de donde vives te dé derecho a presentarlo en otro lugar.</p>
+
+<h2>14. Cambios a estos términos</h2>
+<p>Si cambiamos estos términos, actualizaremos la fecha de arriba. Si el cambio es importante, te avisaremos en la app o por correo antes de que entre en vigor. Si sigues usando {{ app_name }} después, aceptas los nuevos términos.</p>
+
+<h2>15. Contáctanos</h2>
+<p>{{ legal.operator }}<br>{{ legal.mailing_address }}<br><a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a></p>
+<p class="small">Esta es una traducción. Si hay diferencias con la versión en inglés, la versión en inglés es la que vale.</p>
+{% endblock %}

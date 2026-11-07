@@ -1,0 +1,71 @@
+{% extends "web/legal/base.html" %}
+{% block doc_title %}Terms of Use{% endblock %}
+{% block doc %}
+<p class="lede">These terms are an agreement between you and {{ legal.operator }}, which runs {{ app_name }}. By creating an account or using {{ app_name }}, you agree to them and to our <a href="/privacy">Privacy Policy</a>. If you don't agree, please don't use {{ app_name }}.</p>
+
+<h2>1. Who can use {{ app_name }}</h2>
+<ul>
+  <li>You must be at least {{ legal.minimum_age }} years old.</li>
+  <li>Give us a real email address, and keep your password to yourself. You're responsible for what happens on your account.</li>
+  <li>One account per person. Don't pretend to be someone else.</li>
+  <li>If we've removed your account before, don't create a new one without our permission.</li>
+</ul>
+
+<h2>2. Community rules</h2>
+<p>{{ app_name }} is for neighbors. When you post an event, a profile, a photo, an organization or anything else, you agree that it won't:</p>
+<ul>
+  <li>harass, threaten, bully or intimidate anyone;</li>
+  <li>promote hate or discrimination based on race, ethnicity, national origin, immigration status, religion, sex, gender identity, sexual orientation, disability, age or similar characteristics;</li>
+  <li>be sexually explicit, violent or graphic;</li>
+  <li>involve anything illegal, including the sale of drugs, weapons or alcohol in ways the law doesn't allow;</li>
+  <li>share someone else's private information, such as a home address, phone number or photo, without their permission;</li>
+  <li>be fake, misleading or spam, such as an event that isn't real or is only an advertisement;</li>
+  <li>break someone else's rights, such as copyright or trademark;</li>
+  <li>try to break, overload, scrape or get around the security of {{ app_name }}.</li>
+</ul>
+<p><strong>We have zero tolerance for objectionable content and abusive users.</strong> You can report an event, an organization or a member in the app, and block a member so you no longer see their events. We review reports, usually within 24 hours. We may remove content, hide events, or suspend or delete accounts that break these rules, with or without notice.</p>
+
+<h2>3. Events and safety</h2>
+<ul>
+  <li>Hosts are responsible for their events: that they're real, lawful, accurately described, and safe for the people who come. That includes any permits the event needs.</li>
+  <li>For your safety, the meeting spot should be a public place or a block or cross street, never your own or someone else's home address unless the event is truly at that place and you're comfortable sharing it.</li>
+  <li><strong>We don't organize, check or supervise events.</strong> You decide which events to go to and are responsible for your own safety. Use common sense, as you would with any public gathering.</li>
+  <li>Hosts can see the names of people going to their event so they can plan. Use them only for that event.</li>
+</ul>
+
+<h2>4. Organizations</h2>
+<p>If you request or manage an organization, you confirm that you're allowed to represent it. Organization pages are reviewed before they appear. We may decline, hide or remove an organization. Businesses must follow the rules shown when they apply.</p>
+
+<h2>5. Badges</h2>
+<p>Badges and impact numbers celebrate showing up for your neighborhood. They have no money value, can't be bought, sold or transferred, and may change as we improve {{ app_name }}. Don't try to earn them dishonestly, for example by checking in to events you didn't attend.</p>
+
+<h2>6. Texts to guests</h2>
+<p>When text RSVPs are available, a guest who gives us their mobile number agrees to texts about the events they RSVP to, sent at most a few times per event. Message and data rates may apply. Reply STOP to stop all texts, or HELP for help. Agreeing to texts is not a condition of buying anything.</p>
+
+<h2>7. What you post</h2>
+<p>You keep ownership of what you post. You give us a non-exclusive, royalty-free, worldwide license to store, show, copy, translate and share it within {{ app_name }} and our web pages, only to run and improve {{ app_name }}. This license ends when your content is deleted, except for copies in backups that are replaced in the normal course, and for content others have already shared.</p>
+
+<h2>8. Our app</h2>
+<p>We give you a personal, non-transferable, revocable license to use {{ app_name }} for its intended purpose. The app, its design, name and badges belong to us or our licensors. Open-source parts are covered by their own licenses, listed in the app under Settings.</p>
+
+<h2>9. Other services</h2>
+<p>{{ app_name }} can link to other services, such as Partiful, maps apps and app stores. They have their own terms and privacy policies, and we're not responsible for them. If you downloaded {{ app_name }} from the Apple App Store or Google Play, their terms also apply. Apple and Google aren't responsible for {{ app_name }} or for supporting it.</p>
+
+<h2>10. Ending your use</h2>
+<p>You can stop using {{ app_name }} and delete your account at any time (Settings → Delete account). We may suspend or end your access if you break these terms or to protect others. Sections 7 (the parts that survive), 11, 12 and 13 continue after your account ends.</p>
+
+<h2>11. Disclaimers</h2>
+<p>{{ app_name }} is provided "as is" and "as available". To the fullest extent the law allows, we make no promises that it will always work, be error-free, or that events listed in it are accurate, safe or will happen as described.</p>
+
+<h2>12. Limitation of liability</h2>
+<p>To the fullest extent the law allows, we are not liable for indirect, incidental, special or consequential damages, or for anything that happens at an event or between members. Our total liability for any claim about {{ app_name }} is limited to $100. Some places don't allow these limits, so they may not apply to you.</p>
+
+<h2>13. Disputes</h2>
+<p>These terms are governed by the laws of the State of {{ legal.governing_state }}, without regard to conflict-of-law rules. Before filing a claim, please email us so we can try to resolve it informally. Any legal claim must be brought in the state or federal courts located in Denver, {{ legal.governing_state }}, unless the law where you live gives you the right to bring it elsewhere.</p>
+
+<h2>14. Changes to these terms</h2>
+<p>If we change these terms, we'll update the date at the top. If a change matters, we'll tell you in the app or by email before it takes effect. If you keep using {{ app_name }} after that, you accept the new terms.</p>
+
+<h2>15. Contact us</h2>
+<p>{{ legal.operator }}<br>{{ legal.mailing_address }}<br><a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a></p>
+{% endblock %}

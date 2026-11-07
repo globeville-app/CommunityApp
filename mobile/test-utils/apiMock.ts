@@ -40,6 +40,7 @@ const SERVER_CALLS = [
   "getMyBadges",
   "getMember",
   "setBlocked",
+  "reportMember",
   "getBlockedMembers",
   "getCollectCards",
   "collectEvent",

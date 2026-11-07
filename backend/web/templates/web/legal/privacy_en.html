@@ -1,0 +1,127 @@
+{% extends "web/legal/base.html" %}
+{% block doc_title %}Privacy Policy{% endblock %}
+{% block doc %}
+<p class="lede">{{ app_name }} helps neighbors in Denver find and go to events in their neighborhood. This policy explains what we collect, why, who can see it, how long we keep it, and the choices you have. "We" means {{ legal.operator }}, which runs {{ app_name }}.</p>
+
+<section class="summary">
+  <h2>The short version</h2>
+  <ul>
+    <li><strong>We never store your home address.</strong> You type it once so we can find your neighborhood, and then it's gone, from our servers and from your phone.</li>
+    <li><strong>No ads, no tracking, no selling.</strong> We don't sell or rent your information, show ads, or use advertising or analytics tools that follow you around.</li>
+    <li><strong>Neighbors see your first name and last initial,</strong> never your email.</li>
+    <li><strong>Auto check-in stays on your phone.</strong> If you turn it on, your phone notices when you arrive at an event. We only learn that you attended, never where you are.</li>
+    <li><strong>We never read your contacts.</strong> Invites go through your phone's own share menu.</li>
+    <li><strong>You can delete your account</strong> in the app at any time (Settings → Delete account).</li>
+  </ul>
+</section>
+
+<h2 id="collect">1. What we collect</h2>
+
+<h3>When you create an account</h3>
+<ul>
+  <li><strong>Email address and password.</strong> To sign you in and to send account emails, such as a sign-up code or a password reset. Your password is stored scrambled (hashed), so no one, including us, can read it.</li>
+  <li><strong>Profile:</strong> your first name and the first letter of your last name (we never ask for or store your full last name), an optional profile photo, your neighborhood and the local name you choose for it, your language (English or Spanish), and the kinds of events you're interested in.</li>
+  <li><strong>Your home address, used once.</strong> To find your neighborhood, we send the address you type to the U.S. Census Bureau's free address-lookup service, which returns map coordinates. We check which official Denver neighborhood they fall in, then discard both the address and the coordinates. We don't store or log them.</li>
+  <li><strong>Profile photos:</strong> before a photo is saved, we remove the hidden information photos can carry, such as where it was taken.</li>
+</ul>
+
+<h3>When you use the app</h3>
+<ul>
+  <li><strong>Events you post:</strong> title, description, category, date and time, the meeting spot you type and its map pin, who can see it (your neighborhood, or only people with the link), and an optional Partiful link.</li>
+  <li><strong>"I'm going":</strong> the events you say you're going to, and which screen you tapped it on (for example the calendar or an invite link). The screen is only ever counted in totals, never shown per person.</li>
+  <li><strong>Attendance and badges:</strong> the events you attended, whether that was recorded by auto check-in or by tapping "Collect", and the badges you earn from them.</li>
+  <li><strong>Invite links you open,</strong> so you can keep seeing an event you were invited to from another neighborhood.</li>
+  <li><strong>Organizations:</strong> organizations you follow, request or help run, and what you post for them.</li>
+  <li><strong>Safety tools:</strong> reports you make about an event, an organization or a member, and the members you block.</li>
+  <li><strong>Settings:</strong> who can see your badges, your notification choices, and whether auto check-in is on.</li>
+  <li><strong>Push notifications:</strong> if you allow them, a notification address for your phone from Apple or Google, so we can send event reminders and cancellations.</li>
+  <li><strong>Last active time:</strong> a single date and time, updated at most once an hour, so we can count how many people use the app. It doesn't record what you did or where.</li>
+</ul>
+
+<h3>When you report a problem</h3>
+<p>Your message, an optional screenshot (with hidden location information removed), the app version, your phone model and system version, your language and the screen you were on. If you aren't signed in, the email address you give us so we can reply.</p>
+
+<h3>Location (auto check-in)</h3>
+<p>Auto check-in is optional and off until you turn it on. If you do, your phone's own location service watches for your arrival at events you said you're going to, even when the app is closed. This happens on your phone. Our server receives only "this member arrived at this event". We never receive or store your location, coordinates or location history. You can turn it off in the app's Settings or your phone's settings at any time.</p>
+
+<h3>Technical information</h3>
+<p>Like any website or app, our servers see your device's internet (IP) address when you connect. We use it briefly to stop abuse, such as too many sign-in attempts. Rate-limit counters expire within a day. Our hosting provider's request logs may include it for a limited time. We make sure these logs never contain addresses, coordinates or the text of problem reports.</p>
+
+<h3>Guests who RSVP on the web</h3>
+<p>Some events can be shared with an invite link. Anyone can open the link and see the event, without the app. We count how many times event pages are viewed, but not who viewed them. We remember your language choice in a cookie.</p>
+<p>When guest RSVPs by text are available, a guest gives us their first name and a U.S. mobile number, confirmed with a code we text them, and tells us whether they agree to event texts and to a text after the event. We keep a record of that agreement, the events they RSVP to, and the texts we send. We use the number only for texts about the events they RSVP'd to. Hosts see a guest's first name, never their number. Reply STOP to any text to stop them all at once, or HELP for help.</p>
+
+<h3>What we don't collect</h3>
+<p>Your home address (after the one-time lookup), your location or location history, your contacts, your browsing history, payment information, advertising identifiers or your full last name. We don't use third-party analytics, advertising or crash-reporting tools.</p>
+
+<h2 id="use">2. How we use it</h2>
+<ul>
+  <li>To run the app: show you your neighborhood's events, let you post events and say you're going, record attendance and badges, and show your impact.</li>
+  <li>To send you account emails, and the notifications and texts you've agreed to.</li>
+  <li>To keep the community safe: review reports, remove content that breaks our <a href="/terms">Terms of Use</a>, and stop abuse.</li>
+  <li>To understand whether the app is working, using counts only (for example, how many people signed up this week). These counts never show who you are.</li>
+  <li>To fix problems you report.</li>
+</ul>
+<p>We don't use your information for advertising, and we don't make automated decisions about you that have legal or similarly significant effects.</p>
+
+<h2 id="see">3. Who can see what</h2>
+<ul>
+  <li><strong>Other members</strong> see your first name and last initial, your photo, your neighborhood, the events you post (including the meeting spot), and your badges (unless you choose to hide them in Settings). They never see your email address.</li>
+  <li><strong>Who's going:</strong> members see only how many people are going, not who. The host of an event, and its organization's admins, can see the names of the people going so they can plan. For resource fairs and donation drives, hosts see only the count. Hosts never see who didn't come.</li>
+  <li><strong>People with an event's invite link</strong> can see that event, including from another neighborhood. The meeting spot is shown on the web page only to guests who have RSVP'd, and never in link previews.</li>
+  <li><strong>Organizations:</strong> an organization's page, events and impact numbers are public in the app. The member who posts for an organization isn't shown.</li>
+  <li><strong>Our team</strong> can see account information when needed to run the app, answer you, or review a report. Access is limited and protected by two-step sign-in.</li>
+</ul>
+
+<h2 id="share">4. Who we share it with</h2>
+<p><strong>We don't sell or rent your personal information, and we don't share it for advertising.</strong> We use a small number of service providers who handle information for us, only to provide their service:</p>
+<ul>
+  <li><strong>DigitalOcean:</strong> hosts our servers, database and photo storage, in the United States.</li>
+  <li><strong>Postmark:</strong> sends our emails.</li>
+  <li><strong>Expo, Apple and Google:</strong> deliver push notifications. They receive your phone's notification address and the notification text, such as an event's title and time, never its meeting spot.</li>
+  <li><strong>U.S. Census Bureau address lookup:</strong> receives the address you type when you join, as described above.</li>
+  <li><strong>Maps:</strong> event maps are shown by Apple Maps on iPhone and Google Maps on Android, which load map images for the area shown. "Open in" hands an event's location to the maps app you pick.</li>
+  <li><strong>Twilio</strong> (when guest texts are on): sends texts to guests who asked for them.</li>
+  <li><strong>A translation service</strong> (if we turn one on): would receive an event's title and description when you ask to read it in your language, never anything about you.</li>
+</ul>
+<p>We may also share information if the law requires it, to protect someone's safety, or as part of a transfer of the app to a new operator, who would have to honor this policy.</p>
+
+<h2 id="keep">5. How long we keep it</h2>
+<p>Your account, profile, attendance, badges and the basics of events you hosted (title, category, neighborhood and time) are kept as long as your account exists, because your history and impact are built from them. A daily job deletes the rest once it's no longer needed:</p>
+<table>
+  <thead><tr><th>What</th><th>Deleted</th></tr></thead>
+  <tbody>
+    <tr><td>Meeting spots and descriptions of past events, and their translations</td><td>1 year after the event</td></tr>
+    <tr><td>"I'm going" taps</td><td>1 year after the event</td></tr>
+    <tr><td>Reminders that were sent</td><td>30 days after sending</td></tr>
+    <tr><td>Phone notification addresses</td><td>After 90 days unused, when you log out on that phone, or when you delete your account</td></tr>
+    <tr><td>Badge celebrations you've already seen</td><td>90 days after you see them</td></tr>
+    <tr><td>Reports (events, organizations, members), problem reports and their screenshots</td><td>1 year</td></tr>
+    <tr><td>Sign-ins unused for 90 days, and expired email codes</td><td>As soon as they stop working</td></tr>
+    <tr><td>A guest's name, phone number and consent records</td><td>30 days after the last text we sent them, unless they have another event coming up or joined the app</td></tr>
+  </tbody>
+</table>
+<p>Backups of our database are kept by our hosting provider for a short period and then replaced.</p>
+
+<h2 id="choices">6. Your choices and rights</h2>
+<ul>
+  <li><strong>Change your information</strong> in the app: your name, photo, interests, language, badge visibility and notifications.</li>
+  <li><strong>Turn off</strong> auto check-in, notifications or location permission at any time.</li>
+  <li><strong>Block</strong> a member so you no longer see their events.</li>
+  <li><strong>Delete your account</strong> in the app (Settings → Delete account). This removes your sign-in, profile, photo, interests, "I'm going" taps, attendance, badges and notification addresses. Upcoming events you posted are cancelled, and past ones show "Former neighbor" instead of your name. Problem reports you sent are kept without your name or email, so we can still fix the problem. If you can't use the app, see <a href="/delete-account">how to ask us to delete your account</a>.</li>
+  <li><strong>Get a copy, or ask us to correct or delete your information,</strong> by emailing <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a> from the email address on your account. We'll answer within 45 days. We won't treat you differently for asking.</li>
+</ul>
+<p>Depending on where you live, including Colorado, you may have legal rights to access, correct, delete or get a copy of your personal data, and to opt out of its sale or use for targeted advertising (we do neither). Email us to use them. If we turn down a request, you can appeal by replying to our answer.</p>
+
+<h2 id="children">7. Children</h2>
+<p>{{ app_name }} is not for children under {{ legal.minimum_age }}. We don't knowingly collect information from anyone under {{ legal.minimum_age }}. If you believe a child under {{ legal.minimum_age }} has an account, email us and we'll delete it.</p>
+
+<h2 id="security">8. Security</h2>
+<p>All connections to {{ app_name }} are encrypted (HTTPS). Passwords are stored hashed. Photos and screenshots are stored privately and shown only through short-lived links. Our team uses two-step sign-in. No system is perfectly secure, but if a breach affects your information, we'll tell you as the law requires.</p>
+
+<h2 id="changes">9. Changes to this policy</h2>
+<p>If we change this policy, we'll update the date at the top. If a change matters, such as a new kind of information or a new way we use it, we'll tell you in the app or by email before it takes effect.</p>
+
+<h2 id="contact">10. Contact us</h2>
+<p>{{ legal.operator }}<br>{{ legal.mailing_address }}<br><a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a></p>
+{% endblock %}

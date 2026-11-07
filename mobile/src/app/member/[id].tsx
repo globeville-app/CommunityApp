@@ -2,14 +2,16 @@
  * A neighbor's small member page, opened from an event's "Posted by": name,
  * neighborhood, member since, and their badges unless they chose Only me.
  * Never their My Impact numbers. Other neighborhoods get "not found".
- * Also "Block": their events disappear for this member, silently.
+ * Also "Block": their events disappear for this member, silently. And
+ * "Report": an offensive name or photo, or harassment, goes to the team
+ * (Apple's rule for apps where people post).
  */
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { ApiError, getMember, MemberPage, setBlocked } from "../../api";
+import { ApiError, getMember, MemberPage, reportMember, setBlocked } from "../../api";
 import { useAuth } from "../../auth";
 import { Badge } from "../../components/badges/Badge";
 import { shortDate } from "../../i18n/dates";
@@ -18,11 +20,14 @@ import { useLanguage } from "../../language";
 import {
   Avatar,
   BackButton,
+  Button,
   Caption,
   ConfirmDialog,
   ErrorMessage,
+  Field,
   GlassCard,
   Loading,
+  Notice,
   Screen,
   Section,
   Tag,
@@ -39,6 +44,10 @@ export default function Member() {
   const [member, setMember] = useState<MemberPage | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [confirmingBlock, setConfirmingBlock] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [reason, setReason] = useState("");
+  const [reported, setReported] = useState(false);
+  const [reportError, setReportError] = useState<ApiError | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,6 +79,18 @@ export default function Member() {
     }
   }
 
+  async function onReport() {
+    if (!token || !member) return;
+    setReportError(null);
+    try {
+      await reportMember(token, member.id, reason.trim());
+      setReported(true);
+      setReporting(false);
+    } catch (e) {
+      setReportError(e as ApiError);
+    }
+  }
+
   const neighborhood = member.alias ? `${member.alias} (${member.neighborhood.name})` : member.neighborhood.name;
   return (
     <Screen>
@@ -97,6 +118,19 @@ export default function Member() {
         </>
       ) : (
         <TextLink label={t("member.block", { name: member.display_name })} onPress={() => setConfirmingBlock(true)} />
+      )}
+      {member.is_own ? null : reported ? (
+        <Notice message={t("events.report_sent")} />
+      ) : reporting ? (
+        <GlassCard>
+          <Section>{t("member.report_title", { name: member.display_name })}</Section>
+          <Caption onGlass>{t("member.report_note", { name: member.display_name })}</Caption>
+          <Field label={t("events.report_reason_label")} value={reason} onChangeText={setReason} maxLength={200} />
+          <ErrorMessage message={errorMessage(t, reportError)} />
+          <Button title={t("events.report_send")} variant="secondary" onPress={onReport} disabled={!reason.trim()} />
+        </GlassCard>
+      ) : (
+        <TextLink label={t("member.report", { name: member.display_name })} onPress={() => setReporting(true)} />
       )}
       <ConfirmDialog
         visible={confirmingBlock}

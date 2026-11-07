@@ -14,6 +14,9 @@ export const API_BASE_URL: string = String(
 export const PRIVACY_URL: string = String(Constants.expoConfig?.extra?.privacyUrl ?? "");
 export const TERMS_URL: string = String(Constants.expoConfig?.extra?.termsUrl ?? "");
 
+/** Members must be at least this old (the "legal" section of shared/app_config.json). */
+export const MINIMUM_AGE: number = Number(Constants.expoConfig?.extra?.minimumAge ?? 13);
+
 /** The invite link on share cards, from shared/app_config.json. */
 export const INVITE_URL: string = String(Constants.expoConfig?.extra?.inviteUrl ?? "https://globeville.app");
 

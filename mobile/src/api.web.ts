@@ -60,6 +60,7 @@ export {
   logShare,
   markCelebrationsSeen,
   markCheckinOfferSeen,
+  reportMember,
   setBlocked,
   updateProfileSettings,
 } from "./demo/fakeBadges";

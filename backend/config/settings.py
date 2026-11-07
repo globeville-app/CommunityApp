@@ -315,6 +315,9 @@ APP_SCHEME = APP_NAME.lower()
 # Store pages, for the "Collect your badge" and landing pages.
 IOS_STORE_URL = _shared_config.get("ios_store_url", "")
 ANDROID_STORE_URL = _shared_config.get("android_store_url", "")
+# The privacy policy and terms (web/legal.py): who runs the app, how to reach
+# them, and the facts the documents depend on. Filled in by the owner.
+LEGAL = _shared_config.get("legal", {})
 
 # The oldest app version the server still works with, e.g. "1.2.0". Older
 # apps show "Please update" (GET /api/config). Empty = every version works.

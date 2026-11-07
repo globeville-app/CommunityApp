@@ -37,6 +37,7 @@ const shared = require("../shared/app_config.json") as {
   invite_url: string;
   ios_store_url: string;
   android_store_url: string;
+  legal: { minimum_age: number };
 };
 
 const appName = shared.app_name;
@@ -70,6 +71,8 @@ const config: ExpoConfig = {
     infoPlist: {
       // Lets the "Open in" sheet see whether these maps apps are installed.
       LSApplicationQueriesSchemes: ["comgooglemaps", "waze"],
+      // English and Spanish (the permission questions above, in `locales`).
+      CFBundleAllowMixedLocalizations: true,
     },
   },
   android: {
@@ -80,6 +83,17 @@ const config: ExpoConfig = {
     },
     predictiveBackGestureEnabled: false,
     package: APP_ID,
+    // Permissions libraries add that the app doesn't need. Google Play flags
+    // drawing over other apps, and limits broad photo and file access: the
+    // profile photo uses the system photo picker, which needs none of them.
+    blockedPermissions: [
+      "android.permission.SYSTEM_ALERT_WINDOW",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.READ_MEDIA_VIDEO",
+      "android.permission.READ_MEDIA_AUDIO",
+    ],
     versionCode: BUILD_NUMBER,
     intentFilters: [
       {
@@ -92,6 +106,19 @@ const config: ExpoConfig = {
         category: ["BROWSABLE", "DEFAULT"],
       },
     ],
+  },
+  // The phone's permission questions in Spanish, for iPhones set to Spanish
+  // (docs/LANGUAGE.md). English is set by the plugins below; keep both in step.
+  // Android writes its own permission questions in the phone's language.
+  locales: {
+    es: {
+      ios: {
+        CFBundleDisplayName: appName,
+        NSLocationWhenInUseUsageDescription: `${appName} registra tu llegada cuando llegas a los eventos a los que vas. Nunca vemos ni guardamos dónde estás.`,
+        NSLocationAlwaysAndWhenInUseUsageDescription: `${appName} registra tu llegada cuando llegas a los eventos a los que vas, incluso con la app cerrada. Nunca vemos ni guardamos dónde estás.`,
+        NSPhotoLibraryUsageDescription: `${appName} usa tus fotos para que puedas agregar una foto de perfil.`,
+      },
+    },
   },
   web: {
     favicon: "./assets/brand/favicon.png",
@@ -116,6 +143,9 @@ const config: ExpoConfig = {
         locationAlwaysAndWhenInUsePermission: `${appName} checks you in when you arrive at events you're going to, even when the app is closed. We never see or store where you are.`,
         isIosBackgroundLocationEnabled: true,
         isAndroidBackgroundLocationEnabled: true,
+        // Auto check-in uses geofencing only, which needs no location
+        // "foreground service" (and its Google Play declaration and video).
+        isAndroidForegroundServiceEnabled: false,
       },
     ],
     ["react-native-maps", { androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_ANDROID_KEY ?? "" }],
@@ -136,6 +166,8 @@ const config: ExpoConfig = {
     // Empty until the real pages exist; Settings then shows "Coming soon".
     privacyUrl: shared.privacy_url,
     termsUrl: shared.terms_url,
+    // Shown on Sign up ("you're 13 or older"), from the "legal" section.
+    minimumAge: shared.legal.minimum_age,
     // Shown on share cards and in the share message.
     inviteUrl: shared.invite_url,
     // The store pages, for the "Please update" screen. Empty until published.

@@ -46,6 +46,7 @@ def cleanup(now=None, dry_run=False):
     from events.models import Event, EventReport, Going, TranslationCache
     from notifications.models import PushToken, ScheduledNotification
     from organizations.models import OrganizationChangeRequest, OrganizationReport
+    from profiles.models import MemberReport
     from support.models import ProblemReport
 
     from .authentication import EXPIRES_AFTER
@@ -69,6 +70,7 @@ def cleanup(now=None, dry_run=False):
         "celebrations already seen": Celebration.objects.filter(seen_at__lt=now - timedelta(days=90)),
         "event reports": EventReport.objects.filter(created_at__lt=year_ago),
         "organization reports": OrganizationReport.objects.filter(created_at__lt=year_ago),
+        "member reports": MemberReport.objects.filter(created_at__lt=year_ago),
         "decided organization changes": OrganizationChangeRequest.objects.filter(decided_at__lt=year_ago),
         "problem reports": ProblemReport.objects.filter(created_at__lt=year_ago),
         # Guests' phone numbers (Milestone 5): 30 days after the last text

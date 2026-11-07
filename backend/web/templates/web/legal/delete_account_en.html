@@ -1,0 +1,20 @@
+{% extends "web/legal/base.html" %}
+{% block doc_title %}Delete your {{ app_name }} account{% endblock %}
+{% block doc %}
+<h2>In the app (fastest)</h2>
+<ol>
+  <li>Open {{ app_name }} and go to your profile.</li>
+  <li>Tap the gear icon to open Settings.</li>
+  <li>Tap <strong>Delete account</strong> and confirm.</li>
+</ol>
+<p>Your account is deleted right away.</p>
+
+<h2>Without the app</h2>
+<p>Email <a href="mailto:{{ legal.contact_email }}?subject=Delete%20my%20account">{{ legal.contact_email }}</a> from the email address on your account, with the subject "Delete my account". We'll delete it within 30 days and confirm by email. We may ask you to confirm the request so no one else can delete your account.</p>
+
+<h2>What is deleted</h2>
+<p>Your sign-in, profile, photo, interests, "I'm going" taps, attendance, badges, blocks and notification addresses. Upcoming events you posted are cancelled, and past events show "Former neighbor" instead of your name. Events you posted for an organization stay with the organization.</p>
+
+<h2>What is kept</h2>
+<p>Problem reports you sent are kept without your name or email for up to 1 year, so we can still fix the problem. Database backups that include your account are replaced within a short period. See our <a href="/privacy#keep">Privacy Policy</a> for details.</p>
+{% endblock %}

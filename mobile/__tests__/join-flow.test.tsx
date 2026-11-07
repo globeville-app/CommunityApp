@@ -4,6 +4,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
 import { act, fireEvent, screen, waitFor } from "expo-router/testing-library";
 
 import * as api from "../src/api";
@@ -100,6 +101,12 @@ describe("sign up and log in", () => {
 
     fireEvent.changeText(await screen.findByLabelText("Email"), " ana@example.com ");
     fireEvent.changeText(screen.getByLabelText("Password"), "a long pass phrase");
+    // Agreeing to the terms, with the minimum age, before the button.
+    expect(
+      screen.getByText("By creating an account, you confirm you're 13 or older and agree to the Terms of Use and Privacy Policy."),
+    ).toBeTruthy();
+    fireEvent.press(screen.getByRole("link", { name: "Terms of use" }));
+    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.app/terms");
     await pressAndSettle(screen.getByRole("button", { name: "Sign up" }));
 
     expect(await screen.findByText("Where's home?")).toBeTruthy();

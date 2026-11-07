@@ -272,6 +272,13 @@ export async function setBlocked(_token: string, id: number, blocked: boolean) {
   return { is_blocked: blocked };
 }
 
+/** The demo has no team to send reports to; it just says thanks. */
+export async function reportMember(_token: string, _id: number, reason: string) {
+  await pause(200);
+  if (!reason.trim()) throw new ApiError("reason_required", 400);
+  return { ok: true };
+}
+
 export async function getBlockedMembers(_token: string) {
   await pause(200);
   return { members: [...demoBlocked].map(([id, display_name]) => ({ id, display_name })) };

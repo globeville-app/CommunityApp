@@ -273,6 +273,11 @@ export function setBlocked(token: string, id: number, blocked: boolean) {
   return request<{ is_blocked: boolean }>(`/api/members/${id}/block`, { method: blocked ? "PUT" : "DELETE", token });
 }
 
+/** Report a neighbor (name, photo or behavior) to the team; they're never told. */
+export function reportMember(token: string, id: number, reason: string) {
+  return request<{ ok: boolean }>(`/api/members/${id}/report`, { method: "POST", token, json: { reason } });
+}
+
 export function getBlockedMembers(token: string) {
   return request<{ members: BlockedMember[] }>("/api/me/blocks", { token });
 }

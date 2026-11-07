@@ -71,3 +71,13 @@ it("never asks for the phone's contacts (Milestone 5: invites go through the sha
   const config = fs.readFileSync(path.join(__dirname, "..", "app.config.ts"), "utf8");
   expect(config).not.toMatch(/contacts/i);
 });
+
+it("the Android build asks only for what the app uses (Google Play policy)", () => {
+  const config = fs.readFileSync(path.join(__dirname, "..", "app.config.ts"), "utf8");
+  for (const permission of ["SYSTEM_ALERT_WINDOW", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "READ_MEDIA_IMAGES"]) {
+    expect(config).toContain(`"android.permission.${permission}"`);
+  }
+  expect(config).toMatch(/blockedPermissions/);
+  // Geofencing needs no location foreground service (and its Play declaration).
+  expect(config).toMatch(/isAndroidForegroundServiceEnabled: false/);
+});

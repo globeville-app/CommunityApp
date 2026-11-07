@@ -1,0 +1,20 @@
+{% extends "web/legal/base.html" %}
+{% block doc_title %}Eliminar tu cuenta de {{ app_name }}{% endblock %}
+{% block doc %}
+<h2>En la app (lo más rápido)</h2>
+<ol>
+  <li>Abre {{ app_name }} y ve a tu perfil.</li>
+  <li>Toca el ícono del engrane para abrir Ajustes.</li>
+  <li>Toca <strong>Eliminar cuenta</strong> y confirma.</li>
+</ol>
+<p>Tu cuenta se elimina de inmediato.</p>
+
+<h2>Sin la app</h2>
+<p>Escribe a <a href="mailto:{{ legal.contact_email }}?subject=Eliminar%20mi%20cuenta">{{ legal.contact_email }}</a> desde el correo de tu cuenta, con el asunto "Eliminar mi cuenta". La eliminaremos en un plazo de 30 días y te lo confirmaremos por correo. Puede que te pidamos confirmar la solicitud, para que nadie más pueda eliminar tu cuenta.</p>
+
+<h2>Qué se borra</h2>
+<p>Tu inicio de sesión, perfil, foto, intereses, tus "Voy", tu asistencia, tus insignias, tus bloqueos y tus direcciones de notificaciones. Los eventos próximos que publicaste se cancelan y los pasados muestran "Exvecino" en lugar de tu nombre. Los eventos que publicaste por una organización se quedan con la organización.</p>
+
+<h2>Qué se guarda</h2>
+<p>Los reportes de problemas que enviaste se guardan sin tu nombre ni tu correo hasta 1 año, para poder arreglar el problema. Las copias de seguridad de la base de datos que incluyen tu cuenta se reemplazan en poco tiempo. Mira nuestra <a href="/privacy#keep">Política de privacidad</a> para más detalles.</p>
+{% endblock %}

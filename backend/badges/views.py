@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from config.errors import ApiError
 from events.timing import event_end
 from events.views import get_event, member_profile
-from profiles.models import Block, Profile
+from profiles.models import Block, MemberReport, Profile
 
 from . import config, engine
 from .models import Attendance, BadgeState, Celebration, Keepsake, ShareLog
@@ -159,6 +159,25 @@ class BlockView(APIView):
         # Works even if they've since moved neighborhoods.
         Block.objects.filter(blocker=request.user, blocked__profile__pk=member_id).delete()
         return Response({"is_blocked": False})
+
+
+class MemberReportView(APIView):
+    """Report a neighbor (name, photo or behavior) to the team. They're never told who reported them."""
+
+    def post(self, request, member_id):
+        me = member_profile(request)
+        member = Profile.objects.filter(pk=member_id, neighborhood_id=me.neighborhood_id).first()
+        if member is None:
+            raise ApiError("member_not_found", status_code=status.HTTP_404_NOT_FOUND)
+        if member.user_id == request.user.id:
+            raise ApiError("cant_report_yourself")
+        reason = str(request.data.get("reason") or "").strip()
+        if not reason:
+            raise ApiError("reason_required")
+        if len(reason) > MemberReport._meta.get_field("reason").max_length:
+            raise ApiError("reason_too_long")
+        MemberReport.objects.create(reported=member.user, reporter=request.user, reason=reason)
+        return Response({"ok": True}, status=status.HTTP_201_CREATED)
 
 
 class MyBlocksView(APIView):

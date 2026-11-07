@@ -66,3 +66,24 @@ it("lists blocked members in Settings and unblocks them", async () => {
   expect(mocked.setBlocked).toHaveBeenCalledWith("tok-123", 52, false);
   expect(await screen.findByText("You haven't blocked anyone.")).toBeTruthy();
 });
+
+it("reports a neighbor to the team from their page", async () => {
+  mocked.getMember.mockResolvedValue(BEN);
+  mocked.reportMember.mockResolvedValue({ ok: true });
+  renderApp("/member/52");
+  await pressAndSettle(await screen.findByRole("link", { name: "Report Ben R." }));
+  expect(screen.getByText(/Ben R. won't know who reported them/)).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Send report" })).toBeDisabled();
+  fireEvent.changeText(screen.getByLabelText("What's wrong?"), "  Rude photo ");
+  await pressAndSettle(screen.getByRole("button", { name: "Send report" }));
+  expect(mocked.reportMember).toHaveBeenCalledWith("tok-123", 52, "Rude photo");
+  expect(screen.getByText("Thanks. We'll take a look.")).toBeTruthy();
+});
+
+it("no Report or Block on your own page", async () => {
+  mocked.getMember.mockResolvedValue({ ...BEN, is_own: true });
+  renderApp("/member/52");
+  expect(await screen.findByText("Ben R.")).toBeTruthy();
+  expect(screen.queryByRole("link", { name: "Report Ben R." })).toBeNull();
+  expect(screen.queryByRole("link", { name: "Block Ben R." })).toBeNull();
+});

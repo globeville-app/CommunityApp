@@ -87,3 +87,21 @@ class Block(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["blocker", "blocked"], name="one_block_per_pair")]
+
+
+class MemberReport(models.Model):
+    """
+    "Report" on a member's page: an offensive name or photo, harassment
+    (Apple's rule for apps where people post, alongside Block). The team
+    reviews it in Django admin. Deleted after a year (accounts/retention.py).
+    """
+
+    reported = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reports_about")
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="reports_made"
+    )
+    reason = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

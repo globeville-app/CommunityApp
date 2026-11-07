@@ -17,6 +17,7 @@ urlpatterns = [
     path("members/<int:member_id>", views.MemberView.as_view(), name="member"),
     path("members/<int:member_id>/badges", views.MemberBadgesView.as_view(), name="member-badges"),
     path("members/<int:member_id>/block", views.BlockView.as_view(), name="member-block"),
+    path("members/<int:member_id>/report", views.MemberReportView.as_view(), name="member-report"),
     path("me/blocks", views.MyBlocksView.as_view(), name="my-blocks"),
     path("events/<int:event_id>/collect", views.CollectView.as_view(), name="event-collect"),
     path("events/<int:event_id>/decline", views.DeclineView.as_view(), name="event-decline"),

@@ -36,7 +36,8 @@
     "verify_button": "Confirm",
     "verify_resend": "Send a new code",
     "verify_resent": "We sent a new code.",
-    "verify_other_email": "Use a different email"
+    "verify_other_email": "Use a different email",
+    "agreement": "By creating an account, you confirm you're {{age}} or older and agree to the Terms of Use and Privacy Policy."
   },
   "start": {
     "error_title": "Hmm.",
@@ -182,7 +183,8 @@
     "claim_not_found": "That code isn't right. Check it and try again.",
     "claim_used": "That badge was already collected.",
     "claim_expired": "That code has expired. Codes last 7 days after the event.",
-    "guest_not_found": "That guest isn't on the list anymore."
+    "guest_not_found": "That guest isn't on the list anymore.",
+    "cant_report_yourself": "You can't report yourself."
   },
   "demo": {
     "banner_label": "Demo",
@@ -566,7 +568,10 @@
     "block": "Block {{name}}",
     "unblock": "Unblock {{name}}",
     "block_confirm": "Block {{name}}? You won't see their events. They won't be told.",
-    "blocked_note": "You've blocked {{name}} and don't see their events."
+    "blocked_note": "You've blocked {{name}} and don't see their events.",
+    "report": "Report {{name}}",
+    "report_title": "Report {{name}}",
+    "report_note": "For example, an offensive name or photo, or harassment. Our team will review it. {{name}} won't know who reported them."
   },
   "impact": {
     "button": "My Impact",
@@ -592,7 +597,7 @@
   },
   "checkin": {
     "title": "Check in automatically?",
-    "what_it_does": "Your phone notices when you arrive at events you're going to, and your badge grows on its own.",
+    "what_it_does": "Your phone notices when you arrive at events you're going to, even when the app is closed, and your badge grows on its own.",
     "what_it_never_does": "We never see or store where you are.",
     "permission_note": "Your phone will ask to use your location. Choose \"Always\" so it works when the app is closed. You can turn this off in Settings any time.",
     "turn_on": "Turn on",

@@ -36,7 +36,8 @@
     "verify_button": "Confirmar",
     "verify_resend": "Enviar un código nuevo",
     "verify_resent": "Te enviamos un código nuevo.",
-    "verify_other_email": "Usar otro correo"
+    "verify_other_email": "Usar otro correo",
+    "agreement": "Al crear una cuenta, confirmas que tienes {{age}} años o más y aceptas los Términos de uso y la Política de privacidad."
   },
   "start": {
     "error_title": "Mmm.",
@@ -182,7 +183,8 @@
     "claim_not_found": "Ese código no es correcto. Revísalo e inténtalo de nuevo.",
     "claim_used": "Esa insignia ya fue recogida.",
     "claim_expired": "Ese código ha vencido. Los códigos duran 7 días después del evento.",
-    "guest_not_found": "Esa persona ya no está en la lista."
+    "guest_not_found": "Esa persona ya no está en la lista.",
+    "cant_report_yourself": "No puedes reportarte a ti mismo."
   },
   "demo": {
     "banner_label": "Demo",
@@ -566,7 +568,10 @@
     "block": "Bloquear a {{name}}",
     "unblock": "Desbloquear a {{name}}",
     "block_confirm": "¿Bloquear a {{name}}? No verás sus eventos. No se le avisará.",
-    "blocked_note": "Bloqueaste a {{name}} y no ves sus eventos."
+    "blocked_note": "Bloqueaste a {{name}} y no ves sus eventos.",
+    "report": "Reportar a {{name}}",
+    "report_title": "Reportar a {{name}}",
+    "report_note": "Por ejemplo, un nombre o una foto ofensivos, o acoso. Nuestro equipo lo revisará. {{name}} no sabrá quién lo reportó."
   },
   "impact": {
     "button": "Mi impacto",
@@ -592,7 +597,7 @@
   },
   "checkin": {
     "title": "¿Registrarte automáticamente?",
-    "what_it_does": "Tu teléfono nota cuando llegas a los eventos a los que vas, y tu insignia crece sola.",
+    "what_it_does": "Tu teléfono nota cuando llegas a los eventos a los que vas, incluso con la app cerrada, y tu insignia crece sola.",
     "what_it_never_does": "Nunca vemos ni guardamos dónde estás.",
     "permission_note": "Tu teléfono te pedirá usar tu ubicación. Elige \"Siempre\" para que funcione con la app cerrada. Puedes apagarlo en Ajustes cuando quieras.",
     "turn_on": "Activar",
