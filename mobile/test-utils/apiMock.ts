@@ -117,8 +117,8 @@ export function useDefaultReplies(mocked: jest.Mocked<typeof Api>) {
   });
   mocked.getInvite.mockImplementation(async (_token, id) => ({
     code: "Abc234defG",
-    url: "https://globeville.us/e/Abc234defG",
-    message: `Come to the event ${id}! RSVP here: https://globeville.us/e/Abc234defG`,
+    url: "https://globeville.org/e/Abc234defG",
+    message: `Come to the event ${id}! RSVP here: https://globeville.org/e/Abc234defG`,
   }));
   mocked.logInviteShare.mockResolvedValue(undefined);
   mocked.updateProfileSettings.mockImplementation(async (_token, settings) => ({ ...HIGHLAND_PROFILE, ...settings }));

@@ -18,7 +18,7 @@ export const TERMS_URL: string = String(Constants.expoConfig?.extra?.termsUrl ??
 export const MINIMUM_AGE: number = Number(Constants.expoConfig?.extra?.minimumAge ?? 13);
 
 /** The invite link on share cards, from shared/app_config.json. */
-export const INVITE_URL: string = String(Constants.expoConfig?.extra?.inviteUrl ?? "https://globeville.us");
+export const INVITE_URL: string = String(Constants.expoConfig?.extra?.inviteUrl ?? "https://globeville.org");
 
 /** This phone's store page, for "Please update". "" until the app is published. */
 export const STORE_URL: string = String(

@@ -510,9 +510,9 @@ and `mobile/eas.json` has the three app build profiles. Secrets only ever go
 into the DigitalOcean dashboard, never into this repository.
 
 ### 1. Accounts and the domain
-1. Buy `globeville.us` (any registrar) and create accounts at DigitalOcean,
+1. Buy `globeville.org` (any registrar) and create accounts at DigitalOcean,
    Postmark, Expo, Apple Developer and Google Play.
-2. In Postmark, add the sender `hello@globeville.us` and the DNS records it
+2. In Postmark, add the sender `hello@globeville.org` and the DNS records it
    asks for (DKIM and Return-Path), so emails aren't marked as spam.
 
 ### 2. Storage for photos (Spaces)
@@ -528,7 +528,7 @@ into the DigitalOcean dashboard, never into this repository.
 | Setting | What to put |
 | --- | --- |
 | `DJANGO_SECRET_KEY` | 60+ random characters (a password manager can make one). The same value in the `migrate` job. |
-| `ADMIN_URL` | A path only you know, ending in `/`, e.g. `team-7f3k/`. Admin then lives at `https://api.globeville.us/team-7f3k/`. |
+| `ADMIN_URL` | A path only you know, ending in `/`, e.g. `team-7f3k/`. Admin then lives at `https://api.globeville.org/team-7f3k/`. |
 | `SPACES_BUCKET`, `SPACES_KEY`, `SPACES_SECRET` | From step 2 (`SPACES_ENDPOINT` and `SPACES_REGION` match the bucket's region). |
 | `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Postmark → Server → API Tokens: the server token, as both. |
 | `PROBLEM_REPORT_EMAILS` | Who gets problem reports, comma-separated. |
@@ -538,9 +538,9 @@ into the DigitalOcean dashboard, never into this repository.
 3. Deploy. Every push to `main` deploys again; before each deploy the
    `migrate` job updates the database, the rate-limit table and the
    neighborhood map.
-4. Settings → Domains: add `api.globeville.us` and create the DNS record it
+4. Settings → Domains: add `api.globeville.org` and create the DNS record it
    shows. HTTPS certificates are automatic.
-5. Check from a phone's browser: `https://api.globeville.us/api/config`
+5. Check from a phone's browser: `https://api.globeville.org/api/config`
    shows the app name and categories.
 
 The server refuses to start if `DJANGO_SECRET_KEY` is missing, so a forgotten
@@ -557,7 +557,7 @@ python manage.py add_admin_2fa <their username>
 ```
 
 Scan the QR code it prints with the authenticator app. Then sign in at
-`https://api.globeville.us/<ADMIN_URL>`. The owner stats page is linked at the
+`https://api.globeville.org/<ADMIN_URL>`. The owner stats page is linked at the
 top of the admin home page.
 
 **Check once after the first deploy: rate limits see real addresses.** At
@@ -590,7 +590,7 @@ nothing there touches real members.
 2. DigitalOcean → Apps → Create App → "Import from app spec" →
    `.do/staging.yaml`. Fill in every `CHANGE_ME` with **new** values (never
    production's), and a separate Spaces bucket, e.g. `globeville-staging`.
-3. Add the DNS record for `api-staging.globeville.us`.
+3. Add the DNS record for `api-staging.globeville.org`.
 4. Build the app for it: `npx eas build --profile staging`. That build talks
    to staging only.
 
@@ -600,7 +600,7 @@ want to try push on your own phone. Switch the staging app off when you
 don't need it, to save money.
 
 Staging never sends real texts (`SMS_LIVE=0`). Its invite links point at
-`https://api-staging.globeville.us/e/...`; to RSVP there as a guest, read
+`https://api-staging.globeville.org/e/...`; to RSVP there as a guest, read
 the 6-digit code from the staging app's Runtime Logs.
 
 ### 6. App builds (EAS)
@@ -609,8 +609,8 @@ From `mobile/`, after `npx eas login`:
 | Profile | Points at | Used for | Command |
 | --- | --- | --- | --- |
 | `development` | your computer's backend (`mobile/.env`) | testing auto check-in (Milestone 3), which Expo Go can't do | `npx eas build --profile development --platform android` |
-| `preview` | `https://api.globeville.us` | Phase A beta | `npx eas build --profile preview --platform all`, then `npx eas submit --profile preview` |
-| `production` | `https://api.globeville.us` | the stores (Phase B) | `npx eas build --profile production --platform all`, then `npx eas submit` |
+| `preview` | `https://api.globeville.org` | Phase A beta | `npx eas build --profile preview --platform all`, then `npx eas submit --profile preview` |
+| `production` | `https://api.globeville.org` | the stores (Phase B) | `npx eas build --profile production --platform all`, then `npx eas submit` |
 
 - The app's store ID is `app.globeville` (in `mobile/app.config.ts`). It can
   never change once the app is in a store.
@@ -695,7 +695,7 @@ Decisions made while building (approved defaults):
   permission text (`expo-location` in `mobile/app.config.ts`), in both languages.
 - **Spanish review:** badge names and descriptions, stage names, and the new
   screens (`badges`, `impact`, `checkin`, `share`, `celebrate`, `maps` in `es.json`).
-- **Invite link:** `https://globeville.us` (`invite_url` in
+- **Invite link:** `https://globeville.org` (`invite_url` in
   `shared/app_config.json`) should exist before Phase B.
 
 Known limits:
@@ -711,12 +711,12 @@ Known limits:
 
 ## Invite links and guest texts (Milestone 5)
 
-Every event has an invite link, `https://globeville.us/e/{code}`. A host
+Every event has an invite link, `https://globeville.org/e/{code}`. A host
 sends it from their own phone (the app never sees their contacts). Someone
 without the app opens a web page, RSVPs with a first name and a US mobile
 number confirmed by a 6-digit text, and later collects their badge if they
 join. Django serves those pages too, on the same DigitalOcean app
-(`globeville.us` is a second domain in `.do/app.yaml`).
+(`globeville.org` is a second domain in `.do/app.yaml`).
 
 **It ships in two parts, with one switch between them:**
 
@@ -743,7 +743,7 @@ only after the owner checklist below.
 
 | Setting | What it is | Example |
 | --- | --- | --- |
-| `PUBLIC_BASE_URL` | Where invite links point | `https://globeville.us` |
+| `PUBLIC_BASE_URL` | Where invite links point | `https://globeville.org` |
 | `SMS_LIVE` | `1` sends real texts and opens the web RSVP (5.2); anything else logs them instead | `0` |
 | `GUEST_RSVP_WITHOUT_TEXTS` | Staging only: `1` opens the web RSVP with texts off (codes in the log) | unset |
 | `SMS_PROVIDER` | The texting company | `twilio` (the only one built) |
@@ -752,12 +752,12 @@ only after the owner checklist below.
 | `SMS_MONTHLY_BUDGET_USD` | Monthly cap. At 80% an email goes out; at 100% reminders and collect texts pause until next month (codes and cancellations still send) | `50` |
 | `SMS_COST_PER_TEXT_USD` | Planning cost per text, for the budget | `0.01` |
 | `OWNER_ALERT_EMAILS` | Who gets the 80% budget email (comma-separated) | `you@example.com` |
-| `SUPPORT_EMAIL` | Shown in the HELP reply and on the web pages | `hello@globeville.us` |
+| `SUPPORT_EMAIL` | Shown in the HELP reply and on the web pages | `hello@globeville.org` |
 | `APPLE_TEAM_ID` | Apple Developer → Membership, for iPhone app links | `AB12CD34EF` |
 | `ANDROID_CERT_SHA256` | `npx eas credentials` → Android → SHA-256 fingerprint, for Android app links | `AB:CD:…` |
 
 In Twilio, set the Messaging Service's incoming-message webhook to
-`https://globeville.us/webhooks/sms` (POST). Replies of STOP, START and HELP
+`https://globeville.org/webhooks/sms` (POST). Replies of STOP, START and HELP
 (and the Spanish ALTO, PARAR, AYUDA) are handled there; a request without
 Twilio's signature is refused.
 
@@ -798,7 +798,7 @@ texts (5.2).
   the privacy policy (it needs a section on guest phone numbers).
 - **Monthly texting budget** (`SMS_MONTHLY_BUDGET_USD`, $50 is set).
 - **Support email** (`SUPPORT_EMAIL`) and **alert emails** (`OWNER_ALERT_EMAILS`).
-- **`globeville.us` DNS:** point it at the DigitalOcean app (it's in
+- **`globeville.org` DNS:** point it at the DigitalOcean app (it's in
   `.do/app.yaml`). Then the Apple Team ID and the Android fingerprint
   (above), and **a new app build**, so links open the app.
 - **Store links:** `ios_store_url` and `android_store_url` in

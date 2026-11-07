@@ -9,7 +9,7 @@
  *
  * The backend address comes from API_BASE_URL: mobile/.env on your computer,
  * or the build profile in eas.json for real builds (production is
- * https://api.globeville.us). Screens read it through src/config.ts.
+ * https://api.globeville.org). Screens read it through src/config.ts.
  *
  * Milestone 3 (maps and auto check-in):
  *   - GOOGLE_MAPS_ANDROID_KEY: the Google Maps key for Android's maps. The
@@ -22,7 +22,7 @@
  *   - Android push also needs a Firebase project, set up in the Expo account
  *     (README, "Push notifications").
  *
- * Milestone 5 (invite links): globeville.us/e/... and /c/... open the app
+ * Milestone 5 (invite links): globeville.org/e/... and /c/... open the app
  * when it's installed (iOS Universal Links, Android App Links). The domain
  * is the invite_url in shared/app_config.json. The server's
  * /.well-known files need APPLE_TEAM_ID and ANDROID_CERT_SHA256 (README).

@@ -16,7 +16,7 @@
       "autoIncrement": true,
       "env": {
         "APP_ENV": "staging",
-        "API_BASE_URL": "https://api-staging.globeville.us"
+        "API_BASE_URL": "https://api-staging.globeville.org"
       }
     },
     "preview": {
@@ -24,14 +24,14 @@
       "autoIncrement": true,
       "env": {
         "APP_ENV": "preview",
-        "API_BASE_URL": "https://api.globeville.us"
+        "API_BASE_URL": "https://api.globeville.org"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "APP_ENV": "production",
-        "API_BASE_URL": "https://api.globeville.us"
+        "API_BASE_URL": "https://api.globeville.org"
       }
     }
   },

@@ -86,7 +86,7 @@ describe("Invite people", () => {
     renderApp("/invite/42");
     await pressAndSettle(await screen.findByRole("button", { name: "Share" }));
     expect(share).toHaveBeenCalledWith({
-      message: "Come to the event 42! RSVP here: https://globeville.us/e/Abc234defG",
+      message: "Come to the event 42! RSVP here: https://globeville.org/e/Abc234defG",
     });
     expect(mocked.logInviteShare).toHaveBeenCalledWith("tok-123", 42);
   });
@@ -94,15 +94,15 @@ describe("Invite people", () => {
   it("Copy link copies just the link", async () => {
     renderApp("/invite/42");
     await pressAndSettle(await screen.findByRole("button", { name: "Copy link" }));
-    expect(Clipboard.setStringAsync).toHaveBeenCalledWith("https://globeville.us/e/Abc234defG");
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith("https://globeville.org/e/Abc234defG");
     expect(screen.getByRole("button", { name: "Link copied" })).toBeTruthy();
   });
 
   it("Reset link asks first, then shows the new link", async () => {
     mocked.resetInvite.mockResolvedValue({
       code: "NewCode234",
-      url: "https://globeville.us/e/NewCode234",
-      message: "Come! https://globeville.us/e/NewCode234",
+      url: "https://globeville.org/e/NewCode234",
+      message: "Come! https://globeville.org/e/NewCode234",
     });
     renderApp("/invite/42");
     await pressAndSettle(await screen.findByRole("link", { name: "Reset link" }));
@@ -110,7 +110,7 @@ describe("Invite people", () => {
     const confirm = screen.getAllByRole("button", { name: "Reset link" });
     await pressAndSettle(confirm[confirm.length - 1]);
     expect(mocked.resetInvite).toHaveBeenCalledWith("tok-123", 42);
-    expect(await screen.findByText("Come! https://globeville.us/e/NewCode234")).toBeTruthy();
+    expect(await screen.findByText("Come! https://globeville.org/e/NewCode234")).toBeTruthy();
     expect(screen.getByText("Done. Here's the new link.")).toBeTruthy();
   });
 });

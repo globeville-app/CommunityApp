@@ -12,7 +12,7 @@ from events.tests.helpers import EventTestCase
 from events.timing import event_end
 
 
-@override_settings(PUBLIC_BASE_URL="https://globeville.us")
+@override_settings(PUBLIC_BASE_URL="https://globeville.org")
 class InviteLinkTests(EventTestCase):
     def setUp(self):
         super().setUp()
@@ -25,7 +25,7 @@ class InviteLinkTests(EventTestCase):
         self.assertTrue(set(link.code) <= set(INVITE_ALPHABET))
         self.assertFalse(set(link.code) & set("0Oo1lI"))
         invite = self.client.get(f"/api/events/{self.event_id}/invite").data
-        self.assertEqual(invite["url"], f"https://globeville.us/e/{link.code}")
+        self.assertEqual(invite["url"], f"https://globeville.org/e/{link.code}")
         # Ana's account is in Spanish.
         self.assertTrue(invite["message"].startswith("¡Ven a Block party el "))
         self.assertTrue(invite["message"].endswith(f"Confirma aquí: {invite['url']}"))

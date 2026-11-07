@@ -70,9 +70,9 @@ if DEBUG:
 else:
     if SECRET_KEY == DEV_SECRET_KEY:
         raise ImproperlyConfigured("Set DJANGO_SECRET_KEY in the environment before running in production.")
-    # e.g. "api.globeville.us"
+    # e.g. "api.globeville.org"
     ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()]
-    # e.g. "https://api.globeville.us" (the admin's login form needs it)
+    # e.g. "https://api.globeville.org" (the admin's login form needs it)
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
     # App Platform handles HTTPS in front of Django and says so in this header.
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -278,7 +278,7 @@ REST_FRAMEWORK = {
 
 
 # Where invite links and the guest web pages live (Milestone 5), e.g.
-# https://globeville.us/e/Ab3dEf7hJk. No trailing slash.
+# https://globeville.org/e/Ab3dEf7hJk. No trailing slash.
 PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
 
 # --- Texting guests (Milestone 5) -------------------------------------------
@@ -306,7 +306,7 @@ OWNER_ALERT_EMAILS = [
 # Shown in the HELP reply and on the guest pages.
 SUPPORT_EMAIL = os.environ.get("SUPPORT_EMAIL", "")
 
-# Deep links (Milestone 5): the files that let globeville.us/e/... open the app.
+# Deep links (Milestone 5): the files that let globeville.org/e/... open the app.
 APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")
 ANDROID_CERT_SHA256 = os.environ.get("ANDROID_CERT_SHA256", "")
 APP_BUNDLE_ID = "app." + APP_NAME.lower()  # mobile/app.config.ts APP_ID; set once, never changed

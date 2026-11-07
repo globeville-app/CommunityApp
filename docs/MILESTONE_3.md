@@ -355,8 +355,8 @@ If anything here conflicts with `BADGES.md` or an earlier milestone, ask rather 
 ## Open items for the owner
 
 - **Android maps key:** provide a Google Maps API key for Android maps (free at this scale).
-- **Invite link:** `invite_url` is `https://globeville.us`, a simple page with both store links. The owner sets it up before Phase B.
-- **Link preview line** for `globeville.us` (currently "globeville: your neighborhood, together"). This is a placeholder to iterate on; it's set on the landing page, not in the app.
+- **Invite link:** `invite_url` is `https://globeville.org`, a simple page with both store links. The owner sets it up before Phase B.
+- **Link preview line** for `globeville.org` (currently "globeville: your neighborhood, together"). This is a placeholder to iterate on; it's set on the landing page, not in the app.
 - **Location wording:** approve the auto check-in explanation and permission text in both languages before the public launch.
 - **Spanish review:** badge names and descriptions, stage names, and the new screens.
 - **Grove timing for renters:** still benched with alumni (`BACKLOG.md`).

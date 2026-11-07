@@ -41,7 +41,7 @@ The badge step is Globeville's own. Partiful has no badges, so this is what turn
 
 ## Done when
 
-1. **Every event has an invite link** at `https://globeville.us/e/{code}`.
+1. **Every event has an invite link** at `https://globeville.org/e/{code}`.
 2. **After posting, the host lands on "Invite people."** It has the link, a ready-to-send message in their language, and the phone's share sheet. Event detail always has an **Invite** button for the host.
 3. **Anyone with the link can view the event in a phone browser** with no app and no account. The page is in English or Spanish, with a switch.
 4. **Guests RSVP from the page** with a first name and a US mobile number confirmed by a texted code. They agree to event texts, and can optionally agree to a "collect your badge" text.
@@ -139,7 +139,7 @@ The badge step is Globeville's own. Partiful has no badges, so this is what turn
 
 | Topic | Decision |
 |---|---|
-| Setup | iOS Universal Links and Android App Links for `globeville.us/e/*` and `globeville.us/c/*`. In the Expo config: `ios.associatedDomains: ["applinks:globeville.us"]`, plus an Android `intentFilters` entry with `autoVerify: true`. Django serves `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json`. They need the Apple Team ID and the Android signing certificate's SHA-256 fingerprint (from `eas credentials`), which are environment settings. A new app build is required. |
+| Setup | iOS Universal Links and Android App Links for `globeville.org/e/*` and `globeville.org/c/*`. In the Expo config: `ios.associatedDomains: ["applinks:globeville.org"]`, plus an Android `intentFilters` entry with `autoVerify: true`. Django serves `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json`. They need the Apple Team ID and the Android signing certificate's SHA-256 fingerprint (from `eas credentials`), which are environment settings. A new app build is required. |
 | In the app | `/e/{code}` opens the event (through `/api/invites/{code}`). `/c/{token}` saves the claim token and starts the claim (after signup if needed). |
 
 ## Data model (backend)
@@ -329,7 +329,7 @@ Run the tests after each step. Commit after each green step with a clear message
 - `SUPPORT_EMAIL`
 - `APPLE_TEAM_ID`
 - `ANDROID_CERT_SHA256`
-- `PUBLIC_BASE_URL` (`https://globeville.us`)
+- `PUBLIC_BASE_URL` (`https://globeville.org`)
 
 If anything here conflicts with an earlier milestone, ask rather than guess.
 
@@ -338,6 +338,6 @@ If anything here conflicts with an earlier milestone, ask rather than guess.
 - **Text provider:** choose one (Twilio or similar) and complete **US carrier registration for business texting (A2P 10DLC)** before any real text goes out. Registration can take days to weeks. Confirm current prices. Roughly a cent per text plus monthly fees is a planning figure, not a quote.
 - **Legal review:** have someone qualified review the consent wording, the texts and the privacy policy before launch. Texting rules vary by state.
 - **Monthly texting budget:** pick the starting number (for example, $50).
-- **Domain and app IDs:** `globeville.us` must be live. Provide the Apple Team ID and run `eas credentials` for the Android fingerprint.
+- **Domain and app IDs:** `globeville.org` must be live. Provide the Apple Team ID and run `eas credentials` for the Android fingerprint.
 - **Support email** for the HELP reply.
 - **Launch timing:** decide whether this ships before the public launch (it's the growth engine) or right after.
