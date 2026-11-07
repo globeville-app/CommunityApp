@@ -21,7 +21,7 @@ if settings.ADMIN_REQUIRE_2FA:
     admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
-    # Milestone 5: the guest web pages at globeville.app, and texting replies.
+    # Milestone 5: the guest web pages at globeville.us, and texting replies.
     path("", web_views.landing, name="landing"),
     path("e/<str:code>", web_views.event_page, name="web-event"),
     path("e/<str:code>/rsvp", web_views.rsvp_start, name="web-rsvp"),

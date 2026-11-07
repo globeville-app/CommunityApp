@@ -38,13 +38,13 @@ services:
       - key: DJANGO_SECRET_KEY
         type: SECRET
         value: CHANGE_ME
-      # globeville.app serves the invite-link pages (Milestone 5).
+      # globeville.us serves the invite-link pages (Milestone 5).
       - key: ALLOWED_HOSTS
-        value: api.globeville.app,globeville.app
+        value: api.globeville.us,globeville.us
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://api.globeville.app,https://globeville.app
+        value: https://api.globeville.us,https://globeville.us
       - key: PUBLIC_BASE_URL
-        value: https://globeville.app
+        value: https://globeville.us
       - key: ADMIN_URL
         type: SECRET
         value: CHANGE_ME/
@@ -80,7 +80,7 @@ services:
         type: SECRET
         value: CHANGE_ME
       - key: DEFAULT_FROM_EMAIL
-        value: globeville <hello@globeville.app>
+        value: globeville <hello@globeville.us>
       - key: PROBLEM_REPORT_EMAILS
         type: SECRET
         value: CHANGE_ME
@@ -120,10 +120,10 @@ services:
         type: SECRET
         value: CHANGE_ME
     domains:
-      - domain: api.globeville.app
+      - domain: api.globeville.us
         type: PRIMARY
       # The invite-link pages and the deep-link files (Milestone 5).
-      - domain: globeville.app
+      - domain: globeville.us
         type: ALIAS
 
 jobs:
@@ -145,7 +145,7 @@ jobs:
         type: SECRET
         value: CHANGE_ME
       - key: ALLOWED_HOSTS
-        value: api.globeville.app
+        value: api.globeville.us
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}
@@ -172,7 +172,7 @@ jobs:
         type: SECRET
         value: CHANGE_ME
       - key: ALLOWED_HOSTS
-        value: api.globeville.app
+        value: api.globeville.us
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}
@@ -182,7 +182,7 @@ jobs:
       # It also sends guest texts (Milestone 5), so it needs the same
       # texting and email settings as the web service.
       - key: PUBLIC_BASE_URL
-        value: https://globeville.app
+        value: https://globeville.us
       - key: SMS_LIVE
         value: "0"
       - key: TWILIO_ACCOUNT_SID
@@ -212,7 +212,7 @@ jobs:
         type: SECRET
         value: CHANGE_ME
       - key: DEFAULT_FROM_EMAIL
-        value: globeville <hello@globeville.app>
+        value: globeville <hello@globeville.us>
 
   # Once a day: delete what has done its job (backend/accounts/retention.py
   # lists every rule, e.g. problem reports after a year).
@@ -234,7 +234,7 @@ jobs:
         type: SECRET
         value: CHANGE_ME
       - key: ALLOWED_HOSTS
-        value: api.globeville.app
+        value: api.globeville.us
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}

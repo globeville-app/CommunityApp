@@ -277,7 +277,7 @@ def landing(request):
 
 
 def apple_app_site_association(request):
-    """Lets iPhones open globeville.app/e/... and /c/... links straight in the app."""
+    """Lets iPhones open globeville.us/e/... and /c/... links straight in the app."""
     app_id = f"{settings.APPLE_TEAM_ID}.{settings.APP_BUNDLE_ID}"
     data = {
         "applinks": {

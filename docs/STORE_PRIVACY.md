@@ -11,9 +11,9 @@ bottom.
 
 | Field | Value |
 | --- | --- |
-| Privacy policy URL (both stores) | `https://globeville.app/privacy` |
-| Terms of use / EULA (Apple, optional field) | `https://globeville.app/terms` |
-| Account deletion URL (Google, required) | `https://globeville.app/delete-account` |
+| Privacy policy URL (both stores) | `https://globeville.us/privacy` |
+| Terms of use / EULA (Apple, optional field) | `https://globeville.us/terms` |
+| Account deletion URL (Google, required) | `https://globeville.us/delete-account` |
 | Support URL / email | the `contact_email` in `shared/app_config.json` |
 
 ## Data collected
@@ -55,7 +55,7 @@ check-in on/off) are app settings, not a data type either store asks about.
 - **Data sold:** No.
 - **Encrypted in transit:** Yes (HTTPS only).
 - **Users can request deletion:** Yes, in the app (Settings → Delete
-  account) and at `https://globeville.app/delete-account`.
+  account) and at `https://globeville.us/delete-account`.
 - **Data deleted on request** except problem reports, which are kept for up
   to 1 year without the person's name or email.
 - **Independent security review (Google, optional):** No.

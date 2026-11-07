@@ -4,7 +4,7 @@
 # database and its own Spaces folder, says STAGING in the admin, sends no real
 # push notifications (PUSH_ENABLED=0), has no daily cleanup job, and never
 # sends real texts (SMS_LIVE=0: codes show in the server log instead).
-# Invite links point at api-staging.globeville.app/e/... (PUBLIC_BASE_URL),
+# Invite links point at api-staging.globeville.us/e/... (PUBLIC_BASE_URL),
 # so staging needs no second link domain; they open the web page, not the app.
 # Create it like the real one (Apps → Create App → "Import from app spec")
 # and fill in every CHANGE_ME. Never reuse production's secrets here.
@@ -47,9 +47,9 @@ services:
         type: SECRET
         value: CHANGE_ME
       - key: ALLOWED_HOSTS
-        value: api-staging.globeville.app
+        value: api-staging.globeville.us
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://api-staging.globeville.app
+        value: https://api-staging.globeville.us
       - key: ADMIN_URL
         type: SECRET
         value: CHANGE_ME/
@@ -85,7 +85,7 @@ services:
         type: SECRET
         value: CHANGE_ME
       - key: DEFAULT_FROM_EMAIL
-        value: globeville <hello@globeville.app>
+        value: globeville <hello@globeville.us>
       - key: PROBLEM_REPORT_EMAILS
         type: SECRET
         value: CHANGE_ME
@@ -96,7 +96,7 @@ services:
       # Texting guests (Milestone 5): always off here. Codes are written to
       # the server log (Runtime Logs) instead, so you can RSVP on your phone.
       - key: PUBLIC_BASE_URL
-        value: https://api-staging.globeville.app
+        value: https://api-staging.globeville.us
       - key: SMS_LIVE
         value: "0"
       - key: SMS_MONTHLY_BUDGET_USD
@@ -114,7 +114,7 @@ services:
       - key: PUSH_ENABLED
         value: "0"
     domains:
-      - domain: api-staging.globeville.app
+      - domain: api-staging.globeville.us
         type: PRIMARY
 
 jobs:
@@ -138,7 +138,7 @@ jobs:
         type: SECRET
         value: CHANGE_ME
       - key: ALLOWED_HOSTS
-        value: api-staging.globeville.app
+        value: api-staging.globeville.us
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}
@@ -167,7 +167,7 @@ jobs:
         type: SECRET
         value: CHANGE_ME
       - key: ALLOWED_HOSTS
-        value: api-staging.globeville.app
+        value: api-staging.globeville.us
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}
@@ -175,7 +175,7 @@ jobs:
         value: "0"
       # The job also schedules guest texts (Milestone 5); off on staging.
       - key: PUBLIC_BASE_URL
-        value: https://api-staging.globeville.app
+        value: https://api-staging.globeville.us
       - key: SMS_LIVE
         value: "0"
       - key: SMS_MONTHLY_BUDGET_USD

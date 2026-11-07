@@ -161,7 +161,7 @@ def new_invite_code():
 
 class InviteLink(models.Model):
     """
-    https://globeville.app/e/{code}: anyone holding it can see the event
+    https://globeville.us/e/{code}: anyone holding it can see the event
     (Changes Milestone 2). Resetting the link revokes this one and makes a
     new one; the old code then shows "This invite link has expired".
     """

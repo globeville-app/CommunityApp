@@ -100,9 +100,9 @@ describe("the settings screen", () => {
     loggedIn();
     renderApp("/settings");
     fireEvent.press(await screen.findByRole("button", { name: "Privacy policy" }));
-    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.app/privacy");
+    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.us/privacy");
     fireEvent.press(screen.getByRole("button", { name: "Terms of use" }));
-    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.app/terms");
+    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.us/terms");
   });
 
   it("edit profile opens the setup form filled in, with the neighborhood fixed", async () => {

@@ -160,7 +160,7 @@ Each glow fades to transparent at 70% of its size. Add a 1-unit inner border in 
 | 4 | Headline line 2 | The badge name. Outfit 600, 27, white, letter-spacing −0.01em |
 | 5 | Stage label (growth badges only) | A pill with the stage name ("Bloom" / "Flor"). Outfit 500, 12, color `#8FF3EA`, background teal at 16%, border teal at 55%, padding 3 × 11, fully rounded, 7 above |
 | 6 | Count line | Outfit 400, 15, color `#D9D0F5`, 6 above |
-| 7 | Call to action, pinned 16 from the bottom | "Join your neighbors on **globeville.app**" / "Únete a tus vecinos en **globeville.app**". Outfit, 11.5, white at 90%, with the URL in weight 600 |
+| 7 | Call to action, pinned 16 from the bottom | "Join your neighbors on **globeville.us**" / "Únete a tus vecinos en **globeville.us**". Outfit, 11.5, white at 90%, with the URL in weight 600 |
 
 **Count line wording:**
 - **Neighborhood switch on:** "{count} {units} in {Neighborhood}", for example "5 cleanups in Globeville" / "5 limpiezas en Globeville".
@@ -184,7 +184,7 @@ Pass this as the share text, along with the image:
 | On | "I earned the {Badge} badge on globeville 🎉 Join our neighborhood: {invite_url}" | "Gané la insignia {Insignia} en globeville 🎉 Únete a nuestro barrio: {invite_url}" |
 | Off | "I earned the {Badge} badge on globeville 🎉 Join your neighbors: {invite_url}" | "Gané la insignia {Insignia} en globeville 🎉 Únete a tus vecinos: {invite_url}" |
 
-`invite_url` is `https://globeville.app`, read from `shared/app_config.json`.
+`invite_url` is `https://globeville.us`, read from `shared/app_config.json`.
 
 ### Share preview screen (in the app)
 
@@ -204,7 +204,7 @@ The screen sits on the app background (`DESIGN.md` glow on midnight). From top t
 
 **Instagram:** apps can't attach a link to an Instagram story, so the URL on the card is how story viewers find the app. Don't build anything Instagram-specific.
 
-**Later, not in Milestone 3:** the `globeville.app` link preview line (currently a placeholder, "globeville: your neighborhood, together") lives on the landing page and will be revised by the owner.
+**Later, not in Milestone 3:** the `globeville.us` link preview line (currently a placeholder, "globeville: your neighborhood, together") lives on the landing page and will be revised by the owner.
 
 ## 4. Count wording
 

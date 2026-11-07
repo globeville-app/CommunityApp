@@ -1,5 +1,5 @@
 /**
- * A collect link opened in the app (globeville.app/c/{token}): the badge a
+ * A collect link opened in the app (globeville.us/c/{token}): the badge a
  * guest earned at an event. The token is saved and claimed as soon as
  * they're signed in with a finished profile (AppWatchers), so joining first
  * is fine.

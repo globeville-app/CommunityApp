@@ -486,7 +486,7 @@ function inviteCode(event: DemoEvent) {
 
 function inviteFor(event: DemoEvent, language: Language): InviteInfo {
   const code = inviteCode(event);
-  const url = `https://globeville.app/e/${code}`;
+  const url = `https://globeville.us/e/${code}`;
   const date = new Date(event.starts_at).toLocaleDateString(language === "es" ? "es-US" : "en-US", {
     timeZone: DENVER,
     weekday: "long",

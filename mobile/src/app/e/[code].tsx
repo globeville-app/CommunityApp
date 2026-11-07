@@ -1,5 +1,5 @@
 /**
- * An invite link opened in the app (globeville.app/e/{code}): the server
+ * An invite link opened in the app (globeville.us/e/{code}): the server
  * gives this member access to the event, whatever their neighborhood, and
  * we go on to the event, with "I'm going" recorded as from an invite link.
  * Not signed in yet: the web page instead, where anyone can RSVP.

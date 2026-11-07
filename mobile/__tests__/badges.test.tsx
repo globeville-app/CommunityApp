@@ -58,8 +58,8 @@ function visibleText(): string[] {
 }
 
 function expectNoMissingKeys() {
-  // (The invite link, globeville.app, looks like a key but isn't one.)
-  expect(visibleText().filter((text) => /^[a-z_]+(\.[a-z_]+)+$/.test(text) && text !== "globeville.app")).toEqual([]);
+  // (The invite link, globeville.us, looks like a key but isn't one.)
+  expect(visibleText().filter((text) => /^[a-z_]+(\.[a-z_]+)+$/.test(text) && text !== "globeville.us")).toEqual([]);
 }
 
 const HOUR = 60 * 60 * 1000;
@@ -541,7 +541,7 @@ describe("the share card", () => {
     await pressAndSettle(await screen.findByRole("button", { name: "Share" }));
     expect(share).toHaveBeenCalledWith({
       url: "file:///tmp/badge-card.png",
-      message: "I earned the Clean Sweeper badge on globeville 🎉 Join our neighborhood: https://globeville.app",
+      message: "I earned the Clean Sweeper badge on globeville 🎉 Join our neighborhood: https://globeville.us",
     });
     expect(mocked.logShare).toHaveBeenCalledWith("tok-123", "clean_sweeper");
   });

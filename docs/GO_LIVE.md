@@ -27,8 +27,8 @@ The owner chose DigitalOcean so everything is in one account with predictable mo
 | Backend | App Platform web service running Django under `gunicorn` | Auto-deploys from the `main` branch on GitHub. Runs migrations as a pre-deploy job. |
 | Database | Managed PostgreSQL, single node | Daily automatic backups. Move off the SQLite used in development. |
 | Photos | Spaces (object storage), **private** bucket | Served through short-lived signed URLs. EXIF is still stripped before upload (Milestone 1). Problem-report screenshots go in a separate private path that only admin can read. |
-| Email | **Postmark** (decided) | Account emails and problem-report notifications. The free tier (100 emails/month) covers the beta; the paid tier is about $15/month. Send from `hello@globeville.app` after verifying the domain (DKIM and Return-Path DNS records). |
-| Domain | **`globeville.app`** (decided; the owner confirms it's available and buys it) | Backend at `api.globeville.app`. A simple landing page at `globeville.app` with store links, which doubles as `invite_url`. HTTPS everywhere (`.app` requires it), with certificates handled by App Platform. |
+| Email | **Postmark** (decided) | Account emails and problem-report notifications. The free tier (100 emails/month) covers the beta; the paid tier is about $15/month. Send from `hello@globeville.us` after verifying the domain (DKIM and Return-Path DNS records). |
+| Domain | **`globeville.us`** (decided Nov 7, 2026; `globeville.app` was taken) | Backend at `api.globeville.us`. A simple landing page at `globeville.us` with store links, which doubles as `invite_url`. HTTPS everywhere (the server redirects to HTTPS and sends HSTS), with certificates handled by App Platform. |
 
 ### Configuration rules
 - **Secrets are environment variables, never in the repo.** This covers the Django secret key, database URL, Spaces keys, email keys, the translation provider key and `PROBLEM_REPORT_EMAILS`.
@@ -220,7 +220,7 @@ The beta mixes all three groups and invites them in waves, so bugs are caught be
 - Use the owner stats page to watch signups and activity per wave.
 
 ## Decided (Oct 18, 2026)
-- **Domain:** `globeville.app`. Confirm it's available, then buy it.
+- **Domain:** `globeville.us` (`globeville.app` turned out to be taken). Public contact `hello@globeville.us`, forwarded to the owner's Gmail.
 - **Email:** Postmark.
 - **Problem reports:** the owner, within 2 days.
 - **Beta:** the three-wave plan above.

@@ -106,7 +106,7 @@ describe("sign up and log in", () => {
       screen.getByText("By creating an account, you confirm you're 13 or older and agree to the Terms of Use and Privacy Policy."),
     ).toBeTruthy();
     fireEvent.press(screen.getByRole("link", { name: "Terms of use" }));
-    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.app/terms");
+    expect(WebBrowser.openBrowserAsync).toHaveBeenLastCalledWith("https://globeville.us/terms");
     await pressAndSettle(screen.getByRole("button", { name: "Sign up" }));
 
     expect(await screen.findByText("Where's home?")).toBeTruthy();
