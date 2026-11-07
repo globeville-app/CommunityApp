@@ -512,7 +512,7 @@ into the DigitalOcean dashboard, never into this repository.
 ### 1. Accounts and the domain
 1. Buy `globeville.org` (any registrar) and create accounts at DigitalOcean,
    Postmark, Expo, Apple Developer and Google Play.
-2. In Postmark, add the sender `hello@globeville.org` and the DNS records it
+2. In Postmark, add the sender `info@globeville.org` and the DNS records it
    asks for (DKIM and Return-Path), so emails aren't marked as spam.
 
 ### 2. Storage for photos (Spaces)
@@ -752,7 +752,7 @@ only after the owner checklist below.
 | `SMS_MONTHLY_BUDGET_USD` | Monthly cap. At 80% an email goes out; at 100% reminders and collect texts pause until next month (codes and cancellations still send) | `50` |
 | `SMS_COST_PER_TEXT_USD` | Planning cost per text, for the budget | `0.01` |
 | `OWNER_ALERT_EMAILS` | Who gets the 80% budget email (comma-separated) | `you@example.com` |
-| `SUPPORT_EMAIL` | Shown in the HELP reply and on the web pages | `hello@globeville.org` |
+| `SUPPORT_EMAIL` | Shown in the HELP reply and on the web pages | `info@globeville.org` |
 | `APPLE_TEAM_ID` | Apple Developer → Membership, for iPhone app links | `AB12CD34EF` |
 | `ANDROID_CERT_SHA256` | `npx eas credentials` → Android → SHA-256 fingerprint, for Android app links | `AB:CD:…` |
 

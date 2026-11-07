@@ -80,7 +80,7 @@ services:
         type: SECRET
         value: CHANGE_ME
       - key: DEFAULT_FROM_EMAIL
-        value: globeville <hello@globeville.org>
+        value: globeville <info@globeville.org>
       - key: PROBLEM_REPORT_EMAILS
         type: SECRET
         value: CHANGE_ME
@@ -212,7 +212,7 @@ jobs:
         type: SECRET
         value: CHANGE_ME
       - key: DEFAULT_FROM_EMAIL
-        value: globeville <hello@globeville.org>
+        value: globeville <info@globeville.org>
 
   # Once a day: delete what has done its job (backend/accounts/retention.py
   # lists every rule, e.g. problem reports after a year).
