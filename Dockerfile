@@ -21,7 +21,7 @@ COPY backend/ backend/
 
 WORKDIR /app/backend
 # The admin's CSS and JS, gathered once at build time (served by WhiteNoise).
-RUN DJANGO_DEBUG=0 DJANGO_SECRET_KEY=build-only ALLOWED_HOSTS=build \
+RUN DJANGO_DEBUG=0 DJANGO_SECRET_KEY=build-only-throwaway-key-used-for-collectstatic-and-nothing-else ALLOWED_HOSTS=build \
     python manage.py collectstatic --noinput
 
 # Run as an ordinary user, not root: if someone ever broke in through the

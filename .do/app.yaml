@@ -9,7 +9,7 @@
 #
 # The database is a managed PostgreSQL cluster created first, named
 # globeville-db (README, "3. The app").
-name: globeville
+name: globeville-app
 region: sfo
 
 # Emails to the account's team when something goes wrong (review O8). Check

@@ -52,6 +52,18 @@ class ProductionSettingsTests(TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("DJANGO_SECRET_KEY", result.stderr)
 
+    def test_refuses_the_spec_placeholders_and_short_keys(self):
+        """The DigitalOcean spec ships CHANGE_ME; the server must not start with it."""
+        for key, value, word in [
+            ("DJANGO_SECRET_KEY", "CHANGE_ME", "DJANGO_SECRET_KEY"),
+            ("DJANGO_SECRET_KEY", "short-but-random-7f3k9q", "DJANGO_SECRET_KEY"),
+            ("ADMIN_URL", "CHANGE_ME/", "ADMIN_URL"),
+        ]:
+            with self.subTest(key=key, value=value):
+                result = run_manage("check", env={**PRODUCTION_ENV, key: value})
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(word, result.stderr)
+
     def test_passes_djangos_deployment_check(self):
         result = run_manage("check", "--deploy", "--fail-level", "WARNING", env=PRODUCTION_ENV)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

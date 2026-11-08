@@ -70,6 +70,10 @@ if DEBUG:
 else:
     if SECRET_KEY == DEV_SECRET_KEY:
         raise ImproperlyConfigured("Set DJANGO_SECRET_KEY in the environment before running in production.")
+    # The DigitalOcean spec ships placeholders (CHANGE_ME); never run with one,
+    # or with a key short enough to guess.
+    if "CHANGE_ME" in SECRET_KEY or len(SECRET_KEY) < 50:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be 50+ random characters, not the CHANGE_ME placeholder.")
     # e.g. "api.globeville.org"
     ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()]
     # e.g. "https://api.globeville.org" (the admin's login form needs it)
@@ -239,6 +243,8 @@ STORAGES["staticfiles"] = {
 # Where Django admin lives. Production uses a non-default path (GO_LIVE.md),
 # set in the environment, e.g. ADMIN_URL="team-7f3k/".
 ADMIN_URL = os.environ.get("ADMIN_URL", "admin/")
+if not DEBUG and "CHANGE_ME" in ADMIN_URL:
+    raise ImproperlyConfigured("Set ADMIN_URL to your private admin path, not the CHANGE_ME placeholder.")
 # Two-step login for the admin (a code from an authenticator app). On in
 # production by default; see "Admin two-step login" in the README.
 ADMIN_REQUIRE_2FA = os.environ.get("ADMIN_REQUIRE_2FA", "0" if DEBUG else "1") == "1"
