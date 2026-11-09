@@ -68,6 +68,9 @@ const config: ExpoConfig = {
     bundleIdentifier: APP_ID,
     buildNumber: String(BUILD_NUMBER),
     associatedDomains: [`applinks:${linkDomain}`],
+    // Only standard HTTPS, which is exempt from US export rules, so App Store
+    // Connect doesn't hold each build waiting for the encryption question.
+    config: { usesNonExemptEncryption: false },
     infoPlist: {
       // Lets the "Open in" sheet see whether these maps apps are installed.
       LSApplicationQueriesSchemes: ["comgooglemaps", "waze"],

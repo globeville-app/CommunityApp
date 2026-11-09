@@ -622,8 +622,8 @@ From `mobile/`, after `npx eas login`:
 | Profile | Points at | Used for | Command |
 | --- | --- | --- | --- |
 | `development` | your computer's backend (`mobile/.env`) | testing auto check-in (Milestone 3), which Expo Go can't do | `npx eas build --profile development --platform android` |
-| `preview` | `https://api.globeville.org` | Phase A beta | `npx eas build --profile preview --platform all`, then `npx eas submit --profile preview` |
-| `production` | `https://api.globeville.org` | the stores (Phase B) | `npx eas build --profile production --platform all`, then `npx eas submit` |
+| `preview` | `https://api.globeville.org` | installing directly on registered test phones (not TestFlight) | `npx eas build --profile preview --platform all` |
+| `production` | `https://api.globeville.org` | **TestFlight and Play testing (Phase A beta)**, then the stores (Phase B): TestFlight needs a store-type build | `npx eas build --profile production --platform ios`, then `npx eas submit --platform ios --latest` |
 
 - The app's store ID is `app.globeville` (in `mobile/app.config.ts`). It can
   never change once the app is in a store.
