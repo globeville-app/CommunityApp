@@ -16,3 +16,4 @@ boto3==1.43.114             # used by django-storages for Spaces
 whitenoise==6.12.0          # serves the admin's CSS and JS
 django-otp==1.7.5           # two-step login for the admin
 qrcode==8.2                 # shows the admin's two-step setup code as a QR
+pyyaml==6.0.3                # tests check the DigitalOcean specs in .do/

@@ -111,6 +111,15 @@ envs:
   - key: EXPO_ACCESS_TOKEN
     value: ""
 
+# The addresses the website answers on (App Platform lists them for the
+# whole app, not per component).
+domains:
+  - domain: api.globeville.org
+    type: PRIMARY
+  # The invite-link pages, the legal pages and the deep-link files.
+  - domain: globeville.org
+    type: ALIAS
+
 services:
   - name: api
     dockerfile_path: Dockerfile
@@ -132,12 +141,6 @@ services:
         operator: GREATER_THAN
         value: 85
         window: TEN_MINUTES
-    domains:
-      - domain: api.globeville.org
-        type: PRIMARY
-      # The invite-link pages, the legal pages and the deep-link files.
-      - domain: globeville.org
-        type: ALIAS
 
 jobs:
   # Runs before every deploy: database changes, the table the rate limits
