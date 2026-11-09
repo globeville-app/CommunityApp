@@ -233,11 +233,11 @@ msgstr ""
 
 #: templates/web/legal/base.html:7
 msgid ""
-"Draft: not yet in effect. It still needs the owner's details and a legal "
-"review."
+"Draft: not yet in effect. It still needs a legal review and an effective "
+"date."
 msgstr ""
-"Borrador: todavía no está vigente. Aún faltan los datos del responsable y "
-"una revisión legal."
+"Borrador: todavía no está vigente. Aún falta una revisión legal y una fecha "
+"de vigencia."
 
 #: templates/web/legal/base.html:10
 msgid "Effective date:"

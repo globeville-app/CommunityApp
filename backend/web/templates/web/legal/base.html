@@ -4,7 +4,7 @@
 {% block content %}
 <article class="card legal">
   {% if is_draft %}
-    <p class="draft" role="note">{% translate "Draft: not yet in effect. It still needs the owner's details and a legal review." %}</p>
+    <p class="draft" role="note">{% translate "Draft: not yet in effect. It still needs a legal review and an effective date." %}</p>
   {% endif %}
   <h1>{% block doc_title %}{% endblock %}</h1>
   <p class="small">{% translate "Effective date:" %} {{ legal.effective_date }}</p>
