@@ -18,7 +18,9 @@
  *     development build; they don't work in Expo Go.
  *
  * Milestone 4 (push notifications):
- *   - EAS_PROJECT_ID: from `npx eas init` (Expo account). Push tokens need it.
+ *   - The Expo project (`npx eas init`, Nov 2026): @adubin/globeville, ID in
+ *     EXPO_PROJECT_ID below. Builds and push tokens need it. It isn't a
+ *     secret. EAS_PROJECT_ID in the environment overrides it (e.g. a test project).
  *   - Android push also needs a Firebase project, set up in the Expo account
  *     (README, "Push notifications").
  *
@@ -55,9 +57,14 @@ const APP_ID = "app.globeville";
 const slug = appName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
 const linkDomain = new URL(shared.invite_url).host;
 
+// The Expo account and project the builds belong to (expo.dev/accounts/adubin/projects/globeville).
+const EXPO_OWNER = "adubin";
+const EXPO_PROJECT_ID = "4c1bdd43-0055-45c7-ac5d-41526095a720";
+
 const config: ExpoConfig = {
   name: appName,
   slug,
+  owner: EXPO_OWNER,
   scheme: slug,
   version: VERSION,
   orientation: "portrait",
@@ -179,7 +186,7 @@ const config: ExpoConfig = {
     // The same number for every platform, so Settings can show it anywhere.
     buildNumber: String(BUILD_NUMBER),
     // Push notifications need the Expo project's id.
-    ...(process.env.EAS_PROJECT_ID ? { eas: { projectId: process.env.EAS_PROJECT_ID } } : {}),
+    eas: { projectId: process.env.EAS_PROJECT_ID || EXPO_PROJECT_ID },
   },
 };
 

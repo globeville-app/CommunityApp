@@ -649,9 +649,8 @@ through Expo's push service:
   `python manage.py count_hosted_events`: a hosted event only counts once it
   has ended (docs/BADGES.md), so when neighbors checked in during an event
   and nobody collects it afterwards, this is what credits the host.
-- **Expo project.** In `mobile/`, run `npx eas init` once; put the project id
-  it prints in `mobile/.env` as `EAS_PROJECT_ID=...` (and in the EAS build
-  profiles). Push tokens need it.
+- **Expo project.** Done (Nov 2026): `@adubin/globeville`, with its ID in
+  `mobile/app.config.ts` (`EXPO_PROJECT_ID`). Push tokens and builds use it.
 - **Android (Firebase).** Create a free Firebase project, add an Android app
   with the package `app.globeville`, download `google-services.json` into
   `mobile/`, and upload a Firebase service-account key in the Expo account
@@ -669,7 +668,7 @@ that phone and on account deletion.
 
 ## Milestone 4: what needs you
 
-- **Firebase project** for Android push, and the Expo project id (above).
+- **Firebase project** for Android push (the Expo project is set up).
 - **Approval checklist:** what the team checks before approving an
   organization (a real group, a real local presence, an authorized requester).
 - **First organizations:** 3–5 real groups to invite first.
