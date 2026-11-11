@@ -71,6 +71,6 @@
   </section>
 {% endif %}
 
-<p class="open-app"><a class="button secondary" href="{{ app_link }}">{% translate "Open in app" %}</a></p>
+{# No "Open in app" button: a phone with the app opens globeville.org links in the app before this page loads, and an app-only link shows "address is invalid" on phones without it. #}
 {% if support_email %}<p class="small">{% translate "Questions?" %} <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>{% endif %}
 {% endblock %}

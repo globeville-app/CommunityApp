@@ -1,6 +1,7 @@
 """The guest web pages (docs/MILESTONE_5.md, "Web pages" and "Guests and consent")."""
 
 import re
+from datetime import timedelta
 
 from django.test import override_settings
 
@@ -195,7 +196,6 @@ class BeforeTextsAreLiveTests(GuestTestCase):
         page = self.web.get(f"/e/{self.code}")
         self.assertContains(page, "Fall potluck")
         self.assertContains(page, "Want to go?")
-        self.assertContains(page, "Open in app")
         self.assertNotContains(page, 'name="phone"')
         self.assertNotContains(page, "Lowell")
         self.assertContains(self.web.get(f"/e/{self.code}?lang=es"), "¿Quieres ir?")
@@ -213,3 +213,23 @@ class BeforeTextsAreLiveTests(GuestTestCase):
 
     def test_the_app_is_told_there_are_no_guest_badges_yet(self):
         self.assertIs(self.web.get("/api/config").json()["guest_badges"], False)
+
+
+class NoAppOnlyLinksTests(GuestTestCase):
+    """Safari on a phone without the app said "address is invalid" for "Open in app" (1.0.0)."""
+
+    def test_pages_never_link_to_the_app_only_scheme(self):
+        from django.conf import settings
+
+        from guests.models import PendingAttendance
+
+        pages = [self.web.get(f"/e/{self.code}"), self.web.get("/")]
+        self.rsvp()
+        rsvp = GuestRSVP.objects.get()
+        pending = PendingAttendance.objects.create(rsvp=rsvp, expires_at=rsvp.event.starts_at + timedelta(days=30))
+        pages.append(self.web.get(f"/c/{pending.claim_token}"))
+        for page in pages:
+            with self.subTest(page=page.request["PATH_INFO"]):
+                self.assertEqual(page.status_code, 200)
+                self.assertNotContains(page, f"{settings.APP_SCHEME}://")
+                self.assertNotContains(page, "Open in app")

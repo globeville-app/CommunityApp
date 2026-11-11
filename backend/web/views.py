@@ -144,7 +144,6 @@ def event_page(request, code, step=None, error=None, pending="", form=None, stat
         "form": form or {},
         "page_url": f"{settings.PUBLIC_BASE_URL}/e/{code}",
         "og_image": f"{settings.PUBLIC_BASE_URL}{settings.STATIC_URL}web/og-default.png",
-        "app_link": f"{settings.APP_SCHEME}://e/{code}",
         # Milestone 5.1 vs 5.2: see GUEST_RSVP_OPEN in config/settings.py.
         "rsvp_open": settings.GUEST_RSVP_OPEN,
         "ios_store_url": settings.IOS_STORE_URL,
@@ -258,7 +257,6 @@ def collect_page(request, token):
         "claimed": pending.claimed_at is not None,
         "expired": timezone.now() > pending.expires_at,
         "expires": timezone.localtime(pending.expires_at),
-        "app_link": f"{settings.APP_SCHEME}://c/{token}",
         "ios_store_url": settings.IOS_STORE_URL,
         "android_store_url": settings.ANDROID_STORE_URL,
     }

@@ -15,6 +15,7 @@
       <li>{% translate "Install the app" %}
         {% if ios_store_url %}<a class="button secondary" href="{{ ios_store_url }}">App Store</a>{% endif %}
         {% if android_store_url %}<a class="button secondary" href="{{ android_store_url }}">Google Play</a>{% endif %}
+        {% if not ios_store_url and not android_store_url %}<p class="note">{% translate "Coming soon to the App Store and Google Play." %}</p>{% endif %}
       </li>
       <li>{% translate "Sign up, then enter this code:" %}
         <p class="claim-code" id="claim-code">{{ claim_code }}</p>
@@ -22,7 +23,7 @@
       </li>
     </ol>
     <p class="small">{% blocktranslate with day=expires|date:"M j" %}Collect it by {{ day }}.{% endblocktranslate %}</p>
-    <a class="button" href="{{ app_link }}">{% translate "Open in app" %}</a>
+{# No "Open in app" button: with the app installed, this link opens it directly. #}
     <script>
       document.getElementById("copy").addEventListener("click", function () {
         navigator.clipboard && navigator.clipboard.writeText("{{ claim_code }}");
