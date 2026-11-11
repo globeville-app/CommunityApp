@@ -48,7 +48,7 @@ const appName = shared.app_name;
 // The build number is counted up by EAS automatically for real builds
 // (eas.json: appVersionSource "remote"); BUILD_NUMBER is only what Expo Go
 // and the browser demo show at the bottom of Settings.
-const VERSION = "1.0.0";
+const VERSION = "1.0.1";
 const BUILD_NUMBER = 1;
 
 // The app's permanent ID in the App Store and Google Play. Set once and

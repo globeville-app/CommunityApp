@@ -627,8 +627,9 @@ From `mobile/`, after `npx eas login`:
 
 - The app's store ID is `app.globeville` (in `mobile/app.config.ts`). It can
   never change once the app is in a store.
-- Raise `VERSION` in `mobile/app.config.ts` for each store release; EAS
-  counts up the build number by itself.
+- Raise `VERSION` in `mobile/app.config.ts` for each release (patch for
+  fixes, minor for features; see `docs/CHANGELOG.md`); EAS counts up the
+  build number by itself.
 - iPhone builds need the Apple Developer membership; EAS walks you through
   signing the first time.
 - Store privacy answers are drafted in `docs/STORE_PRIVACY.md`.
