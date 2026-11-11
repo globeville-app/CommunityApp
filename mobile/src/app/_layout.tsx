@@ -83,7 +83,9 @@ function AppShell() {
       <Stack
         screenOptions={{
           headerShown: false,
-          animation: "fade",
+          // No stack animation: screens are see-through over the shared glow,
+          // so each one fades its own content in instead (Screen in ui.tsx).
+          animation: "none",
           contentStyle: { backgroundColor: "transparent" },
         }}
       >

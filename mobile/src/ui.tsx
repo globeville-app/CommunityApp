@@ -10,8 +10,8 @@
 // Only the one icon set; the package root would pull in every icon font.
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
-import { Href, router, useIsFocused } from "expo-router";
-import { ComponentProps, ReactNode } from "react";
+import { Href, router, useFocusEffect, useIsFocused } from "expo-router";
+import { ComponentProps, ReactNode, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -28,6 +28,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { LanguageToggle } from "./components/LanguageToggle";
@@ -59,15 +60,41 @@ function Frost({ dark, intensity, style }: { dark?: boolean; intensity: number; 
 
 // ---- Layout -------------------------------------------------------------------
 
+/**
+ * How a screen arrives. Screens are see-through so the one shared glow
+ * drifts on behind every page; the stack therefore swaps screens with no
+ * animation of its own (two see-through pages fading over each other read
+ * as one jumbled page) and each screen's content fades and rises in here,
+ * every time it comes into view, including on Back. Reduce Motion: a short
+ * fade only.
+ */
+function useArrival() {
+  const reduceMotion = useReducedMotion();
+  const progress = useSharedValue(0);
+  useFocusEffect(
+    useCallback(() => {
+      progress.value = 0;
+      progress.value = withTiming(1, { duration: reduceMotion ? 120 : 260, easing: Easing.out(Easing.cubic) });
+    }, [progress, reduceMotion]),
+  );
+  return useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: reduceMotion ? 0 : (1 - progress.value) * 12 }],
+  }));
+}
+
 export function Screen({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
+  const arrival = useArrival();
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom", "left", "right"]}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {children}
-        </ScrollView>
-        {footer}
-      </KeyboardAvoidingView>
+      <Animated.View style={[styles.flex, arrival]}>
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            {children}
+          </ScrollView>
+          {footer}
+        </KeyboardAvoidingView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -93,7 +120,8 @@ export function JoinHeader({ back }: { back?: boolean }) {
  */
 export function TabScene({ children }: { children: ReactNode }) {
   const focused = useIsFocused();
-  return <View style={[styles.flex, !focused && styles.hidden]}>{children}</View>;
+  const arrival = useArrival();
+  return <Animated.View style={[styles.flex, arrival, !focused && styles.hidden]}>{children}</Animated.View>;
 }
 
 /** A round glass back button for the top of a screen. */

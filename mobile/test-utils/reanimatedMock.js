@@ -1,6 +1,6 @@
 /**
  * Test stand-in for react-native-reanimated: just the features the app uses
- * (the glow and the sliding sheet). Tests check behavior, not motion.
+ * (the glow, the sliding sheet and screens fading in). Tests check behavior, not motion.
  * Wired up through "moduleNameMapper" in package.json.
  */
 const { View } = require("react-native");
@@ -18,6 +18,6 @@ module.exports = {
   withTiming: (value) => value,
   cancelAnimation: () => undefined,
   useReducedMotion: () => false,
-  Easing: { inOut: (fn) => fn, sin: (t) => t },
+  Easing: { inOut: (fn) => fn, out: (fn) => fn, sin: (t) => t, cubic: (t) => t },
   SlideInDown: entering,
 };
