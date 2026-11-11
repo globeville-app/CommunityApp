@@ -14,6 +14,7 @@ Rules, in the order they're checked when a text is due:
 PRIVACY: phone numbers and message text are never logged here.
 """
 
+import logging
 from datetime import datetime, time, timedelta
 from decimal import Decimal
 
@@ -28,6 +29,8 @@ from config.wording import words
 
 from .models import ScheduledText
 from .texter import TextUnavailable, get_texter
+
+logger = logging.getLogger(__name__)
 
 QUIET_START = 20  # 8:00 PM
 QUIET_END = 9  # 9:00 AM
@@ -99,6 +102,13 @@ def _check_budget_alert(now):
     month = _denver(now).strftime("%Y-%m")
     if not cache.add(f"sms-budget-alert:{month}", 1, timeout=40 * 24 * 3600):
         return  # already told them this month
+    try:
+        _email_budget_alert(now)
+    except Exception as error:  # an email outage must never stop texts from sending
+        logger.error("Budget alert email failed: %s", type(error).__name__)
+
+
+def _email_budget_alert(now):
     send_mail(
         subject=f"{settings.APP_NAME}: texting is at 80% of this month's budget",
         message=(

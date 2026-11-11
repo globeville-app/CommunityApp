@@ -1,6 +1,9 @@
 """Confirming the email at signup, and "Forgot password?" (review P5 and D1)."""
 
+import re
 from datetime import timedelta
+from smtplib import SMTPException
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -139,3 +142,44 @@ class PasswordResetTests(APITestCase):
         for _ in range(7):
             self.ask()
         self.assertEqual(len(mail.outbox), 5)
+
+
+class EmailOutageTests(APITestCase):
+    """
+    When the email service refuses or is down (Postmark's test mode only
+    delivers to the app's own domain), accounts still work: sign-up used to
+    fail after the account was created, so trying again said "email taken".
+    """
+
+    def setUp(self):
+        cache.clear()
+        patcher = mock.patch("accounts.codes.send_mail", side_effect=SMTPException("refused"))
+        self.send_mail = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_sign_up_succeeds_and_a_new_code_can_be_asked_for_later(self):
+        with self.assertLogs("accounts.codes", level="ERROR") as logs:
+            reply = self.client.post(
+                "/api/auth/signup", {"email": "ana@example.com", "password": PASSWORD, "language": "en"}, format="json"
+            )
+        self.assertEqual(reply.status_code, 201)
+        self.assertIn("SMTPException", logs.output[0])
+        self.assertNotIn("ana@example.com", "\n".join(logs.output))
+        self.assertFalse(Account.objects.get(user__email="ana@example.com").email_verified)
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {reply.data['token']}")
+        with self.assertLogs("accounts.codes", level="ERROR"):
+            self.assertEqual(self.client.post("/api/account/verify-email/resend").status_code, 204)
+
+        # Once email works again, the next code arrives and confirms the account.
+        self.send_mail.side_effect = None
+        self.client.post("/api/account/verify-email/resend")
+        digits = re.search(r"\b\d{6}\b", self.send_mail.call_args.kwargs["message"]).group()
+        self.assertEqual(self.client.post("/api/account/verify-email", {"code": digits}, format="json").status_code, 204)
+        self.assertTrue(Account.objects.get(user__email="ana@example.com").email_verified)
+
+    def test_password_reset_answers_the_same_when_email_fails(self):
+        get_user_model().objects.create_user("ana@example.com", "ana@example.com", PASSWORD)
+        with self.assertLogs("accounts.codes", level="ERROR"):
+            reply = self.client.post("/api/auth/password-reset", {"email": "ana@example.com"}, format="json")
+        self.assertEqual(reply.status_code, 204)

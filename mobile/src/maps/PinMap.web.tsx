@@ -29,8 +29,14 @@ export function PinMap({ center, pin, onChange, locked }: { center: LatLng; pin:
       disabled={locked}
       onLayout={(e) => setBox(e.nativeEvent.layout)}
       onPress={(e) => {
-        const x = e.nativeEvent.locationX / box.width - 0.5;
-        const y = e.nativeEvent.locationY / box.height - 0.5;
+        // Browsers don't always fill in locationX/Y for a click; offsetX/Y is
+        // the same position. Never save a pin from a missing position.
+        const event = e.nativeEvent as unknown as { locationX?: number; locationY?: number; offsetX?: number; offsetY?: number };
+        const px = Number.isFinite(event.locationX) ? event.locationX! : event.offsetX;
+        const py = Number.isFinite(event.locationY) ? event.locationY! : event.offsetY;
+        if (!Number.isFinite(px) || !Number.isFinite(py)) return;
+        const x = px! / box.width - 0.5;
+        const y = py! / box.height - 0.5;
         onChange({
           latitude: Number((center.latitude - y * 2 * SPAN).toFixed(6)),
           longitude: Number((center.longitude + x * 2 * SPAN).toFixed(6)),

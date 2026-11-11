@@ -368,6 +368,9 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+# Give up on the email server after 10 seconds instead of holding the
+# request (and a server worker) until it's killed.
+EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "webmaster@localhost")
 
 # Who gets an email for each problem report: a comma-separated list in the

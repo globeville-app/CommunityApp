@@ -339,7 +339,8 @@ export default function EventDetail() {
           <Field label={t("events.report_reason_label")} value={reason} onChangeText={setReason} maxLength={200} />
           <Button title={t("events.report_send")} variant="secondary" onPress={onReport} disabled={!reason.trim()} />
         </GlassCard>
-      ) : (
+      ) : event.is_organizer ? null : (
+        // Hosts don't report their own event; they can edit or cancel it.
         <TextLink label={t("events.report_link")} onPress={() => setReporting(true)} />
       )}
 

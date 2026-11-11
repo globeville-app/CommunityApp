@@ -266,12 +266,14 @@ describe("the event detail", () => {
     await screen.findByText("12 neighbors going");
     expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Cancel event" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Report" })).toBeTruthy();
     first.unmount();
 
     mocked.getEvent.mockResolvedValue(sampleEvent({ is_organizer: true }));
     mocked.cancelEvent.mockResolvedValue(sampleEvent({ is_organizer: true, status: "cancelled" }));
     renderApp("/event/7");
     expect(await screen.findByRole("button", { name: "Edit" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Report" })).toBeNull(); // not your own event
     fireEvent.press(screen.getByRole("button", { name: "Cancel event" }));
     expect(await screen.findByRole("header", { name: "Cancel this event?" })).toBeTruthy();
     await pressAndSettle(screen.getAllByRole("button", { name: "Cancel event" }).at(-1)!);

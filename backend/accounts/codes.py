@@ -8,6 +8,7 @@ asking for a new one replaces the old one.
 """
 
 import json
+import logging
 import secrets
 from datetime import timedelta
 from functools import lru_cache
@@ -20,6 +21,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from .models import EmailCode, language_of
+
+logger = logging.getLogger(__name__)
 
 LIFETIME = timedelta(minutes=30)
 MAX_ATTEMPTS = 5
@@ -58,12 +61,19 @@ def send_code(user, purpose):
         defaults={"code_hash": EmailCode.hash(code), "expires_at": timezone.now() + LIFETIME, "attempts": 0},
     )
     words = _strings()[language_of(user)][purpose]
-    send_mail(
-        subject=words["subject"].format(app=settings.APP_NAME),
-        message=words["body"].format(app=settings.APP_NAME, code=code, minutes=int(LIFETIME.total_seconds() // 60)),
-        from_email=None,  # DEFAULT_FROM_EMAIL
-        recipient_list=[user.email or user.username],
-    )
+    # If the email service refuses or is down, the account (or reset) must
+    # still go through: the member asks for a new code later. Raising here
+    # used to fail sign-up after the account was created, so retrying said
+    # "email taken". Only the kind of error is logged, never the address.
+    try:
+        send_mail(
+            subject=words["subject"].format(app=settings.APP_NAME),
+            message=words["body"].format(app=settings.APP_NAME, code=code, minutes=int(LIFETIME.total_seconds() // 60)),
+            from_email=None,  # DEFAULT_FROM_EMAIL
+            recipient_list=[user.email or user.username],
+        )
+    except Exception as error:
+        logger.error("Email code (%s) not sent: %s", purpose, type(error).__name__)
 
 
 def use_code(user, purpose, code):
