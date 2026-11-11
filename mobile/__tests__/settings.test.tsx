@@ -161,7 +161,7 @@ describe("report a problem", () => {
     expect(mocked.sendProblemReport).toHaveBeenCalledWith("tok-123", {
       message: "The photo button does nothing.",
       contact_email: undefined,
-      screenshot: { uri: "file:///shot.png", mimeType: "image/png" },
+      screenshot: { uri: "file:///shot.shrunk.jpg", mimeType: "image/jpeg" }, // shrunk to JPEG first
       app_version: "1.0.0 (12)",
       os: "iOS 19.1",
       device_model: "iPhone 16",

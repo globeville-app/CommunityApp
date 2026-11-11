@@ -14,12 +14,15 @@ export class ApiError extends Error {
   code: string;
   status: number;
   fields?: Record<string, string[]>;
+  /** For uploads that fail before the server answers: the phone's own reason, shown in small print. */
+  detail?: string;
 
-  constructor(code: string, status = 0, fields?: Record<string, string[]>) {
+  constructor(code: string, status = 0, fields?: Record<string, string[]>, detail?: string) {
     super(code);
     this.code = code;
     this.status = status;
     this.fields = fields;
+    this.detail = detail;
   }
 }
 

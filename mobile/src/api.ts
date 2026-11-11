@@ -38,6 +38,7 @@ import {
   Translation,
 } from "./apiTypes";
 import { API_BASE_URL, REQUEST_TIMEOUT_MS, UPLOAD_TIMEOUT_MS } from "./config";
+import { uploadForm } from "./uploads";
 import type { Language } from "./i18n";
 
 export * from "./apiTypes";
@@ -157,15 +158,23 @@ export function saveProfile(token: string, profile: ProfileInput) {
 
 /** Works signed in or not (token may be null). Returns a reference number. */
 export function sendProblemReport(token: string | null, report: ProblemReportInput, formKey?: string) {
-  const form = new FormData();
-  const { screenshot, ...fields } = report;
-  for (const [key, value] of Object.entries(fields)) {
-    if (value) form.append(key, String(value));
+  const { screenshot, ...rest } = report;
+  const fields: Record<string, string> = {};
+  for (const [key, value] of Object.entries(rest)) {
+    if (value) fields[key] = String(value);
   }
+  // With a screenshot: the native uploader (uploads.ts). Text only: a plain form.
   if (screenshot) {
-    const extension = screenshot.mimeType === "image/png" ? "png" : "jpg";
-    form.append("screenshot", { uri: screenshot.uri, name: `screenshot.${extension}`, type: screenshot.mimeType } as any);
+    return uploadForm<{ id: number }>("/api/support/report", {
+      token,
+      fieldName: "screenshot",
+      file: screenshot,
+      fields,
+      idempotencyKey: formKey,
+    });
   }
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.append(key, value);
   return request<{ id: number }>("/api/support/report", {
     method: "POST",
     token,
@@ -181,11 +190,7 @@ export function deleteAccount(token: string, password: string) {
 }
 
 export function uploadPhoto(token: string, photo: { uri: string; mimeType: string }) {
-  const form = new FormData();
-  const extension = photo.mimeType === "image/png" ? "png" : "jpg";
-  // React Native's FormData accepts this {uri, name, type} shape for files.
-  form.append("photo", { uri: photo.uri, name: `photo.${extension}`, type: photo.mimeType } as any);
-  return request<Profile>("/api/profile/photo", { method: "POST", token, form, timeoutMs: UPLOAD_TIMEOUT_MS });
+  return uploadForm<Profile>("/api/profile/photo", { token, fieldName: "photo", file: photo });
 }
 
 export function getMyProfile(token: string) {
@@ -370,10 +375,7 @@ export function updateOrganization(token: string, id: number, changes: Partial<O
 }
 
 export function uploadOrganizationPhoto(token: string, id: number, photo: { uri: string; mimeType: string }) {
-  const form = new FormData();
-  const extension = photo.mimeType === "image/png" ? "png" : "jpg";
-  form.append("photo", { uri: photo.uri, name: `photo.${extension}`, type: photo.mimeType } as any);
-  return request<OrgPage>(`/api/organizations/${id}/photo`, { method: "POST", token, form, timeoutMs: UPLOAD_TIMEOUT_MS });
+  return uploadForm<OrgPage>(`/api/organizations/${id}/photo`, { token, fieldName: "photo", file: photo });
 }
 
 export function addOrganizationAdmin(token: string, id: number, email: string) {

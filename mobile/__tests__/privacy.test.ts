@@ -7,8 +7,20 @@ const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
 
 it("has no general-purpose storage library that could hold the address", () => {
   // AsyncStorage is allowed only for the language and maps app preferences (below).
-  const storage = deps.filter((d) => /mmkv|sqlite|expo-file-system|realm/i.test(d));
+  const storage = deps.filter((d) => /mmkv|sqlite|realm/i.test(d));
   expect(storage).toEqual([]);
+});
+
+it("uses expo-file-system only to send photos, never to save anything", () => {
+  // It's there for its native uploader (src/uploads.ts, 1.0.1). It can also
+  // write files, so it may appear in that one file, and only to upload.
+  const users = sourceFiles()
+    .filter(([, source]) => /from "expo-file-system/.test(source))
+    .map(([file]) => path.relative(path.join(__dirname, ".."), file));
+  expect(users).toEqual([path.join("src", "uploads.ts")]);
+  const uploads = fs.readFileSync(path.join(__dirname, "..", "src", "uploads.ts"), "utf8");
+  expect(uploads).toMatch(/\.upload\(/);
+  expect(uploads).not.toMatch(/\.(write|create|copy|move|rename)\(|Directory|Paths|downloadFileAsync|writeAsStringAsync/);
 });
 
 /** Every source file under src/, as [path, contents]. */

@@ -28,6 +28,40 @@ jest.mock("expo-image-picker", () => ({
   },
 }));
 
+// Photos are shrunk to a JPEG before upload (src/photos.ts). The fake keeps
+// the file name and marks it "shrunk", so tests can see the step happened.
+jest.mock("expo-image-manipulator", () => {
+  const shrunk = (uri: string) => uri.replace(/\.(png|jpe?g|heic)$/i, ".shrunk.jpg");
+  return {
+    SaveFormat: { JPEG: "jpeg", PNG: "png", WEBP: "webp" },
+    ImageManipulator: {
+      manipulate: jest.fn((uri: string) => {
+        const context: { resize: jest.Mock; renderAsync: jest.Mock } = {
+          resize: jest.fn((): unknown => context),
+          renderAsync: jest.fn(async () => ({ saveAsync: jest.fn(async () => ({ uri: shrunk(uri) })) })),
+        };
+        return context;
+      }),
+    },
+  };
+});
+
+// Uploads use expo-file-system's native uploader (src/uploads.ts). Tests set
+// what `upload` answers; by default the server accepts with an empty object.
+jest.mock("expo-file-system", () => {
+  const upload = jest.fn(async (_uri: string, _url: string, _options: unknown) => ({ status: 200, body: "{}", headers: {} }));
+  class File {
+    uri: string;
+    constructor(uri: string) {
+      this.uri = uri;
+    }
+    upload(url: string, options: unknown) {
+      return upload(this.uri, url, options);
+    }
+  }
+  return { File, UploadType: { BINARY_CONTENT: 0, MULTIPART: 1 }, __upload: upload };
+});
+
 // App config: the name comes from the same shared file the real app uses.
 jest.mock("expo-constants", () => {
   const shared = require("../shared/app_config.json");

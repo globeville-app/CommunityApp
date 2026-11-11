@@ -7,7 +7,6 @@
  * other screens' fields: the screen it came from passes just its route name
  * (e.g. "join/address"), never what was typed there.
  */
-import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,11 +16,11 @@ import { ApiError, newFormKey, sendProblemReport } from "../api";
 import { useAuth } from "../auth";
 import { errorMessage } from "../i18n/errors";
 import { useLanguage } from "../language";
+import { pickScreenshot } from "../photos";
 import { deviceDetails } from "../report";
 import { BackButton, Button, Caption, ErrorMessage, Field, Notice, Screen, Title, TextLink } from "../ui";
 
 const MAX_LENGTH = 1000;
-const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 // How long "Thanks! We got it." shows before going back.
 const THANKS_MS = 1800;
 
@@ -46,21 +45,11 @@ export default function Report() {
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  async function pickScreenshot() {
+  async function onPickScreenshot() {
     setError(null);
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      quality: 0.7, // makes iPhone HEIC screenshots arrive as JPEG
-      preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
-      exif: false, // the server strips EXIF anyway
-    });
-    if (result.canceled || !result.assets?.length) return;
-    const asset = result.assets[0];
-    if (asset.fileSize && asset.fileSize > MAX_SCREENSHOT_BYTES) {
-      setError(new ApiError("bad_image"));
-      return;
-    }
-    setScreenshot({ uri: asset.uri, mimeType: asset.mimeType === "image/png" ? "image/png" : "image/jpeg" });
+    const picked = await pickScreenshot();
+    if (picked === "too_large") setError(new ApiError("bad_image"));
+    else if (picked) setScreenshot(picked);
   }
 
   async function onSend() {
@@ -128,7 +117,7 @@ export default function Report() {
       <Button
         title={screenshot ? t("report.change_screenshot") : t("report.add_screenshot")}
         variant="secondary"
-        onPress={pickScreenshot}
+        onPress={onPickScreenshot}
       />
 
       {token ? null : (

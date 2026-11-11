@@ -2,6 +2,7 @@
  * Screen tests for the whole join flow, with the backend API mocked.
  */
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ImageManipulator } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -246,7 +247,8 @@ describe("address → match → profile setup → profile", () => {
     await pressAndSettle(screen.getByRole("button", { name: "Finish" }));
     await waitFor(() =>
       expect(mocked.uploadPhoto).toHaveBeenCalledWith("tok-123", {
-        uri: "file:///photo.jpg",
+        // Shrunk to a small JPEG on the phone first (src/photos.ts).
+        uri: "file:///photo.shrunk.jpg",
         mimeType: "image/jpeg",
       }),
     );
@@ -279,11 +281,29 @@ describe("address → match → profile setup → profile", () => {
     expect(mocked.saveProfile).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects a photo over 5 MB before uploading", async () => {
+  it("shrinks a large photo instead of refusing it", async () => {
     mocked.matchAddress.mockResolvedValue({ neighborhood_id: 1, name: "Hale", aliases: [] });
     (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({
       canceled: false,
-      assets: [{ uri: "file:///big.jpg", mimeType: "image/jpeg", fileSize: 6 * 1024 * 1024 }],
+      assets: [{ uri: "file:///big.heic", mimeType: "image/heic", fileSize: 9 * 1024 * 1024, width: 4032, height: 4032 }],
+    });
+    renderApp();
+    await submitAddress();
+    fireEvent.press(await screen.findByRole("button", { name: "Join Hale" }));
+    await pressAndSettle(await screen.findByRole("button", { name: "Add a photo" }));
+    expect(await screen.findByLabelText("Selected photo")).toBeTruthy();
+    const context = (ImageManipulator.manipulate as jest.Mock).mock.results[0].value;
+    expect(context.resize).toHaveBeenCalledWith({ width: 1080 });
+  });
+
+  it("refuses a photo over 5 MB only if it can't be shrunk", async () => {
+    mocked.matchAddress.mockResolvedValue({ neighborhood_id: 1, name: "Hale", aliases: [] });
+    (ImageManipulator.manipulate as jest.Mock).mockImplementationOnce(() => {
+      throw new Error("unsupported");
+    });
+    (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValue({
+      canceled: false,
+      assets: [{ uri: "file:///big.jpg", mimeType: "image/jpeg", fileSize: 6 * 1024 * 1024, width: 4000 }],
     });
     renderApp();
     await submitAddress();
