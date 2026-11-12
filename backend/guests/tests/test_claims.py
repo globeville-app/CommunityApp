@@ -81,11 +81,27 @@ class GuestListTests(GuestTestCase):
 
     def test_host_sees_names_never_phone_numbers(self):
         data = self.client.get(f"/api/events/{self.event.pk}/guests").data
-        self.assertEqual(data["members"], [{"display_name": "Ben R."}])
+        self.assertEqual(data["members"], [{"id": self.ben.profile.pk, "display_name": "Ben R.", "badges": []}])
         self.assertEqual([g["first_name"] for g in data["guests"]], ["Rosa"])
         self.assertEqual(data["going_count"], 2)
         self.assertIsNone(data["came"])  # not over yet
         self.assertNotIn(PHONE_E164[-4:], str(data))
+
+    def test_members_badges_show_unless_hidden_or_from_another_neighborhood(self):
+        from badges.models import BadgeState
+        from profiles.models import Profile
+
+        BadgeState.objects.create(user=self.ben, badge_key="local", count=1, stage=1)
+        BadgeState.objects.create(user=self.cy, badge_key="local", count=1, stage=1)
+        Going.objects.create(user=self.cy, event=self.event)  # invited from another neighborhood
+        members = self.client.get(f"/api/events/{self.event.pk}/guests").data["members"]
+        ben, cy = members
+        self.assertEqual([b["key"] for b in ben["badges"]], ["local"])
+        self.assertEqual((cy["id"], cy["badges"]), (None, []))  # like the member page: neighbors only
+
+        Profile.objects.filter(user=self.ben).update(badge_visibility=Profile.BadgeVisibility.PRIVATE)
+        ben = self.client.get(f"/api/events/{self.event.pk}/guests").data["members"][0]
+        self.assertEqual(ben["badges"], [])  # "Only me" in Settings
 
     def test_only_the_host_and_organization_admins(self):
         self.as_user(self.ben)

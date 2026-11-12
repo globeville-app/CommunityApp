@@ -543,7 +543,9 @@ export async function getGuests(token: string, id: number): Promise<GuestList> {
   return {
     going_count: event.goingEmails.length + event.extraGoing,
     names_hidden: sensitive,
-    members: sensitive ? [] : event.goingEmails.map((e) => ({ display_name: db.profiles[e]?.display_name ?? "" })),
+    members: sensitive
+      ? []
+      : event.goingEmails.map((e) => ({ id: null, display_name: db.profiles[e]?.display_name ?? "", badges: [] })),
     // The demo has no web guests (they RSVP by text on the real server).
     guests: [],
     came: null,

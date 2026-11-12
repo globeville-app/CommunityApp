@@ -322,7 +322,9 @@ export type GuestList = {
   going_count: number;
   /** Resource fairs and donation drives: counts only. */
   names_hidden: boolean;
-  members: { display_name: string }[];
+  /** id is set only for neighbors (it opens their member page); badges are
+   * their earned ones, empty if they hid them or aren't a neighbor. */
+  members: { id: number | null; display_name: string; badges: BadgeData[] }[];
   guests: { id: number; first_name: string }[];
   /** After the event: confirmed attendance out of everyone who was going. */
   came: { confirmed: number; of: number } | null;

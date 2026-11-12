@@ -1,16 +1,18 @@
 /**
  * The host's guest list (docs/MILESTONE_5.md): members' display names and
- * guests' first names, with Remove; after the event, "Came: X of Y". Never
+ * guests' first names, with Remove; neighbors' badges unless they hid them
+ * (tap a neighbor for their member page); after the event, "Came: X of Y". Never
  * phone numbers, and never who didn't come. Resource fairs and donation
  * drives show counts only.
  */
-import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
-import { ApiError, getGuests, GuestList, removeGuest } from "../../api";
+import { ApiError, BadgeData, getGuests, GuestList, removeGuest } from "../../api";
 import { useAuth } from "../../auth";
+import { Badge } from "../../components/badges/Badge";
 import { errorMessage } from "../../i18n/errors";
 import {
   BackButton,
@@ -27,6 +29,25 @@ import {
   TextLink,
   Title,
 } from "../../ui";
+import { colors, type } from "../../theme";
+
+// Up to this many badges fit beside a name; the rest show as "+2".
+const BADGES_SHOWN = 3;
+
+/** A member's best badges, highest stage first. */
+function BadgeStrip({ badges }: { badges: BadgeData[] }) {
+  if (badges.length === 0) return null;
+  const best = [...badges].sort((a, b) => b.stage - a.stage).slice(0, BADGES_SHOWN);
+  const more = badges.length - best.length;
+  return (
+    <View style={styles.strip}>
+      {best.map((badge) => (
+        <Badge key={badge.key} badgeKey={badge.key} kind={badge.kind} stage={badge.stage} count={badge.count} size={30} />
+      ))}
+      {more > 0 ? <Text style={[type.caption, { color: colors.textSecondary }]}>+{more}</Text> : null}
+    </View>
+  );
+}
 
 export default function Guests() {
   const { t } = useTranslation();
@@ -80,7 +101,16 @@ export default function Guests() {
               {list.members.map((member, i) => (
                 <View key={`m${i}`}>
                   {i > 0 ? <Divider /> : null}
-                  <ListRow label={member.display_name} />
+                  <ListRow
+                    label={member.display_name}
+                    onPress={
+                      member.id !== null
+                        ? () => router.push({ pathname: "/member/[id]", params: { id: String(member.id) } })
+                        : undefined
+                    }
+                  >
+                    <BadgeStrip badges={member.badges} />
+                  </ListRow>
                 </View>
               ))}
               {list.guests.map((guest, i) => (
@@ -107,3 +137,7 @@ export default function Guests() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  strip: { flexDirection: "row", alignItems: "center", gap: 4 },
+});

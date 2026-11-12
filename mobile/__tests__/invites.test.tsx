@@ -134,7 +134,19 @@ describe("the host's event detail and guest list", () => {
     mocked.getGuests.mockResolvedValue({
       going_count: 3,
       names_hidden: false,
-      members: [{ display_name: "Rosa M." }],
+      members: [
+        {
+          id: 9,
+          display_name: "Rosa M.",
+          badges: [
+            { key: "local", kind: "growth", stage: 2, count: 3, next_threshold: 5, earned_at: null },
+            { key: "clean_sweeper", kind: "growth", stage: 1, count: 1, next_threshold: 3, earned_at: null },
+            { key: "fiestero", kind: "growth", stage: 1, count: 1, next_threshold: 3, earned_at: null },
+            { key: "open_door", kind: "keepsake", stage: 1, count: 1, next_threshold: null, earned_at: null },
+          ],
+        },
+        { id: null, display_name: "Lu P.", badges: [] },
+      ],
       guests: [
         { id: 5, first_name: "Maria" },
         { id: 6, first_name: "Joe" },
@@ -144,6 +156,10 @@ describe("the host's event detail and guest list", () => {
     mocked.removeGuest.mockResolvedValue(undefined);
     renderApp("/guests/42");
     expect(await screen.findByText("Rosa M.")).toBeTruthy();
+    // Her best three badges, then "+1"; a guest from another neighborhood shows none.
+    expect(screen.getByTestId("badge-local")).toBeTruthy();
+    expect(screen.getByText("+1")).toBeTruthy();
+    expect(screen.getByText("Lu P.")).toBeTruthy();
     expect(screen.getByText("Maria (guest)")).toBeTruthy();
     expect(screen.getByText("Came: 2 of 3 (confirmed)")).toBeTruthy();
     expect(screen.getByText(/Some people come and never confirm/)).toBeTruthy();

@@ -105,11 +105,14 @@ class GuestListView(APIView):
         """
         Who's going, for the host and organization admins only (Changes
         Milestone 2): display names for members, first names for guests.
-        Never phone numbers. For resource fairs and donation drives only the
+        Members' earned badges show too, unless they hid them. Never phone
+        numbers. For resource fairs and donation drives only the
         counts are shown, since going there can mean someone needed help.
         """
         from badges import config as badge_config
+        from badges.views import badges_json
         from events.models import Going
+        from profiles.models import Profile
         from events.timing import has_ended
         from events.views import going_total
         from guests.rsvp import going_guests
@@ -119,9 +122,20 @@ class GuestListView(APIView):
         members, guests = [], []
         if not names_hidden:
             goings = Going.objects.filter(event=event).select_related("user__profile").order_by("created_at")
-            members = [
-                {"display_name": g.user.profile.display_name} for g in goings if hasattr(g.user, "profile")
-            ]
+            host_neighborhood = getattr(getattr(request.user, "profile", None), "neighborhood_id", None)
+
+            def member_json(profile):
+                # Badges follow the member page's rule: neighbors only, and
+                # never if the member chose "Only me" in Settings.
+                neighbor = profile.neighborhood_id == host_neighborhood
+                shown = neighbor and profile.badge_visibility == Profile.BadgeVisibility.NEIGHBORHOOD
+                return {
+                    "id": profile.pk if neighbor else None,
+                    "display_name": profile.display_name,
+                    "badges": badges_json(profile.user, earned_only=True) if shown else [],
+                }
+
+            members = [member_json(g.user.profile) for g in goings if hasattr(g.user, "profile")]
             unclaimed = going_guests(event).exclude(pending__claimed_at__isnull=False).select_related("guest")
             guests = [{"id": r.pk, "first_name": r.guest.first_name} for r in unclaimed.order_by("created_at")]
         ended = has_ended(event, timezone.now())
