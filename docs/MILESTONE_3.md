@@ -1,6 +1,6 @@
 # Milestone 3: Badges, attendance and My Impact
 
-**App name:** Globeville. The name still lives only in `shared/app_config.json`.
+**App name:** globeville. The name still lives only in `shared/app_config.json`.
 
 **Builds on:** Milestones 1, 1.5 (`SETTINGS.md`) and 2. Every rule in those docs still applies.
 

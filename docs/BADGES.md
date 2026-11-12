@@ -1,4 +1,4 @@
-# Globeville Badge Catalog
+# globeville Badge Catalog
 
 These are the member badges every neighbor can earn. **This is the source of truth for badge rules.** `MILESTONE_3.md` says how to build them. Spanish names and descriptions are drafts for the neighborhood reviewer. Stage numbers are adjustable.
 

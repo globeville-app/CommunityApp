@@ -1,5 +1,5 @@
 /**
- * The small "gv" mark (for globeville) for tight spaces such as a tab bar (design/BRAND.md).
+ * The small "gv" mark (the app's initials) for tight spaces such as a tab bar (design/BRAND.md).
  */
 import Svg, { Path } from "react-native-svg";
 

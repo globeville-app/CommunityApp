@@ -1,6 +1,6 @@
 # Milestone 2: Neighborhood calendar — post events, "I'm going", categories
 
-**App name:** Globeville. The name still lives only in `shared/app_config.json`.
+**App name:** globeville. The name still lives only in `shared/app_config.json`.
 
 **Builds on:** Milestone 1: join flow, profiles, email login, the Expo app and the Django REST backend. Read `MILESTONE_1.md` first. Every rule there still applies.
 
@@ -27,7 +27,7 @@
 
 ## Context
 
-Partiful already handles invitations well: invite pages, guest lists and reminders. Globeville should not rebuild that.
+Partiful already handles invitations well: invite pages, guest lists and reminders. globeville should not rebuild that.
 
 What's missing is a way for neighbors to discover what's happening nearby when nobody sent them an invite. That includes the neighbor two doors down whose number the organizer doesn't have, and neighbors who read Spanish first. Partiful only reaches people the host already knows.
 

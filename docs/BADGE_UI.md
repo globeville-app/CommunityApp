@@ -1,4 +1,4 @@
-# Globeville: Badge and share card visuals
+# globeville: Badge and share card visuals
 
 **This doc is the visual spec for Milestone 3.** It describes exactly how badges and share cards are drawn. No mock files or images are needed. Read it with `BADGES.md` (the rules) and `MILESTONE_3.md` (the build).
 

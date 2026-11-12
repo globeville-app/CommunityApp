@@ -2,7 +2,7 @@
 
 **Read first:** `MILESTONE_1.md`, `SETTINGS.md`, `LANGUAGE.md`, `MILESTONE_2.md` and `BRAND.md`. Every privacy rule in them still applies, especially that **home addresses are never stored or logged**.
 
-**This doc covers how Globeville goes live, not what features it has.** Features live in their own milestone docs. The only new feature here is the owner stats page, which the owner needs from day one of the beta.
+**This doc covers how globeville goes live, not what features it has.** Features live in their own milestone docs. The only new feature here is the owner stats page, which the owner needs from day one of the beta.
 
 ---
 
@@ -124,14 +124,14 @@ A single staff-only page in Django admin that shows how many people are using th
 - Badge shares, last 30 days (counts only; no member is recorded)
 - Community badge results (admin-only, as `BADGES.md` describes)
 
-### Value signals (is Globeville worth using?)
+### Value signals (is globeville worth using?)
 
-These five numbers answer one question: **are people using Globeville for things Partiful and group chats don't do?** Show them together at the top of the page, last 30 days and since launch.
+These five numbers answer one question: **are people using globeville for things Partiful and group chats don't do?** Show them together at the top of the page, last 30 days and since launch.
 
 | # | Signal | How it's counted | What a good sign looks like |
 |---|---|---|---|
 | 1 | **Events without a Partiful link** | Events with no `partiful_url` ÷ all events | Most events. Organizers post things here first, not just copies of Partiful invites. |
-| 2 | **Found on Globeville vs. invited** | Each "I'm going" records **where it came from** (see below). Calendar, For you, Following and organization page count as "found." Invite link and share card count as "invited." | A real share of RSVPs are "found." People are discovering events they weren't invited to. |
+| 2 | **Found on globeville vs. invited** | Each "I'm going" records **where it came from** (see below). Calendar, For you, Following and organization page count as "found." Invite link and share card count as "invited." | A real share of RSVPs are "found." People are discovering events they weren't invited to. |
 | 3 | **Activity in Spanish** | Share of active members, and of guest RSVPs, whose language is Spanish | It's close to the neighborhood's own share of Spanish speakers. |
 | 4 | **Came back** | Members whose first counted attendance was in the period, and who had another counted attendance within 60 days ÷ those first-timers | Clearly above zero, and rising. |
 | 5 | **Guest-to-member conversion** (Milestone 5) | Guests who claimed ÷ guests whose events ended | Any steady conversion; the loop is working. |
@@ -143,7 +143,7 @@ These five numbers answer one question: **are people using Globeville for things
 
 **Build note:** signals 1, 3 and 4 use data that already exists. Signal 2 needs the `source` field, and signal 5 needs Milestone 5. **Build all five with Milestone 5** (see its build steps), and show "not yet tracked" until data exists.
 
-**Owner's question for the beta:** alongside the numbers, ask each organizer, "If Globeville disappeared tomorrow, what would you use instead?" Record the answers in this doc.
+**Owner's question for the beta:** alongside the numbers, ask each organizer, "If globeville disappeared tomorrow, what would you use instead?" Record the answers in this doc.
 
 ### Tests
 - The page loads for staff and is refused for non-staff and signed-out users.

@@ -92,7 +92,7 @@ Under **Wireless LAN adapter Wi-Fi**, note the **IPv4 Address**, for example
 ### 6. Check the phone can reach the server
 
 1. On the **computer**, open `http://localhost:8000/api/config` in a browser.
-   You should see a line with `"app_name":"Globeville"` and the interests.
+   You should see a line with `"app_name":"globeville"` and the interests.
 2. On the **iPhone**, on the same Wi-Fi, open `http://10.0.0.29:8000/api/config`
    in Safari. You should see the same line.
 
@@ -106,7 +106,7 @@ Under **Wireless LAN adapter Wi-Fi**, note the **IPv4 Address**, for example
 > 3. Open **PowerShell as administrator** (Start → type `PowerShell` →
 >    right-click → **Run as administrator**) and run this one line:
 >    ```
->    New-NetFirewallRule -DisplayName "Globeville dev server (port 8000)" -Direction Inbound -Protocol TCP -LocalPort 8000 -Action Allow -Profile Private
+>    New-NetFirewallRule -DisplayName "globeville dev server (port 8000)" -Direction Inbound -Protocol TCP -LocalPort 8000 -Action Allow -Profile Private
 >    ```
 >    This opens only port 8000, only on private networks. You can remove it
 >    later in **Windows Defender Firewall → Advanced settings → Inbound Rules**.

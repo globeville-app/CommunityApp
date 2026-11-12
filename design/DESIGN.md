@@ -1,10 +1,10 @@
-# Globeville Design System (v1)
+# globeville Design System (v1)
 
 Hand this file to Claude Code with the milestone specs. It describes the look of every screen so the Expo app matches the approved mocks. Where a milestone spec and this file disagree on visuals, this file wins; on behavior and data, the milestone spec wins.
 
 ## The idea
 
-Globeville feels like ambient lighting at a good party: slow, glowing color drifting behind frosted-glass surfaces. One signature move (the glow), everything else calm and readable.
+globeville feels like ambient lighting at a good party: slow, glowing color drifting behind frosted-glass surfaces. One signature move (the glow), everything else calm and readable.
 
 ## Color tokens
 
@@ -71,4 +71,4 @@ Rules:
 
 ## Reference
 
-The mocks live on a private claude.ai design canvas ("Globeville MVP Mocks"). Claude Code can't open that link, so export screenshots of each screen from the canvas and add them to `design/screens/` in the repo alongside this file.
+The mocks live on a private claude.ai design canvas ("globeville MVP Mocks"). Claude Code can't open that link, so export screenshots of each screen from the canvas and add them to `design/screens/` in the repo alongside this file.

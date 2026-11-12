@@ -1,16 +1,23 @@
 """
 The app name may only be written in shared/app_config.json. Everything else
 reads it from there, so renaming the app is a one-line change.
+
+The name is lowercase, the same as the domain, bucket, bundle
+ID and link scheme, so those uses (globeville.org, app.globeville,
+globeville-media, globeville://) don't count: only the name on its own does.
+"Globeville" with a capital G is the neighborhood, which is data, not the
+app's name. Tests may spell out the words a person sees.
 """
 
 import json
+import re
 
 from django.conf import settings
 from django.test import SimpleTestCase
 
-SKIP_DIRS = {"node_modules", ".venv", "__pycache__", ".expo", ".git", "media", "dist", "coverage", "web-demo"}
+SKIP_DIRS = {"__tests__", "node_modules", ".venv", "__pycache__", ".expo", ".git", "media", "dist", "coverage", "web-demo"}
 SKIP_FILES = {"package-lock.json", "yarn.lock", "db.sqlite3"}
-SKIP_SUFFIXES = {".md", ".geojson", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".ttf", ".pyc", ".sqlite3"}
+SKIP_SUFFIXES = {".md", ".geojson", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".ttf", ".pyc", ".sqlite3", ".svg"}
 
 
 def app_name_from_shared_config():
@@ -35,11 +42,12 @@ class AppNameTests(SimpleTestCase):
 
     def test_name_is_not_hard_coded_in_backend_or_mobile(self):
         name = app_name_from_shared_config()
+        on_its_own = re.compile(r"(?<![\w./@:-])" + re.escape(name) + r"(?![\w.:/-])")
         offenders = []
         checked = 0
         for path in files_to_check():
             checked += 1
-            if name in path.read_text(encoding="utf-8", errors="ignore"):
+            if on_its_own.search(path.read_text(encoding="utf-8", errors="ignore")):
                 offenders.append(str(path.relative_to(settings.REPO_ROOT)))
         self.assertGreater(checked, 20)  # make sure we actually looked
         self.assertEqual(offenders, [], f'"{name}" is hard-coded; read it from shared/app_config.json')

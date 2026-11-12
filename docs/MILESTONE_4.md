@@ -1,6 +1,6 @@
 # Milestone 4: Reminders and organization profiles
 
-**App name:** Globeville. The name still lives only in `shared/app_config.json`.
+**App name:** globeville. The name still lives only in `shared/app_config.json`.
 
 **Builds on:** Milestones 1, 1.5 (`SETTINGS.md`), 2 and 3. Every rule in those docs still applies, except where this doc changes one on purpose (marked **Changes Milestone N**).
 

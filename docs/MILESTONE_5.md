@@ -1,6 +1,6 @@
 # Milestone 5: Invite links (the host-to-guest loop)
 
-**App name:** Globeville. The name still lives only in `shared/app_config.json`.
+**App name:** globeville. The name still lives only in `shared/app_config.json`.
 
 **Builds on:** Milestones 1–4. Every rule in those docs still applies, except where this doc changes one on purpose (marked **Changes Milestone N**).
 
@@ -23,21 +23,21 @@ The product owner is learning Python. Prefer clear, conventional code over cleve
 
 ## Context
 
-Partiful grows because hosting *means* sending a link. Guests open it in a browser, RSVP with no app, and some of them later host their own events. Globeville needs its own version of that loop, so it doesn't send growth to Partiful.
+Partiful grows because hosting *means* sending a link. Guests open it in a browser, RSVP with no app, and some of them later host their own events. globeville needs its own version of that loop, so it doesn't send growth to Partiful.
 
 The loop:
 1. **Host posts an event** and gets an invite link.
 2. **Host texts the link from their own phone** to anyone, in the neighborhood or not.
 3. **Guests open it in their browser** and RSVP.
-4. **After the event, guests who opted in get "Collect your badge"** and join Globeville.
+4. **After the event, guests who opted in get "Collect your badge"** and join globeville.
 5. **New members host,** and the loop repeats.
 
-The badge step is Globeville's own. Partiful has no badges, so this is what turns a guest into a member.
+The badge step is globeville's own. Partiful has no badges, so this is what turns a guest into a member.
 
 **Three rules keep the loop legal, cheap and honest:**
-1. **Globeville never texts people who didn't opt in.** Invites go from the host's own phone through the share sheet. Our server texts only guests who RSVP'd and consented.
-2. **Globeville never reads the phone's contacts.**
-3. **Hosts see real turnout,** not just RSVPs, because Globeville counts confirmed attendance.
+1. **globeville never texts people who didn't opt in.** Invites go from the host's own phone through the share sheet. Our server texts only guests who RSVP'd and consented.
+2. **globeville never reads the phone's contacts.**
+3. **Hosts see real turnout,** not just RSVPs, because globeville counts confirmed attendance.
 
 ## Done when
 
@@ -71,7 +71,7 @@ The badge step is Globeville's own. Partiful has no badges, so this is what turn
 - Texts about event edits (time or place changes)
 - Polls, comments, photos, plus-ones and capacity limits
 - Flyers, QR codes and WhatsApp cards (backlog)
-- A "Globeville isn't in your neighborhood yet" waitlist (backlog)
+- A "globeville isn't in your neighborhood yet" waitlist (backlog)
 - Ticketing or payments (Milestone 6)
 - Guests hosting without joining
 - Phone numbers outside the US
@@ -104,7 +104,7 @@ The badge step is Globeville's own. Partiful has no badges, so this is what turn
 | Topic | Decision |
 |---|---|
 | Guest sign-in | First name and a US mobile number. Normalize the number with the `phonenumbers` package to E.164 format and reject non-US numbers. The number is confirmed with a 6-digit texted code that expires after 10 minutes, with at most 5 tries. A signed cookie keeps the browser signed in as that guest for 90 days. There's no password and no profile. |
-| Consent (two checkboxes, **both unchecked by default**) | **Required to RSVP:** "Text me a code and updates about this event (like a cancellation or a reminder I ask for). Msg & data rates may apply. Reply STOP to opt out." **Optional:** "After the event, text me so I can collect my badge on Globeville." Both are shown in the page's language. |
+| Consent (two checkboxes, **both unchecked by default**) | **Required to RSVP:** "Text me a code and updates about this event (like a cancellation or a reminder I ask for). Msg & data rates may apply. Reply STOP to opt out." **Optional:** "After the event, text me so I can collect my badge on globeville." Both are shown in the page's language. |
 | Proof of consent | For each guest, store when they agreed to each consent, the consent wording version (`consent_version`, for example `2026-10-v1`), and the page language. Never overwrite it; record new consent as new rows. |
 | Reminder choice | A third optional choice: "Remind me the day before." |
 | Going count (**Changes Milestone 2**) | The count includes members and guests (guests the host removed don't count). |
@@ -116,11 +116,11 @@ The badge step is Globeville's own. Partiful has no badges, so this is what turn
 | Topic | Decision |
 |---|---|
 | Provider | One SMS provider (Twilio Messaging Service or similar) behind a small `Texter` interface in `backend/texting/`, with a fake version for tests and development. **Tests never call the real provider.** |
-| What we send | Only these four kinds, all starting with "Globeville:". English examples: <ul><li>**Code** (required consent): "Globeville: your code is 482913. It expires in 10 minutes."</li><li>**Cancellation** (required consent): "Globeville: {title} on {date} was cancelled by the host."</li><li>**Reminder** (only if chosen): "Globeville: reminder, {title} is tomorrow at {time}. Can't make it? {short link}"</li><li>**Collect** (only with the optional consent): "Globeville: you went to {title}! Collect your badge: {link}. Reply STOP to opt out."</li></ul> Each also has a Spanish version, sent in the guest's language. |
+| What we send | Only these four kinds, all starting with "globeville:". English examples: <ul><li>**Code** (required consent): "globeville: your code is 482913. It expires in 10 minutes."</li><li>**Cancellation** (required consent): "globeville: {title} on {date} was cancelled by the host."</li><li>**Reminder** (only if chosen): "globeville: reminder, {title} is tomorrow at {time}. Can't make it? {short link}"</li><li>**Collect** (only with the optional consent): "globeville: you went to {title}! Collect your badge: {link}. Reply STOP to opt out."</li></ul> Each also has a Spanish version, sent in the guest's language. |
 | When | **Reminder:** 5:00 PM Denver time the day before. **Collect:** 10:00 AM Denver time the morning after the event ends. **Cancellation:** right away, but if it's outside quiet hours, held until 9:00 AM. |
 | Quiet hours | No texts before 9:00 AM or after 8:00 PM Denver time, except the code, which the guest just asked for. A text due inside quiet hours waits until 9:00 AM. |
 | Scheduling | Add a **ScheduledText** model, and send due texts from Milestone 4's `send_due_notifications` command, which runs every 15 minutes. Each text is sent at most once; running the command twice changes nothing. |
-| Opt-out replies | An inbound webhook from the provider (`POST /webhooks/sms`, with the provider's signature checked) handles replies: <ul><li>**STOP** (also STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT, ALTO, PARAR) marks the number opted out at once and cancels its scheduled texts.</li><li>**START** (or UNSTOP) opts it back in.</li><li>**HELP** (or AYUDA) replies: "Globeville: event texts for RSVPs. Reply STOP to opt out. Help: {support email}."</li></ul> An opted-out number gets nothing, not even codes, until START. The web page then explains how to opt back in. |
+| Opt-out replies | An inbound webhook from the provider (`POST /webhooks/sms`, with the provider's signature checked) handles replies: <ul><li>**STOP** (also STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT, ALTO, PARAR) marks the number opted out at once and cancels its scheduled texts.</li><li>**START** (or UNSTOP) opts it back in.</li><li>**HELP** (or AYUDA) replies: "globeville: event texts for RSVPs. Reply STOP to opt out. Help: {support email}."</li></ul> An opted-out number gets nothing, not even codes, until START. The web page then explains how to opt back in. |
 | Monthly budget | `SMS_MONTHLY_BUDGET_USD` and `SMS_COST_PER_TEXT_USD` are environment settings. **At 80%,** email the owner (`OWNER_ALERT_EMAILS`). **At 100%,** pause reminders and collect texts for the rest of the month; codes and cancellations keep sending. The owner stats page shows spending against the budget. |
 | Abuse limits | At most 5 RSVPs per phone per day, 3 code texts per phone per hour (10 per day), 30 RSVP attempts per IP address per hour, and 200 guest RSVPs per event. Use Django's database cache for the counters, so no new service (like Redis) is needed. Hosts can remove a guest. Django admin can block a number. |
 | Phone numbers | Stored only to text guests. They're never shown, logged or put in error reports. Django admin shows only the last 4 digits. Numbers are deleted 30 days after the event's last scheduled text, unless the guest joined or has another upcoming RSVP. |
@@ -182,7 +182,7 @@ The badge step is Globeville's own. Partiful has no badges, so this is what turn
 | `POST /e/{code}/cancel-rsvp` | Signed-in guest says they're not going. |
 | `GET /r/{signed_token}` | The "Can't make it?" link from the reminder text. It confirms with one tap, with no sign-in needed (the token is signed and tied to that RSVP). |
 | `GET /e/{code}/calendar.ics` | Calendar file, for signed-in guests only. |
-| `GET /c/{claim_token}` | The collect page: "Collect your badge on Globeville," store links, the claim code with a copy button, and **Open in app**. |
+| `GET /c/{claim_token}` | The collect page: "Collect your badge on globeville," store links, the claim code with a copy button, and **Open in app**. |
 | `POST /webhooks/sms` | Inbound replies (STOP, START, HELP) and delivery status, with the provider's signature checked. |
 | `GET /.well-known/...` | The deep-link files. |
 

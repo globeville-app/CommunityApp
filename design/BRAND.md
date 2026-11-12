@@ -1,6 +1,6 @@
-# Globeville Brand: Logo and Wordmark (v1)
+# globeville Brand: Logo and Wordmark (v1)
 
-This file tells you how to implement the Globeville logo in the Expo app. It works alongside `DESIGN.md`: colors and type come from there, and this file adds the logo rules. The final assets are in `assets/brand/`. Use those files. Do not redraw the logo or re-typeset the icon.
+This file tells you how to implement the globeville logo in the Expo app. It works alongside `DESIGN.md`: colors and type come from there, and this file adds the logo rules. The final assets are in `assets/brand/`. Use those files. Do not redraw the logo or re-typeset the icon.
 
 ## The two marks
 
@@ -10,7 +10,7 @@ This file tells you how to implement the Globeville logo in the Expo app. It wor
 | **gv icon** | Lowercase "gv" (for **g**lobe**v**ille) in Outfit SemiBold, white, on the midnight glow square | App icon, favicon, avatar for official accounts, small spaces |
 
 Rules:
-- The name is always lowercase in the logo: **globeville**. In sentences, write "Globeville". Never write "GlobeVille" or "GLOBEVILLE".
+- The name is always lowercase: **globeville**, in the logo and in sentences, including at the start of a sentence. Never write "GlobeVille" or "GLOBEVILLE". "Globeville" with a capital G means only the neighborhood.
 - The wordmark uses the normal letterforms, so the g hangs below the line. Do not raise or resize the g in the wordmark (we tried it and it reads like a 9).
 - The gv icon uses the same normal letterforms as the wordmark: the g hangs below the line and the v sits on it. The letters are vector outlines in the icon files. Do not rebuild them from live text.
 - The logo is white on dark. On light backgrounds, use `globeville-wordmark-midnight.svg` (#1A0F3D).
@@ -63,7 +63,7 @@ The SVGs are vector outlines traced from Outfit 600, so they render the same eve
    ```json
    {
      "expo": {
-       "name": "Globeville",
+       "name": "globeville",
        "icon": "./assets/brand/icon.png",
        "userInterfaceStyle": "dark",
        "android": {
@@ -106,7 +106,7 @@ The SVGs are vector outlines traced from Outfit 600, so they render the same eve
 - [ ] The Android adaptive icon stays readable under circle, squircle and teardrop masks. The letters are not clipped.
 - [ ] The splash and Join screens show the same wordmark with no font-swap flicker.
 - [ ] The wordmark keeps its proportions at heights 24, 44 and 80.
-- [ ] VoiceOver and TalkBack read the logo as "Globeville".
+- [ ] VoiceOver and TalkBack read the logo as "globeville".
 - [ ] The app name appears in code only in `shared/app_config.json`. The logo art comes from the files above.
 
 ## Change log

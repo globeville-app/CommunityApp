@@ -1,6 +1,6 @@
 # Language: English and Spanish (v1)
 
-Globeville launches in Globeville, a largely Spanish-speaking neighborhood, so English and Spanish are both required at launch. Spanish is not a later add-on.
+globeville launches in Globeville, a largely Spanish-speaking neighborhood, so English and Spanish are both required at launch. Spanish is not a later add-on.
 
 This file adds requirements to `MILESTONE_1.md` (Part A) and `MILESTONE_2.md` (Part B). Where they conflict, this file wins on anything about language.
 

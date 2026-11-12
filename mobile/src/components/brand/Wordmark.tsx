@@ -1,5 +1,5 @@
 /**
- * The logo: "globeville" in lowercase letter outlines (design/BRAND.md).
+ * The logo: the app name in lowercase letter outlines (design/BRAND.md).
  * Drawn from vector paths, not live text, so it never shifts while fonts load.
  * Screen readers read the app name from shared/app_config.json.
  */
