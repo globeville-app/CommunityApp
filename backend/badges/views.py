@@ -14,6 +14,7 @@ from config.errors import ApiError
 from events.timing import event_end
 from events.views import get_event, member_profile
 from profiles.models import Block, MemberReport, Profile
+from support.notify import alert_team, preview
 
 from . import config, engine
 from .models import Attendance, BadgeState, Celebration, Keepsake, ShareLog
@@ -176,7 +177,8 @@ class MemberReportView(APIView):
             raise ApiError("reason_required")
         if len(reason) > MemberReport._meta.get_field("reason").max_length:
             raise ApiError("reason_too_long")
-        MemberReport.objects.create(reported=member.user, reporter=request.user, reason=reason)
+        report = MemberReport.objects.create(reported=member.user, reporter=request.user, reason=reason)
+        alert_team(request, "member reported", [f"Reason: {preview(reason)}"], "profiles_memberreport", report.pk)
         return Response({"ok": True}, status=status.HTTP_201_CREATED)
 
 

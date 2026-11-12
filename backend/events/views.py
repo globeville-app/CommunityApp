@@ -19,6 +19,7 @@ from accounts.models import language_of
 from config.errors import ApiError
 from config.idempotency import once_per_key
 from profiles.models import Profile
+from support.notify import alert_team, preview
 
 from notifications import scheduling
 
@@ -345,7 +346,10 @@ class EventReportView(APIView):
             raise ApiError("reason_required")
         if len(reason) > REPORT_REASON_MAX:
             raise ApiError("reason_too_long")
-        EventReport.objects.create(event=event, reporter=request.user, reason=reason)
+        report = EventReport.objects.create(event=event, reporter=request.user, reason=reason)
+        alert_team(
+            request, f"event reported: {event.title}", [f"Reason: {preview(reason)}"], "events_eventreport", report.pk
+        )
         return Response({"ok": True}, status=status.HTTP_201_CREATED)
 
 
