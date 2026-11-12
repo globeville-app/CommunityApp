@@ -3,9 +3,9 @@
  *   0. Post as: You / [Organization] (Milestone 4; only for admins of an
  *      approved organization), then which of its neighborhoods
  *   1. What kind of event? (category picker)
- *   2. Got a Partiful link? (optional; prefills the title, may suggest a category)
- *   3. Details
- *   4. Map pin (Milestone 3): tap the map, drag the pin to the meeting spot
+ *   2. Details (a Partiful link is an optional field there; "Fill in from
+ *      Partiful" prefills the title and may suggest a category)
+ *   3. Map pin (Milestone 3): tap the map, drag the pin to the meeting spot
  * Editing (?id=) opens straight on Details; the category can still change.
  * "Add a map pin" on a pinless event opens editing on the pin (?step=pin).
  * Times are entered in Denver time.
@@ -58,7 +58,7 @@ import {
   Title,
 } from "../ui";
 
-type Step = "who" | "where" | "category" | "partiful" | "details" | "pin";
+type Step = "who" | "where" | "category" | "details" | "pin";
 
 // Downtown Denver, if the server can't say where the neighborhood is.
 const DENVER: LatLng = { latitude: 39.7392, longitude: -104.9903 };
@@ -179,7 +179,6 @@ export default function EventForm() {
         setDescription(event.description);
         setTitleAlt(event.title_alt ?? "");
         setDescriptionAlt(event.description_alt ?? "");
-        setShowAlt(!!event.title_alt || !!event.description_alt);
         if (event.latitude !== null && event.longitude !== null) {
           setPin({ latitude: event.latitude, longitude: event.longitude });
           setPinLocked(new Date(event.starts_at).getTime() <= Date.now());
@@ -193,15 +192,12 @@ export default function EventForm() {
     setCategory(next);
     setOtherText(nextOther);
     if (suggestion === next) setSuggestion(null);
-    setStep(editingId ? "details" : step === "category" && !title ? "partiful" : "details");
+    setStep("details");
   }
 
-  async function onPartifulContinue() {
+  async function onPartifulFill() {
     const url = partifulUrl.trim();
-    if (!url || !token) {
-      setStep("details");
-      return;
-    }
+    if (!url || !token) return;
     setBusy(true);
     try {
       const preview = await partifulPreview(token, url);
@@ -217,7 +213,6 @@ export default function EventForm() {
       setPartifulNote("not_found");
     } finally {
       setBusy(false);
-      setStep("details");
     }
   }
 
@@ -229,8 +224,9 @@ export default function EventForm() {
       title: title.trim(),
       description: description.trim(),
       language: writing,
-      title_alt: showAlt ? titleAlt.trim() : "",
-      description_alt: showAlt ? descriptionAlt.trim() : "",
+      // Collapsing the other language only hides the fields; what was typed is kept.
+      title_alt: titleAlt.trim(),
+      description_alt: descriptionAlt.trim(),
       starts_at: toServerTime(date, start),
       ends_at: hasEnd ? endServerTime(date, start, end) : null,
       location_text: location.trim(),
@@ -321,28 +317,6 @@ export default function EventForm() {
     );
   }
 
-  if (step === "partiful") {
-    return (
-      <Screen>
-        <BackButton />
-        <Title>{t("post.partiful_title")}</Title>
-        <Intro>{t("post.partiful_intro")}</Intro>
-        <Field
-          label={t("post.partiful_label")}
-          icon="link-outline"
-          placeholder={PARTIFUL_PLACEHOLDER}
-          value={partifulUrl}
-          onChangeText={setPartifulUrl}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-        />
-        <Button title={t("post.continue")} onPress={onPartifulContinue} busy={busy} />
-        <TextLink label={t("post.skip")} onPress={() => setStep("details")} />
-      </Screen>
-    );
-  }
-
   return (
     <Screen>
       <BackButton />
@@ -372,14 +346,6 @@ export default function EventForm() {
           />
         ) : null}
       </GlassCard>
-
-      {partifulNote ? (
-        partifulNote === "found" ? (
-          <Notice message={t("post.partiful_found")} />
-        ) : (
-          <Caption>{t("post.partiful_not_found")}</Caption>
-        )
-      ) : null}
 
       <Field label={t("post.title_label")} value={title} onChangeText={setTitle} maxLength={80} />
       <GlassCard>
@@ -411,6 +377,13 @@ export default function EventForm() {
         maxLength={2000}
       />
 
+      <TextLink
+        label={showAlt ? t(`post.hide_alt_${otherLanguage}`) : t(`post.show_alt_${otherLanguage}`)}
+        onPress={() => setShowAlt(!showAlt)}
+      />
+      {!showAlt && (titleAlt.trim() || descriptionAlt.trim()) ? (
+        <Caption>{t(`post.alt_added_${otherLanguage}`)}</Caption>
+      ) : null}
       {showAlt ? (
         <>
           <Field
@@ -427,20 +400,31 @@ export default function EventForm() {
             maxLength={2000}
           />
         </>
-      ) : (
-        <TextLink label={t(`post.add_alt_${otherLanguage}`)} onPress={() => setShowAlt(true)} />
-      )}
+      ) : null}
 
-      {editingId ? (
-        <Field
-          label={t("post.partiful_label")}
-          icon="link-outline"
-          value={partifulUrl}
-          onChangeText={setPartifulUrl}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-        />
+      <Field
+        label={t("post.partiful_label")}
+        icon="link-outline"
+        placeholder={PARTIFUL_PLACEHOLDER}
+        value={partifulUrl}
+        onChangeText={(next) => {
+          setPartifulUrl(next);
+          setPartifulNote(null);
+        }}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="url"
+      />
+      <Caption>{t("post.partiful_hint")}</Caption>
+      {partifulUrl.trim() && !partifulNote ? (
+        <Button title={t("post.partiful_fill")} variant="secondary" onPress={onPartifulFill} busy={busy} />
+      ) : null}
+      {partifulNote ? (
+        partifulNote === "found" ? (
+          <Notice message={t("post.partiful_found")} />
+        ) : (
+          <Caption>{t("post.partiful_not_found")}</Caption>
+        )
       ) : null}
 
       <GlassCard>

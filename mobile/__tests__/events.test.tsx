@@ -156,9 +156,11 @@ describe("the category picker (posting)", () => {
     expect(screen.getByText("Describe your event in a few words.")).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText("Describe it in a few words"), "Quinceañera rehearsal");
     fireEvent.press(screen.getByRole("button", { name: "Use this" }));
-    expect(await screen.findByRole("header", { name: "Got a Partiful link?" })).toBeTruthy();
+    expect(await screen.findByRole("header", { name: DETAILS })).toBeTruthy();
   });
 });
+
+const DETAILS = "Details";
 
 describe("posting an event", () => {
   async function chooseCleanup() {
@@ -166,14 +168,14 @@ describe("posting an event", () => {
     await pressAndSettle(await screen.findByRole("button", { name: "Post an event" }));
     fireEvent.press(await screen.findByRole("button", { name: "Community & Giving" }));
     fireEvent.press(screen.getByRole("checkbox", { name: "Cleanup" }));
-    expect(await screen.findByRole("header", { name: "Got a Partiful link?" })).toBeTruthy();
+    expect(await screen.findByRole("header", { name: DETAILS })).toBeTruthy();
   }
 
-  it("the Partiful step fills in the title and offers, not forces, a suggestion", async () => {
+  it("the optional Partiful field fills in the title and offers, not forces, a suggestion", async () => {
     mocked.partifulPreview.mockResolvedValue({ title: "Fall Potluck on Lowell", suggested_category: "potluck" });
     await chooseCleanup();
     fireEvent.changeText(screen.getByLabelText("Partiful link"), "https://partiful.com/e/abc");
-    await pressAndSettle(screen.getByRole("button", { name: "Continue" }));
+    await pressAndSettle(screen.getByRole("button", { name: "Fill in from Partiful" }));
 
     expect(mocked.partifulPreview).toHaveBeenCalledWith("tok-123", "https://partiful.com/e/abc");
     expect(await screen.findByLabelText("Title")).toHaveProp("value", "Fall Potluck on Lowell");
@@ -188,7 +190,6 @@ describe("posting an event", () => {
     mocked.createEvent.mockResolvedValue(sampleEvent({ id: 42, title: "River cleanup", category: "cleanup", group: "community", is_organizer: true }));
     mocked.getEvent.mockResolvedValue(sampleEvent({ id: 42, title: "River cleanup", category: "cleanup", group: "community", is_organizer: true }));
     await chooseCleanup();
-    fireEvent.press(screen.getByRole("link", { name: "Skip" }));
 
     fireEvent.changeText(await screen.findByLabelText("Title"), "River cleanup");
     fireEvent.changeText(screen.getByLabelText("Date"), "2030-10-24");
@@ -197,8 +198,13 @@ describe("posting an event", () => {
     fireEvent.changeText(screen.getByLabelText("End time"), "12:00");
     fireEvent.changeText(screen.getByLabelText("Meeting spot"), "Riverside park by the bridge");
     expect(screen.getByText("Neighbors will see this. For a block party, a block or cross street is enough.")).toBeTruthy();
-    fireEvent.press(screen.getByRole("link", { name: "Add Spanish version" }));
+    expect(screen.getByText("Times are in Mountain Time.")).toBeTruthy();
+    // The Spanish fields start closed, and closing them keeps what was typed.
+    expect(screen.queryByLabelText("Title in Spanish (optional)")).toBeNull();
+    fireEvent.press(screen.getByRole("link", { name: "Spanish version (optional)" }));
     fireEvent.changeText(screen.getByLabelText("Title in Spanish (optional)"), "Limpieza del río");
+    fireEvent.press(screen.getByRole("link", { name: "Hide Spanish version" }));
+    expect(screen.getByText("Spanish version added.")).toBeTruthy();
     await pressAndSettle(screen.getByRole("button", { name: "Next: map pin" }));
     await dropPin(39.7621, -105.0098);
     await pressAndSettle(screen.getByRole("button", { name: "Post" }));
@@ -227,7 +233,6 @@ describe("posting an event", () => {
   it("shows the server's reason when posting fails", async () => {
     mocked.createEvent.mockRejectedValue(new ApiError("start_in_past", 400));
     await chooseCleanup();
-    fireEvent.press(screen.getByRole("link", { name: "Skip" }));
     fireEvent.changeText(await screen.findByLabelText("Title"), "Cleanup");
     fireEvent.changeText(screen.getByLabelText("Meeting spot"), "The park");
     await pressAndSettle(screen.getByRole("button", { name: "Next: map pin" }));
