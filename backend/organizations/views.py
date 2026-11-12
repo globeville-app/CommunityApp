@@ -28,6 +28,7 @@ from neighborhoods.geo import neighborhood_center
 from neighborhoods.models import Neighborhood
 from profiles.models import Profile
 from profiles.photos import PhotoError, clean_photo
+from support.notify import alert_team, preview
 
 from .models import (
     DESCRIPTION_MAX,
@@ -220,6 +221,13 @@ class OrganizationListView(APIView):
             organization.neighborhoods.set(neighborhood_ids)
             # The member who asks becomes its first admin.
             OrganizationAdmin.objects.create(organization=organization, user=request.user)
+        alert_team(
+            request,
+            f"new organization to review: {organization.name}",
+            [f"Type: {organization.get_type_display()}", f"About: {preview(organization.description)}"],
+            "organizations_organization",
+            organization.pk,
+        )
         return Response(org_json(organization, request, profile), status=status.HTTP_201_CREATED)
 
 
@@ -291,7 +299,17 @@ class OrganizationDetailView(APIView):
                 OrganizationChangeRequest.objects.filter(
                     organization=organization, status=OrganizationChangeRequest.Status.PENDING
                 ).delete()
-                OrganizationChangeRequest.objects.create(organization=organization, requested_by=request.user, **change)
+                pending = OrganizationChangeRequest.objects.create(
+                    organization=organization, requested_by=request.user, **change
+                )
+        if change:
+            alert_team(
+                request,
+                f"organization change to review: {organization.name}",
+                [f"Changes: {', '.join(sorted(change))}"],
+                "organizations_organizationchangerequest",
+                pending.pk,
+            )
         return Response(org_json(organization, request, profile))
 
 
@@ -439,7 +457,14 @@ class OrganizationReportView(APIView):
             raise ApiError("reason_required")
         if len(reason) > REPORT_REASON_MAX:
             raise ApiError("reason_too_long")
-        OrganizationReport.objects.create(organization=organization, reporter=request.user, reason=reason)
+        report = OrganizationReport.objects.create(organization=organization, reporter=request.user, reason=reason)
+        alert_team(
+            request,
+            f"organization reported: {organization.name}",
+            [f"Reason: {preview(reason)}"],
+            "organizations_organizationreport",
+            report.pk,
+        )
         return Response({"ok": True}, status=status.HTTP_201_CREATED)
 
 
