@@ -11,7 +11,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
 import { Href, router, useFocusEffect, useIsFocused } from "expo-router";
-import { ComponentProps, ReactNode, useCallback } from "react";
+import { ComponentProps, ReactNode, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -188,6 +188,10 @@ export function Caption({ children, onGlass }: { children: ReactNode; onGlass?: 
 // ---- Inputs and buttons -------------------------------------------------------
 
 export function Field({ label, icon, ...props }: TextInputProps & { label: string; icon?: IconName }) {
+  const { t } = useTranslation();
+  // Password boxes get an eye button to show what was typed.
+  const [revealed, setRevealed] = useState(false);
+  const isPassword = !!props.secureTextEntry;
   // Multi-line boxes (the problem report) are taller, with gentler corners.
   const box = props.multiline ? styles.inputMultiline : null;
   return (
@@ -203,7 +207,19 @@ export function Field({ label, icon, ...props }: TextInputProps & { label: strin
           style={[styles.inputText, props.multiline && styles.inputTextMultiline]}
           textAlignVertical={props.multiline ? "top" : undefined}
           {...props}
+          secureTextEntry={isPassword && !revealed}
         />
+        {isPassword ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={revealed ? t("common.hide_password") : t("common.show_password")}
+            hitSlop={12}
+            onPress={() => setRevealed(!revealed)}
+            style={styles.inputAction}
+          >
+            <Ionicons name={revealed ? "eye-off-outline" : "eye-outline"} size={22} color={colors.textSoft} />
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
@@ -471,6 +487,7 @@ export const styles = StyleSheet.create({
   // zIndex keeps the icon and text above the frosted layer; in a browser the
   // glass would otherwise blur the typed text.
   inputIcon: { marginRight: 10, zIndex: 1 },
+  inputAction: { marginLeft: 10, zIndex: 1, minWidth: 28, alignItems: "center" },
   inputText: {
     flex: 1,
     height: "100%",

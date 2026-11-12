@@ -122,7 +122,6 @@ describe("the map pin", () => {
     renderApp("/event-form");
     fireEvent.press(await screen.findByRole("button", { name: "Community & Giving" }));
     fireEvent.press(screen.getByRole("checkbox", { name: "Cleanup" }));
-    fireEvent.press(await screen.findByRole("link", { name: "Skip" }));
     fireEvent.changeText(await screen.findByLabelText("Title"), "Cleanup");
     fireEvent.changeText(screen.getByLabelText("Meeting spot"), "The park");
     await pressAndSettle(screen.getByRole("button", { name: "Next: map pin" }));

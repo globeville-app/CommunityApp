@@ -2,7 +2,9 @@
   "common": {
     "back": "Atrás",
     "try_again": "Intentar otra vez",
-    "loading": "Cargando"
+    "loading": "Cargando",
+    "show_password": "Mostrar contraseña",
+    "hide_password": "Ocultar contraseña"
   },
   "language": {
     "toggle_label": "Idioma",

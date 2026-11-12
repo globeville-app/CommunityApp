@@ -39,7 +39,6 @@ describe("posting: who can see this", () => {
     await pressAndSettle(await screen.findByRole("button", { name: "Post an event" }));
     fireEvent.press(await screen.findByRole("button", { name: "Community & Giving" }));
     fireEvent.press(screen.getByRole("checkbox", { name: "Cleanup" }));
-    fireEvent.press(await screen.findByRole("link", { name: "Skip" }));
     fireEvent.changeText(await screen.findByLabelText("Title"), "River cleanup");
     fireEvent.changeText(screen.getByLabelText("Meeting spot"), "Riverside park");
     expect(screen.getByText("Who can see this?")).toBeTruthy();

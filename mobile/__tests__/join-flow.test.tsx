@@ -102,6 +102,12 @@ describe("sign up and log in", () => {
 
     fireEvent.changeText(await screen.findByLabelText("Email"), " ana@example.com ");
     fireEvent.changeText(screen.getByLabelText("Password"), "a long pass phrase");
+    // Typed once, with an eye button to check it instead of a second box.
+    expect(screen.getByLabelText("Password")).toHaveProp("secureTextEntry", true);
+    fireEvent.press(screen.getByRole("button", { name: "Show password" }));
+    expect(screen.getByLabelText("Password")).toHaveProp("secureTextEntry", false);
+    fireEvent.press(screen.getByRole("button", { name: "Hide password" }));
+    expect(screen.getByLabelText("Password")).toHaveProp("secureTextEntry", true);
     // Agreeing to the terms, with the minimum age, before the button.
     expect(
       screen.getByText("By creating an account, you confirm you're 13 or older and agree to the Terms of Use and Privacy Policy."),

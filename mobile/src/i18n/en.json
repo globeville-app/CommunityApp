@@ -2,7 +2,9 @@
   "common": {
     "back": "Back",
     "try_again": "Try again",
-    "loading": "Loading"
+    "loading": "Loading",
+    "show_password": "Show password",
+    "hide_password": "Hide password"
   },
   "language": {
     "toggle_label": "Language",

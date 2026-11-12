@@ -268,7 +268,6 @@ describe("Post as", () => {
     fireEvent.press(screen.getByRole("checkbox", { name: "Elyria Swansea" }));
     fireEvent.press(await screen.findByRole("button", { name: "Community & Giving" }));
     fireEvent.press(screen.getByRole("checkbox", { name: "Cleanup" }));
-    fireEvent.press(await screen.findByRole("link", { name: "Skip" }));
     expect(await screen.findByText("Posting as Our Lady Church in Elyria Swansea")).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText("Title"), "Parish cleanup");
     fireEvent.changeText(screen.getByLabelText("Meeting spot"), "The parish hall");
