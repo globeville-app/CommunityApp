@@ -336,8 +336,14 @@ export default function EventDetail() {
       ) : reporting ? (
         <GlassCard>
           <Text style={[type.section, { color: colors.textPrimary }]}>{t("events.report_title")}</Text>
+          <Caption onGlass>{t("events.report_note")}</Caption>
           <Field label={t("events.report_reason_label")} value={reason} onChangeText={setReason} maxLength={200} />
           <Button title={t("events.report_send")} variant="secondary" onPress={onReport} disabled={!reason.trim()} />
+          {/* A bug isn't the event's fault: that goes to Report a problem. */}
+          <TextLink
+            label={t("events.report_app_problem")}
+            onPress={() => router.push({ pathname: "/report", params: { from: "event" } })}
+          />
         </GlassCard>
       ) : event.is_organizer ? null : (
         // Hosts don't report their own event; they can edit or cancel it.

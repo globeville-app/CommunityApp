@@ -355,7 +355,7 @@
     "auto_translated": "Traducido automáticamente",
     "show_original": "Ver original",
     "show_translation": "Ver traducción",
-    "report_link": "Reportar",
+    "report_link": "Reportar este evento",
     "report_title": "Reportar este evento",
     "report_reason_label": "¿Qué pasa?",
     "report_send": "Enviar reporte",
@@ -376,7 +376,9 @@
     "hosted_by": "Organizado por {{name}}",
     "link_only": "Solo con enlace",
     "invite_people": "Invitar gente",
-    "guest_list": "Lista de invitados"
+    "guest_list": "Lista de invitados",
+    "report_note": "Para un evento que es spam, falso, peligroso u ofensivo. Nuestro equipo lo revisa, y el anfitrión no sabrá quién lo reportó.",
+    "report_app_problem": "¿Algo no funciona en la app? Reporta un problema"
   },
   "picker": {
     "event_title": "¿Qué tipo de evento?",

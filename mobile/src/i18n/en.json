@@ -355,7 +355,7 @@
     "auto_translated": "Auto-translated",
     "show_original": "Show original",
     "show_translation": "Show translation",
-    "report_link": "Report",
+    "report_link": "Report this event",
     "report_title": "Report this event",
     "report_reason_label": "What's wrong?",
     "report_send": "Send report",
@@ -376,7 +376,9 @@
     "hosted_by": "Hosted by {{name}}",
     "link_only": "Link only",
     "invite_people": "Invite people",
-    "guest_list": "Guest list"
+    "guest_list": "Guest list",
+    "report_note": "For an event that's spam, fake, unsafe or offensive. Our team reviews it, and the host won't know who reported it.",
+    "report_app_problem": "Something not working in the app? Report a problem instead"
   },
   "picker": {
     "event_title": "What kind of event?",

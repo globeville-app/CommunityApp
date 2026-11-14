@@ -271,14 +271,14 @@ describe("the event detail", () => {
     await screen.findByText("12 neighbors going");
     expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Cancel event" })).toBeNull();
-    expect(screen.getByRole("link", { name: "Report" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Report this event" })).toBeTruthy();
     first.unmount();
 
     mocked.getEvent.mockResolvedValue(sampleEvent({ is_organizer: true }));
     mocked.cancelEvent.mockResolvedValue(sampleEvent({ is_organizer: true, status: "cancelled" }));
     renderApp("/event/7");
     expect(await screen.findByRole("button", { name: "Edit" })).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Report" })).toBeNull(); // not your own event
+    expect(screen.queryByRole("link", { name: "Report this event" })).toBeNull(); // not your own event
     fireEvent.press(screen.getByRole("button", { name: "Cancel event" }));
     expect(await screen.findByRole("header", { name: "Cancel this event?" })).toBeTruthy();
     await pressAndSettle(screen.getAllByRole("button", { name: "Cancel event" }).at(-1)!);
@@ -310,11 +310,23 @@ describe("the event detail", () => {
     mocked.getEvent.mockResolvedValue(sampleEvent());
     mocked.reportEvent.mockResolvedValue({ ok: true });
     renderApp("/event/7");
-    fireEvent.press(await screen.findByRole("link", { name: "Report" }));
+    fireEvent.press(await screen.findByRole("link", { name: "Report this event" }));
+    // It says what it's for, and points app problems to Report a problem.
+    expect(screen.getByText(/For an event that's spam, fake, unsafe or offensive/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Something not working in the app? Report a problem instead" })).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText("What's wrong?"), "Spam");
     await pressAndSettle(screen.getByRole("button", { name: "Send report" }));
     expect(mocked.reportEvent).toHaveBeenCalledWith("tok-123", 7, "Spam");
     expect(await screen.findByText("Thanks. We'll take a look.")).toBeTruthy();
+  });
+
+  it("an app problem goes to Report a problem, not the event report", async () => {
+    mocked.getEvent.mockResolvedValue(sampleEvent());
+    renderApp("/event/7");
+    fireEvent.press(await screen.findByRole("link", { name: "Report this event" }));
+    await pressAndSettle(screen.getByRole("link", { name: "Something not working in the app? Report a problem instead" }));
+    expect(await screen.findByRole("header", { name: "Report a problem" })).toBeTruthy();
+    expect(mocked.reportEvent).not.toHaveBeenCalled();
   });
 
   it("opens Partiful when there's a link", async () => {
