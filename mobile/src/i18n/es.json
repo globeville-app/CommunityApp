@@ -646,7 +646,7 @@
     "weekdays": "lun,mar,mié,jue,vie,sáb,dom",
     "months": "ene,feb,mar,abr,may,jun,jul,ago,sep,oct,nov,dic",
     "date": "{weekday} {day} {month}",
-    "org_invite": "{org} te invitó a ayudar con su página. Abre Configuración → Tus organizaciones para aceptar."
+    "org_invite": "{org} te invitó a ayudar con su página. Abre Configuración > Tus organizaciones para aceptar."
   },
   "notifications": {
     "offer_title": "¿Quieres un recordatorio el día antes de los eventos a los que vas?",
@@ -754,7 +754,7 @@
     },
     "org_invite": {
       "subject": "Te invitaron a ayudar con {org} en {app}",
-      "body": "Hola:\n\n{org} te invitó a ser una de sus personas administradoras en {app}. Quienes administran publican los eventos de la organización y mantienen su página al día.\n\nPara aceptar, abre la app {app} y ve a Configuración → Tus organizaciones. Si no lo esperabas, puedes rechazarlo ahí o simplemente ignorar este correo.\n\n— El equipo de {app}"
+      "body": "Hola:\n\n{org} te invitó a ser una de sus personas administradoras en {app}. Quienes administran publican los eventos de la organización y mantienen su página al día.\n\nPara aceptar, abre la app {app} y ve a Configuración > Tus organizaciones. Si no lo esperabas, puedes rechazarlo ahí o simplemente ignorar este correo.\n\nEl equipo de {app}"
     }
   },
   "update": {
