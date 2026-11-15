@@ -43,6 +43,7 @@ from .models import (
     OrganizationReport,
     OrganizationTranslation,
 )
+from .notify import invite_received
 
 logger = logging.getLogger(__name__)
 NOT_FOUND = status.HTTP_404_NOT_FOUND
@@ -355,8 +356,12 @@ class OrganizationAdminsView(APIView):
             Organization.objects.select_for_update().filter(pk=organization.pk).first()
             if organization.admins.count() + organization.invites.count() >= MAX_ADMINS:
                 raise ApiError("too_many_admins")
+            invite, created = None, False
             if user is not None and Profile.objects.filter(user=user).exists() and not organization.is_admin(user):
-                OrganizationInvite.objects.get_or_create(organization=organization, user=user)
+                invite, created = OrganizationInvite.objects.get_or_create(organization=organization, user=user)
+        if created:
+            # Only a new invitation; inviting again doesn't buzz them twice.
+            invite_received(invite)
         return Response(org_json(organization, request, profile), status=status.HTTP_202_ACCEPTED)
 
     def delete(self, request, org_id):

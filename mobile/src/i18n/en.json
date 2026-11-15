@@ -645,7 +645,8 @@
     "pm": "PM",
     "weekdays": "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
     "months": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
-    "date": "{weekday}, {month} {day}"
+    "date": "{weekday}, {month} {day}",
+    "org_invite": "{org} invited you to help run their page. Open Settings → Your organizations to accept."
   },
   "notifications": {
     "offer_title": "Get a reminder the day before events you're going to?",
@@ -750,6 +751,10 @@
     "reset": {
       "subject": "Reset your {app} password",
       "body": "Someone asked to reset the password for your {app} account.\n\nYour code is {code}. Type it in the app with your new password. It works for {minutes} minutes.\n\nIf it wasn't you, you can ignore this email: your password hasn't changed."
+    },
+    "org_invite": {
+      "subject": "You're invited to help run {org} on {app}",
+      "body": "Hi,\n\n{org} invited you to be one of its admins on {app}. Admins post the organization's events and keep its page up to date.\n\nTo accept, open the {app} app and go to Settings → Your organizations. If you weren't expecting this, you can decline there, or just ignore this email.\n\n— The {app} team"
     }
   },
   "update": {

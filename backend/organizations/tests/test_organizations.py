@@ -126,6 +126,37 @@ class AdminTests(OrgTestCase):
         # Admins can cancel the rest.
         self.assertEqual(client.delete(f"/api/organizations/{organization.pk}/invites").data["pending_invites"], 0)
 
+    def test_the_invited_member_is_told_by_email_and_push_once(self):
+        from unittest import mock
+
+        from django.core import mail
+
+        organization = self.org()
+        helper = self.member("helper")
+        url = f"/api/organizations/{organization.pk}/admins"
+        with mock.patch("notifications.push.send_to_user") as push:
+            self.api(self.admin_user).post(url, {"email": "helper@example.com"}, format="json")
+            self.api(self.admin_user).post(url, {"email": "helper@example.com"}, format="json")  # again: no repeat
+            self.api(self.admin_user).post(url, {"email": "stranger@example.com"}, format="json")  # not a member
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["helper@example.com"])
+        self.assertIn(organization.name, mail.outbox[0].subject)
+        self.assertIn("Your organizations", mail.outbox[0].body)
+        push.assert_called_once()
+        self.assertEqual(push.call_args.args[0], helper)
+
+    def test_a_failing_email_never_fails_the_invite(self):
+        from unittest import mock
+
+        organization = self.org()
+        self.member("helper")
+        with mock.patch("organizations.notify.send_mail", side_effect=OSError("down")):
+            response = self.api(self.admin_user).post(
+                f"/api/organizations/{organization.pk}/admins", {"email": "helper@example.com"}, format="json"
+            )
+        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.data["pending_invites"], 1)
+
     def test_only_approved_organizations_invite(self):
         organization = self.org(status="pending")
         self.member("helper")
